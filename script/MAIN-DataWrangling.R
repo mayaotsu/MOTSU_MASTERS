@@ -15,7 +15,7 @@ rm(df1, df2, df)
 colnames(spc)[5:6] = c("lat", "lon")
 
 #load eds-static variables, do not forget to transform lon range to 0-360
-load("/Users/mayaotsu/Documents/MOTSU_MASTERS/eds_bathymetry_rugosity.RData")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_bathymetry_rugosity.RData")
 static <- df
 static$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
 static = static[,c(3:13)]

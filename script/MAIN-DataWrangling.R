@@ -91,7 +91,7 @@ spc %>%
   geom_point(shape = 21)
 
 #load dynamic variables
-load("/Users/mayaotsu/Documents/MOTSU_MASTERS/eds_time.RData")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
 dynamic <- df
 dynamic = dynamic[,c(3:346)]
 
@@ -116,7 +116,7 @@ spc %>%
   geom_point(shape = 21)
 
 #load TKE, less tke vals because starts in 2009
-TKE <- readRDS("/Users/mayaotsu/Documents/MOTSU_MASTERS/spcdata_tke.rds")
+TKE <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spcdata_tke.rds")
 TKE <- filter(TKE, method == "nSPC")
 TKE = TKE %>% 
   mutate(lon = round(longitude, 3),
@@ -125,7 +125,7 @@ spc <- left_join(spc, TKE[, !names(TKE) %in% c("longitude", "latitude", "longwes
 rm(TKE)
 
 #load otp
-otp <- read.csv("/Users/mayaotsu/Documents/MOTSU_MASTERS/eds_sedac_gfw_otp.csv")
+otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp.csv")
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 otp = otp %>% 
   mutate(lon = round(lon, 3),
@@ -145,7 +145,7 @@ rm(otp)
 
 #call in coral cover, left join by lat and lon
 #increased from 8880 to 8944
-cca <- read.csv("/Users/mayaotsu/Documents/MOTSU_MASTERS/coral_cover/spc_coral_cover.csv")
+cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv")
 cca = cca %>% 
   mutate(lon = round(lon, 3),
          lat = round(lat, 3))

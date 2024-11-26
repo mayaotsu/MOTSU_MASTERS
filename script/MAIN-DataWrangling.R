@@ -211,7 +211,7 @@ spc_reduced <- spc %>%
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
 saveRDS(spc_reduced, "spcdata_reduced")
 
-###################### END ##################
+###################### END ###################
 
 spc_lufu <- spc %>% filter(species == "LUFU" & presence == 1)
 spc_luka <- spc %>% filter(species == "LUKA" & presence == 1)

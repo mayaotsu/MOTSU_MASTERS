@@ -6,7 +6,10 @@ spc_reduced %>%
   group_by(lon, lat, island, species) %>% 
   summarise(density=mean(density)) %>% 
   ggplot(aes(lon, lat, size = density, fill = species)) + 
-  geom_point(shape = 21) #+
+  geom_point(shape = 21) +
+  labs(title = "Density Distribution by Species",
+       x = "Longitude",
+       y = "Latitude") 
  # facet_wrap(~island, scale = "free")
 
 #presence
@@ -39,6 +42,6 @@ p2 = spc_reduced %>%
   theme_classic(base_size = 15)
 
 p1+p2
-sggsave(last_plot(), file = ""
+ggsave(last_plot(), file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/depth_profile.png")
 
 

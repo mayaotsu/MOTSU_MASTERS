@@ -209,39 +209,7 @@ spc_reduced <- spc %>%
 #spc_reduced$log_mean_1mo_chla_ESA <- log(spc_reduced$mean_1mo_chla_ESA)
 
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
-saveRDS(spc_reduced, "spcdata_reduced")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/script/spcdata_reduced.RData")
 
 ###################### END ###################
 
-spc_lufu <- spc %>% filter(species == "LUFU" & presence == 1)
-spc_luka <- spc %>% filter(species == "LUKA" & presence == 1)
-spc_combined <- bind_rows(spc_lufu_presence, spc_luka_presence)
-
-#combined plot
-ggplot(spc_combined, aes(x = lon, y = lat, color = species)) +
-  geom_point(shape = 21, size = 3) +
-  scale_color_manual(values = c("LUFU" = "blue", "LUKA" = "red"), 
-                     labels = c("LUFU" = "Lutjanus fulvus", "LUKA" = "Lutjanus kasmira")) +
-  labs(title = "Presence of Lutjanus fulvus (LUFU) and Lutjanus kasmira (LUKA)",
-       x = "Latitude",
-       y = "Longitude",
-       color = "Species") +
-  theme_minimal()
-
-#toau plot (LUFU)
-ggplot(spc_lufu, aes(x = lon, y = lat, color = species)) +
-  geom_point(shape = 21, size = 2, fill = "blue") +
-  labs(title = "Presence of Lutjanus fulvus (LUFU)",
-       x = "Longitude",
-       y = "Latitude",
-       color = "Species") +
-  theme_minimal() + coord_fixed() + xlim(180, 206) +  ylim(18, 30)
-
-#taape plot (LUKA)
-ggplot(spc_luka, aes(x = lon, y = lat, color = species)) +
-  geom_point(shape = 21, size = 2, fill = "red") +
-  labs(title = "Presence of Lutjanus kasmira (LUKA)",
-       x = "Longitude",
-       y = "Latitude",
-       color = "Species") +
-  theme_minimal() + coord_fixed() + xlim(180, 206) +  ylim(18, 30)

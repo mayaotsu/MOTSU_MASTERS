@@ -209,7 +209,7 @@ spc_reduced <- spc %>%
 #spc_reduced$log_mean_1mo_chla_ESA <- log(spc_reduced$mean_1mo_chla_ESA)
 
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/script/spcdata_reduced.RData")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spcdata_reduced.RData")
 
 ###################### END ###################
 

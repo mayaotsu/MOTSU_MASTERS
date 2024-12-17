@@ -1,27 +1,30 @@
 #density
+spc_reduced$species <- factor(spc_reduced$species, levels = c('LUFU', 'LUKA')) 
 spc_reduced %>% 
   filter(density>0) %>% 
   mutate(lon=round(lon, 1),
-       (lat=round(lat, 1))) %>% 
-  group_by(lon, lat, island, species) %>% 
+     (lat=round(lat, 1))) %>% 
+  group_by(lon, lat, island, region, species) %>% 
   summarise(density=mean(density)) %>% 
   ggplot(aes(lon, lat, size = density, fill = species)) + 
-  geom_point(shape = 21) +
+  geom_point(shape = 21, alpha = 1) +
   labs(title = "Density Distribution by Species",
        x = "Longitude",
-       y = "Latitude") 
- # facet_wrap(~island, scale = "free")
+       y = "Latitude") #+
+  #facet_wrap(~island, scale = "free")
+ggsave(last_plot(), file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/density_dist_species.png")
+
 
 #presence
 spc_reduced %>% 
   filter(density>0) %>% 
   mutate(lon=round(lon, 2),
          (lat=round(lat, 2))) %>% 
-  group_by(lon, lat, island, species) %>% 
+  group_by(lon, lat, region, species) %>% 
   summarise(density=mean(density)) %>% 
   ggplot(aes(lon, lat, fill = species)) + 
   geom_point(shape = 21) +
-  facet_wrap(~island, scale = "free")
+  facet_wrap(~region, scale = "free")
 
 #depth profile
 library(patchwork)

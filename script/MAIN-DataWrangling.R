@@ -194,7 +194,7 @@ spc_reduced <- spc %>%
                 #  "q95_Wind_Speed_ASCAT_daily_01dy" ,
                 #  "q95_Wind_Speed_ASCAT_daily_01mo" ,
                 #  "q95_Wind_Speed_ASCAT_daily_01yr" , #wind
-                "TKE", #TKE
+                # "TKE", #TKE
                 #  "date_r" ,
                # pop_density = "gpw_v4_population_density_rev11_15_min.nc" , #5 km, #pop density, removed, correlated with MHI Shore spear 0.79
                 #"gpw_v4_population_density_rev11_1_deg.nc" , #30 km,
@@ -205,8 +205,22 @@ spc_reduced <- spc %>%
                 otp_all_effluent = "hi_otp_all_osds_effluent.tif", #effluent
                 "MHI_Boat_Spear_hr.tif", #spearfishing
                 "MHI_Shore_Spear_hr.tif",
-                "coral_cover")
-#spc_reduced$log_mean_1mo_chla_ESA <- log(spc_reduced$mean_1mo_chla_ESA)
+                "coral_cover", 
+                #"hi_otp_all_fishing.tif", 
+                #"hi_otp_all_fishing_com.tif", 
+               "hi_otp_all_fishing_com_line.tif",
+               "hi_otp_all_fishing_com_net.tif",
+               "hi_otp_all_fishing_com_spear.tif", 
+               #"hi_otp_all_fishing_rec.tif", 
+               "hi_otp_all_fishing_rec_boat.tif",
+               "hi_otp_all_fishing_rec_boat_spear.tif",
+               "hi_otp_all_fishing_rec_shore.tif", 
+               "hi_otp_all_fishing_rec_shore_line.tif",
+               "hi_otp_all_fishing_rec_shore_net.tif", 
+               "hi_otp_all_fishing_rec_shore_spear.tif"
+               
+               
+               )
 
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
 save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spcdata_reduced.RData")

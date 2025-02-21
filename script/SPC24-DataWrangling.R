@@ -11,11 +11,11 @@ sum(df$SPECIES == "CEAR", na.rm = TRUE) #12056, 2340
 
 species <- c("Lutjanus kasmira", "Cephalopholis argus", "Lutjanus fulvus")
 islands <- c("Hawaii", "Kahoolawe", "Kauai", "Lanai", "Maui", "Molokai", "Niihau", "Oahu",
-             "French Frigate", "Gardner", "Kure", "Laysan", "Lisianski", "Maro", "Midway", "Necker", "Nihoa",
-             "Pearl & Hermes", "Molokini", "Lehua", "Kaula")
+             "French Frigate", "Gardner", "Kure", "Laysan", "Lisianski", "Midway", "Necker", "Nihoa",
+             "Pearl & Hermes")
 nSPC <- c("nSPC")
 
-#filter out for only LUKA/LUFU/CEAR, islands, and spc in method
+#filter out for only LUKA/LUFU/CEAR, islands, and spc in method---- 4310 obs
 df <- df %>%
   filter(SCIENTIFIC_NAME %in% species & ISLAND %in% islands & METHOD %in% nSPC) %>%
   select("ISLAND", "LATITUDE", "LONGITUDE", "DATE_", "METHOD", "SPECIES", "COUNT", "REGION",
@@ -30,6 +30,10 @@ df <- df %>%
 
 #transform lon
 df$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
+#lat and lon decimal places
+df <- df %>%
+  mutate(lon = round(lon, 3),
+         lat = round(lat, 3))
 
 #add year, month,day columns
 df <- df %>%
@@ -42,3 +46,15 @@ df <- df %>%
 #add presence column ASSIGN PRESENCE VALUES 0??
 df <- df %>%
   mutate(presence = ifelse(density > 0, 1, 0))
+
+#load spc_reduced
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc.RData")
+#combine df and spc_reduced--- 14502 obs, 47 vars
+df_combined <- left_join(df, spc_reduced, by = c("lat", "lon"))
+
+#delete duplicates ---- 10996 obs, 47 vars
+df_combined <- df_combined %>%
+  distinct()
+
+rm(df, spc_reduced)
+#save(df_combined, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc2024.RData")

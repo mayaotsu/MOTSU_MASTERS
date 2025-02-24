@@ -1,27 +1,45 @@
 ## DATA CLEANING FOR NEW 2024 NCRMMP
+
 rm(list = ls())
+
 library(dplyr)
 library(lubridate)
+
 load("/Users/mayaotsu/Downloads/ALL_REA_FISH_RAW.rdata")
 
+select=dplyr::select
+
 colnames(df)
+
 sum(df$SPECIES == "LUKA", na.rm = TRUE) #4216, 2536
 sum(df$SPECIES == "LUFU", na.rm = TRUE) #1956, 974
 sum(df$SPECIES == "CEAR", na.rm = TRUE) #12056, 2340
 
-species <- c("Lutjanus kasmira", "Cephalopholis argus", "Lutjanus fulvus")
-islands <- c("Hawaii", "Kahoolawe", "Kauai", "Lanai", "Maui", "Molokai", "Niihau", "Oahu",
-             "French Frigate", "Gardner", "Kure", "Laysan", "Lisianski", "Midway", "Necker", "Nihoa",
-             "Pearl & Hermes")
+species <- c("LUKA", "CEAR", "LUFU")[3]
+
 nSPC <- c("nSPC")
 
 #filter out for only LUKA/LUFU/CEAR, islands, and spc in method---- 4310 obs
 df <- df %>%
-  filter(SCIENTIFIC_NAME %in% species & ISLAND %in% islands & METHOD %in% nSPC) %>%
+  filter(REGION %in% c("MHI", "NWHI") & METHOD %in% "nSPC") %>%
   select("ISLAND", "LATITUDE", "LONGITUDE", "DATE_", "METHOD", "SPECIES", "COUNT", "REGION",
-         "DEPTH", "DENSITY")
+         "DEPTH", "DENSITY", "OBS_YEAR") %>% 
+  mutate(x = ifelse(SPECIES %in% species, DENSITY, 0))
 
-#rename columns
+df = df %>% 
+  group_by(LONGITUDE, LATITUDE, DATE_, OBS_YEAR, ISLAND, REGION) %>% 
+  summarise(DENSITY=sum(x, na.rm = TRUE)) %>% 
+  mutate(pa = ifelse(DENSITY > 0, 1, 0))
+
+df %>% 
+#  filter(ISLAND == "Niihau") %>%
+#  filter(OBS_YEAR==2021) %>% 
+  ggplot(aes(x=LONGITUDE, y=LATITUDE, fill= as.factor(pa))) + 
+  geom_point(shape=21) + 
+  facet_wrap(~OBS_YEAR, scales = "free")
+
+
+#rename columns 
 df <- df %>%
   rename(
     island = ISLAND, lat = LATITUDE, lon = LONGITUDE, date = DATE_, method = METHOD, species = SPECIES, 
@@ -44,8 +62,8 @@ df <- df %>%
   )
 
 #add presence column ASSIGN PRESENCE VALUES 0??
-df <- df %>%
-  mutate(presence = ifelse(density > 0, 1, 0))
+df$density[is.na(df$density)] <- 0
+df$presence <- ifelse(df$density > 0, 1, 0)
 
 #load spc_reduced
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc.RData")

@@ -138,9 +138,6 @@ rm(otp)
 #saveRDS(spc, "spcdata_full")
 
 #get rid of unneeded columns from otp, eds
-#colnames(spc)
-
-#add log chla column
 #spc_reduced$log_mean_1mo_chla_ESA <- log(spc_reduced$mean_1mo_chla_ESA)
 
 #call in coral cover, left join by lat and lon
@@ -166,7 +163,7 @@ spc_reduced <- spc %>%
                 #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr",
                 #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy",
                 #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo" ,
-                # q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
+                 q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
                 #  "mean_Kd490_ESA_OC_CCI_monthly_01dy",
                 # mean_1mo_kd490_ESA = "mean_Kd490_ESA_OC_CCI_monthly_01mo" , correlated with 1mochla 0.89
                 #  "mean_Kd490_ESA_OC_CCI_monthly_01yr", 
@@ -203,8 +200,8 @@ spc_reduced <- spc %>%
                 otp_nearshore_sediment = "hi_otp_all_nearshore_sediment.tif" , #nearshore sediment (urban runoff?)
                 otp_all_coastal_mod = "hi_otp_all_coastal_mod.tif" , #coastal mod
                 otp_all_effluent = "hi_otp_all_osds_effluent.tif", #effluent
-                "MHI_Boat_Spear_hr.tif", #spearfishing
-                "MHI_Shore_Spear_hr.tif",
+               # "MHI_Boat_Spear_hr.tif", #spearfishing
+               # "MHI_Shore_Spear_hr.tif",
                 "coral_cover", 
                 #"hi_otp_all_fishing.tif", 
                 #"hi_otp_all_fishing_com.tif", 
@@ -222,8 +219,34 @@ spc_reduced <- spc %>%
                
                )
 
+#turn year column into a factor-- 10 levels 09,10,11,12,13,14,15,16,17,19
+spc_reduced$year <- as.factor(spc_reduced$year)
+class(spc_reduced$year)
+
+#change all OTP NWHI data NAs except sedimentation data to 0
+library(tidyr)
+columns_to_modify <- c(
+  "otp_all_coastal_mod", 
+  "otp_all_effluent",
+  "hi_otp_all_fishing_com_line.tif",
+  "hi_otp_all_fishing_com_net.tif",
+  "hi_otp_all_fishing_com_spear.tif",
+  "hi_otp_all_fishing_rec_boat.tif",
+  "hi_otp_all_fishing_rec_boat_spear.tif",
+  "hi_otp_all_fishing_rec_shore.tif",
+  "hi_otp_all_fishing_rec_shore_line.tif",
+  "hi_otp_all_fishing_rec_shore_net.tif",
+  "hi_otp_all_fishing_rec_shore_spear.tif"
+)
+spc_reduced <- spc_reduced %>%
+  mutate(across(all_of(columns_to_modify), ~ ifelse(region == "NWHI" & is.na(.), 0, .)))
+
+#save rdata
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spcdata_reduced.RData")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc.RData")
+
+#saverds
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc")
 
 ###################### END ###################
-
+     

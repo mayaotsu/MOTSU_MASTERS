@@ -6,38 +6,35 @@ library(dplyr)
 library(lubridate)
 
 load("/Users/mayaotsu/Downloads/ALL_REA_FISH_RAW.rdata")
-
 select=dplyr::select
 
 colnames(df)
 
-sum(df$SPECIES == "LUKA", na.rm = TRUE) #4216, 2536
-sum(df$SPECIES == "LUFU", na.rm = TRUE) #1956, 974
-sum(df$SPECIES == "CEAR", na.rm = TRUE) #12056, 2340
-
 species <- c("LUKA", "CEAR", "LUFU")[3]
-
 nSPC <- c("nSPC")
 
 #filter out for only LUKA/LUFU/CEAR, islands, and spc in method---- 4310 obs
-df <- df %>%
+df_new <- df %>%
   filter(REGION %in% c("MHI", "NWHI") & METHOD %in% "nSPC") %>%
   select("ISLAND", "LATITUDE", "LONGITUDE", "DATE_", "METHOD", "SPECIES", "COUNT", "REGION",
          "DEPTH", "DENSITY", "OBS_YEAR") %>% 
-  mutate(x = ifelse(SPECIES %in% species, DENSITY, 0))
+  mutate(x = ifelse(SPECIES %in% species, DENSITY, 0)) # if species == LUKA, populate x with density; if not, populate x with 0
 
-df = df %>% 
-  group_by(LONGITUDE, LATITUDE, DATE_, OBS_YEAR, ISLAND, REGION) %>% 
+df_new = df_new %>% 
+  group_by(LONGITUDE, LATITUDE, DATE_, OBS_YEAR, SPECIES, ISLAND, REGION) %>% 
   summarise(DENSITY=sum(x, na.rm = TRUE)) %>% 
-  mutate(pa = ifelse(DENSITY > 0, 1, 0))
+  mutate(pa = ifelse(DENSITY > 0, 1, 0)) 
 
-df %>% 
+#df_new %>% 
 #  filter(ISLAND == "Niihau") %>%
 #  filter(OBS_YEAR==2021) %>% 
-  ggplot(aes(x=LONGITUDE, y=LATITUDE, fill= as.factor(pa))) + 
-  geom_point(shape=21) + 
-  facet_wrap(~OBS_YEAR, scales = "free")
+  #ggplot(aes(x=LONGITUDE, y=LATITUDE, fill= as.factor(pa))) + 
+  #geom_point(shape=21) + 
+  #facet_wrap(~OBS_YEAR, scales = "free")
 
+dfluka_2024 <- subset(df_new, OBS_YEAR == 2024)
+#dfcear_2024 <- subset(df_new, OBS_YEAR == 2024)
+dflufu_2024 <- subset(df_new, OBS_YEAR == 2024)
 
 #rename columns 
 df <- df %>%

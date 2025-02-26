@@ -205,16 +205,16 @@ spc_reduced <- spc %>%
                 "coral_cover", 
                 #"hi_otp_all_fishing.tif", 
                 #"hi_otp_all_fishing_com.tif", 
-               "hi_otp_all_fishing_com_line.tif",
-               "hi_otp_all_fishing_com_net.tif",
-               "hi_otp_all_fishing_com_spear.tif", 
+                com_line = "hi_otp_all_fishing_com_line.tif",
+                com_net = "hi_otp_all_fishing_com_net.tif",
+                com_spear = "hi_otp_all_fishing_com_spear.tif", 
                #"hi_otp_all_fishing_rec.tif", 
-               "hi_otp_all_fishing_rec_boat.tif",
-               "hi_otp_all_fishing_rec_boat_spear.tif",
-               "hi_otp_all_fishing_rec_shore.tif", 
-               "hi_otp_all_fishing_rec_shore_line.tif",
-               "hi_otp_all_fishing_rec_shore_net.tif", 
-               "hi_otp_all_fishing_rec_shore_spear.tif"
+               rec_boat = "hi_otp_all_fishing_rec_boat.tif",
+               rec_boat_spear = "hi_otp_all_fishing_rec_boat_spear.tif",
+               rec_shore = "hi_otp_all_fishing_rec_shore.tif", 
+               rec_shore_line = "hi_otp_all_fishing_rec_shore_line.tif",
+               rec_shore_net = "hi_otp_all_fishing_rec_shore_net.tif", 
+               rec_shore_spear = "hi_otp_all_fishing_rec_shore_spear.tif"
                
                
                )
@@ -228,25 +228,29 @@ library(tidyr)
 columns_to_modify <- c(
   "otp_all_coastal_mod", 
   "otp_all_effluent",
-  "hi_otp_all_fishing_com_line.tif",
-  "hi_otp_all_fishing_com_net.tif",
-  "hi_otp_all_fishing_com_spear.tif",
-  "hi_otp_all_fishing_rec_boat.tif",
-  "hi_otp_all_fishing_rec_boat_spear.tif",
-  "hi_otp_all_fishing_rec_shore.tif",
-  "hi_otp_all_fishing_rec_shore_line.tif",
-  "hi_otp_all_fishing_rec_shore_net.tif",
-  "hi_otp_all_fishing_rec_shore_spear.tif"
+  "com_line",
+  "com_net",
+  "com_spear",
+  "rec_boat",
+  "rec_boat_spear",
+  "rec_shore",
+  "rec_shore_line",
+  "rec_shore_net",
+  "rec_shore_spear"
 )
 spc_reduced <- spc_reduced %>%
   mutate(across(all_of(columns_to_modify), ~ ifelse(region == "NWHI" & is.na(.), 0, .)))
 
+#exclude midway 
+spc_reduced <- spc_reduced %>% filter(island!= "Midway")
+unique(spc_reduced$island)
+
 #save rdata
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc.RData")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited.RData")
 
 #saverds
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc")
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited")
 
 ###################### END ###################
      

@@ -78,17 +78,17 @@ spc = spc %>% as.data.frame()
 summary(spc$rugosity)
 
 #take a look, can also do with just presence data
-spc %>% 
-  ggplot(aes(lon, lat, fill = rugosity)) + 
-  geom_point(shape = 21)
+#spc %>% 
+ # ggplot(aes(lon, lat, fill = rugosity)) + 
+ # geom_point(shape = 21)
 
-spc %>% 
-  ggplot(aes(rugosity, density, fill = rugosity)) + 
-  geom_point(shape = 21)
+#spc %>% 
+ # ggplot(aes(rugosity, density, fill = rugosity)) + 
+  #geom_point(shape = 21)
 
-spc %>% 
-  ggplot(aes(depth, density, fill = rugosity)) + 
-  geom_point(shape = 21)
+#spc %>% 
+ # ggplot(aes(depth, density, fill = rugosity)) + 
+  #geom_point(shape = 21)
 
 #load dynamic variables
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
@@ -111,9 +111,9 @@ spc = left_join(spc, dynamic)
 rm(df, dynamic)
 
 #take a look
-spc %>% 
-  ggplot(aes(mean_Sea_Surface_Temperature_CRW_daily_01dy, density, fill = density)) + 
-  geom_point(shape = 21)
+#spc %>% 
+  #ggplot(aes(mean_Sea_Surface_Temperature_CRW_daily_01dy, density, fill = density)) + 
+ # geom_point(shape = 21)
 
 #load TKE, less tke vals because starts in 2009
 TKE <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spcdata_tke.rds")

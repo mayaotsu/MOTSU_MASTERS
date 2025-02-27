@@ -1,20 +1,22 @@
 #running models
 #example running of BRTs using Kole distribution from SPC data for MHI
+rm(list = ls())
 library(matrixStats)
 library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-rm(list=ls())
-df<-readRDS("/Users/mayaotsu/Documents/MOTSU_MASTERS/spcdata_reduced")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited")
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
 colnames(df)
 
-Predictors<-c(2,11,14, 17, 18, 20:28) #rugosity 14, bathymetry 15
-#depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q951yrSSTCRW,
-#TKE, nearshore sediment, coastal mod, effluent, MHI boat spear, MHI shore spear, coral cover
+Predictors<-c(2, 14, 17, 19, 20:28,30,32:34) #rugosity 14, bathymetry 15
+#re-add year (factor variable) 11
+#depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q05&951yrSSTCRW,
+#nearshore sediment, coastal mod, effluent, coral cover,
+#com line, com net, com spear, rec boat spear, rec shore line, rec shore net, rec shore spear
 
 # Test predictors for colinearity using correlation matrix chart -- SAL and SLA are very correlated (cor = 0.74)
 library(PerformanceAnalytics)
@@ -27,7 +29,7 @@ Response<-which(colnames(df) %in% c("presence") )
 taape <- df[df$species=="LUKA",]
 
 start = Sys.time()
-PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 end = Sys.time()
 end - start 
 
@@ -75,7 +77,7 @@ Reduced_Predictors<-which(colnames(taape) %in% colnames(Predictors_to_Keep))
 
 #refit model
 start = Sys.time()
-PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 end = Sys.time()
 end - start 
 

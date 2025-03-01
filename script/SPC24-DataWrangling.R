@@ -1,71 +1,83 @@
 ## DATA CLEANING FOR NEW 2024 NCRMMP
 
 rm(list = ls())
-
 library(dplyr)
 library(lubridate)
 
 load("/Users/mayaotsu/Downloads/ALL_REA_FISH_RAW.rdata")
 select=dplyr::select
-
 colnames(df)
 
-species <- c("LUKA", "CEAR", "LUFU")[3]
-nSPC <- c("nSPC")
-
-#filter out for only LUKA/LUFU/CEAR, islands, and spc in method---- 4310 obs
-df_new <- df %>%
-  filter(REGION %in% c("MHI", "NWHI") & METHOD %in% "nSPC") %>%
-  select("ISLAND", "LATITUDE", "LONGITUDE", "DATE_", "METHOD", "SPECIES", "COUNT", "REGION",
-         "DEPTH", "DENSITY", "OBS_YEAR") %>% 
-  mutate(x = ifelse(SPECIES %in% species, DENSITY, 0)) # if species == LUKA, populate x with density; if not, populate x with 0
-
-df_new = df_new %>% 
-  group_by(LONGITUDE, LATITUDE, DATE_, OBS_YEAR, SPECIES, ISLAND, REGION) %>% 
-  summarise(DENSITY=sum(x, na.rm = TRUE)) %>% 
-  mutate(pa = ifelse(DENSITY > 0, 1, 0)) 
-
-#df_new %>% 
-#  filter(ISLAND == "Niihau") %>%
-#  filter(OBS_YEAR==2021) %>% 
-  #ggplot(aes(x=LONGITUDE, y=LATITUDE, fill= as.factor(pa))) + 
-  #geom_point(shape=21) + 
-  #facet_wrap(~OBS_YEAR, scales = "free")
-
-dfluka_2024 <- subset(df_new, OBS_YEAR == 2024)
-#dfcear_2024 <- subset(df_new, OBS_YEAR == 2024)
-dflufu_2024 <- subset(df_new, OBS_YEAR == 2024)
+#species <- c("LUKA", "CEAR", "LUFU")[2]
+#nSPC <- c("nSPC")
 
 #rename columns 
 df <- df %>%
   rename(
-    island = ISLAND, lat = LATITUDE, lon = LONGITUDE, date = DATE_, method = METHOD, species = SPECIES, 
-    count = COUNT, region = REGION, depth = DEPTH, density = DENSITY
-  )
+    island = "ISLAND", depth = "DEPTH", method = "METHOD", date_ = "DATE_", latitude = "LATITUDE", longitude = "LONGITUDE", 
+    species= "SPECIES", density = "DENSITY", count = "COUNT", region = "REGION")
 
 #transform lon
-df$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
+df$longitude = ifelse(df$longitude < 0, df$longitude + 360, df$longitude)
 #lat and lon decimal places
 df <- df %>%
-  mutate(lon = round(lon, 3),
-         lat = round(lat, 3))
+  mutate(longitude = round(longitude, 4),
+         latitude = round(latitude, 5))
 
 #add year, month,day columns
 df <- df %>%
   mutate(
-    year = year(date),
-    month = month(date),
-    day = day(date)
+    year = year(date_),
+    month = month(date_),
+    day = day(date_)
   )
 
-#add presence column ASSIGN PRESENCE VALUES 0??
-df$density[is.na(df$density)] <- 0
-df$presence <- ifelse(df$density > 0, 1, 0)
+#make a presence column
+df = df %>%
+  mutate(x = ifelse(species == "CEAR", density, 0)) %>% 
+  group_by(island, depth, method, date_, latitude, longitude, species, region, year, month, day) %>%  # Grouping by year before summarizing
+  summarise(density = sum(x, na.rm = TRUE)) %>% 
+  mutate(presence = ifelse(density > 0, 1, 0))
+#filter out for only CEAR, islands, and spc in method
+df <- df %>%
+  subset(region %in% c("MHI", "NWHI") & method == "nSPC" & species == "CEAR") %>%
+  select("island", "depth", "method", "date_", "latitude", "longitude", "species", "density", "presence", "region",
+         "year", "month", "day") 
+
+#save .RData
+save(df, file ="/Users/mayaotsu/Downloads/calibr_CEAR_abund.RData")
+
+
+
+
+ # mutate(x = ifelse(species %in% species, density, 0))
+# if species == CEAR, populate x with density; if not, populate x with 0
+
+
+#df = df %>% 
+  #group_by(longitude, latitude, date_, year, species, island, region) %>% 
+ # summarise(density=sum(x, na.rm = TRUE)) %>% 
+ # mutate(pa = ifelse(density > 0, 1, 0)) 
+
+  
+  
+  
+####
+df %>% 
+  filter(species == "CEAR") %>%
+  filter(year==2016) %>% 
+  ggplot(aes(x=lon, y=lat, fill= as.factor(pa), shape = as.factor(pa))) + 
+  geom_point(shape=21) +
+  facet_wrap(~island, scales = "free")
+
+#dfcear_2024 <- subset(df_new, OBS_YEAR == 2024)
 
 #load spc_reduced
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc.RData")
-#combine df and spc_reduced--- 14502 obs, 47 vars
-df_combined <- left_join(df, spc_reduced, by = c("lat", "lon"))
+
+#combine df and spc_reduced
+df_combined <- df %>%
+  left_join(spc_reduced, by = c("lat", "lon", "species", "year"))
 
 #delete duplicates ---- 10996 obs, 47 vars
 df_combined <- df_combined %>%

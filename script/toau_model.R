@@ -7,7 +7,7 @@ library(fmsb)
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
 
 
-df<-readRDS("/Users/mayaotsu/Documents/MOTSU_MASTERS/spcdata_reduced")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited")
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
@@ -27,7 +27,7 @@ chart.Correlation(preds)
 df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 toau <- df[df$species=="LUFU",]
-PA_Model_Step<-fit.brt.n_eval_Balanced(toau, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Step<-fit.brt.n_eval_Balanced(toau, gbm.x=Predictors, gbm.y= c(Response), lr=0.05, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/toau_PA_model_step_0.001_bf0.75_noLATLON.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
@@ -70,7 +70,8 @@ Reduced_Predictors<-which(colnames(toau) %in% colnames(Predictors_to_Keep))
 
 #refit model
 start = Sys.time()
-PA_Model_Reduced<-fit.brt.n_eval_Balanced(toau, gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Reduced<-fit.brt.n_eval_Balanced(toau, 
+                                          gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.05, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 end = Sys.time()
 end - start 
 

@@ -259,7 +259,7 @@ spc_reduced <- spc_reduced %>% filter(island!= "Midway")
 unique(spc_reduced$island)
 
 #SAVE JUST MHI
-subset(spc_reduced, region == "MHI")
+spc_reduced = subset(spc_reduced, region == "MHI")
 save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI.RData")
 saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI")
 

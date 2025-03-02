@@ -7,12 +7,12 @@ library(fmsb)
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
 
 
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR")
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
-Predictors<-c(2,11,14, 17, 18, 20:28) #rugosity 14, bathymetry 15
+Predictors<-c(2,5,6,11, 14, 17, 19, 20:28,30,32:35) #rugosity 14, bathymetry 15
 colnames(df)
 #depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q951yrSSTCRW,
 #TKE, nearshore sediment, coastal mod, effluent, MHI boat spear, MHI shore spear, coral cover
@@ -27,7 +27,7 @@ chart.Correlation(preds)
 df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 toau <- df[df$species=="LUFU",]
-PA_Model_Step<-fit.brt.n_eval_Balanced(toau, gbm.x=Predictors, gbm.y= c(Response), lr=0.05, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Step<-fit.brt.n_eval_Balanced(toau, gbm.x=Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/toau_PA_model_step_0.001_bf0.75_noLATLON.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
@@ -71,7 +71,7 @@ Reduced_Predictors<-which(colnames(toau) %in% colnames(Predictors_to_Keep))
 #refit model
 start = Sys.time()
 PA_Model_Reduced<-fit.brt.n_eval_Balanced(toau, 
-                                          gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.05, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+                                          gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 end = Sys.time()
 end - start 
 
@@ -79,8 +79,6 @@ save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/mo
 
 
 #re-evaluate model fit
-
-
 PA_Model<-PA_Model_Reduced[[1]]
 
 
@@ -146,7 +144,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("toau_pa_trial0.001_0.75bf_50ensemble.png", res = 300, height = 10, width = 8, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/toau_pa_trial_0.01_bf0.75_full.png", res = 300, height = 10, width = 8, units = "in")
 par(mfrow=c(4,4))
 mn_part_plot<-list()  
 for(y in Num_Preds){

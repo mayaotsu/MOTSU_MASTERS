@@ -13,8 +13,7 @@ is.nan.data.frame <- function(x)
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
 Predictors<-c(2,5,6,11, 14, 17, 19, 20:28,30,32:35) #rugosity 14, bathymetry 15
-colnames(df)
-#depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q951yrSSTCRW,
+Response<-which(colnames(df) %in% c("presence") )#depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q951yrSSTCRW,
 #TKE, nearshore sediment, coastal mod, effluent, MHI boat spear, MHI shore spear, coral cover
 
 # Look at predictor covariance and plot predictors across space to make sure they look right

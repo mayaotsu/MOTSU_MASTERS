@@ -5,7 +5,7 @@ library(matrixStats)
 library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI")
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
@@ -154,7 +154,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/taape_pa_trial_0.01_bf0.75_full2.png", res = 300, height = 10, width = 10, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/taape_pa_trial_0.01_bf0.75_JUSTMHI.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(4,4))
 mn_part_plot<-list()  
 for(y in Num_Preds){

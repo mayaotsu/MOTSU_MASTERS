@@ -6,11 +6,12 @@ library(ggplot2)
 #load spc
 load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Downloads/calibr_LUFU_abund.RData"); df2 = df
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR.RData"); df3 = df
 
-spc = rbind(df1, df2) %>% 
+spc = rbind(rbind(df1, df2), df3) %>% 
   filter(method == "nSPC")
 
-rm(df1, df2, df)
+rm(df1, df2, df3,df)
 
 colnames(spc)[5:6] = c("lat", "lon")
 
@@ -19,6 +20,17 @@ load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_bathymetry_rugosit
 static <- df
 static$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
 static = static[,c(3:13)]
+
+# make sure decimal places are same
+spc = spc %>% 
+  mutate(lon = round(lon, 4),
+         lat = round(lat, 5))
+spc$lat <- as.numeric(spc$lat)
+
+static = static %>% 
+  mutate(lon = round(lon, 4),
+         lat = round(lat, 5))
+static$lat <- as.numeric(static$lat)
 
 #add eds static variables to spc
 spc = left_join(spc, static)
@@ -163,7 +175,7 @@ spc_reduced <- spc %>%
                 #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr",
                 #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy",
                 #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo" ,
-                 q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
+                q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
                 #  "mean_Kd490_ESA_OC_CCI_monthly_01dy",
                 # mean_1mo_kd490_ESA = "mean_Kd490_ESA_OC_CCI_monthly_01mo" , correlated with 1mochla 0.89
                 #  "mean_Kd490_ESA_OC_CCI_monthly_01yr", 
@@ -193,31 +205,31 @@ spc_reduced <- spc %>%
                 #  "q95_Wind_Speed_ASCAT_daily_01yr" , #wind
                 # "TKE", #TKE
                 #  "date_r" ,
-               # pop_density = "gpw_v4_population_density_rev11_15_min.nc" , #5 km, #pop density, removed, correlated with MHI Shore spear 0.79
+                # pop_density = "gpw_v4_population_density_rev11_15_min.nc" , #5 km, #pop density, removed, correlated with MHI Shore spear 0.79
                 #"gpw_v4_population_density_rev11_1_deg.nc" , #30 km,
                 #"gpw_v4_population_density_rev11_2pt5_min.nc",  #60 km,
                 #"gpw_v4_population_density_rev11_30_min.nc",# 110 km 
                 otp_nearshore_sediment = "hi_otp_all_nearshore_sediment.tif" , #nearshore sediment (urban runoff?)
                 otp_all_coastal_mod = "hi_otp_all_coastal_mod.tif" , #coastal mod
                 otp_all_effluent = "hi_otp_all_osds_effluent.tif", #effluent
-               # "MHI_Boat_Spear_hr.tif", #spearfishing
-               # "MHI_Shore_Spear_hr.tif",
+                "MHI_Boat_Spear_hr.tif", #spearfishing
+                "MHI_Shore_Spear_hr.tif",
                 "coral_cover", 
                 #"hi_otp_all_fishing.tif", 
                 #"hi_otp_all_fishing_com.tif", 
-                com_line = "hi_otp_all_fishing_com_line.tif",
+                #com_line = "hi_otp_all_fishing_com_line.tif",
                 com_net = "hi_otp_all_fishing_com_net.tif",
-                com_spear = "hi_otp_all_fishing_com_spear.tif", 
-               #"hi_otp_all_fishing_rec.tif", 
-               rec_boat = "hi_otp_all_fishing_rec_boat.tif",
-               rec_boat_spear = "hi_otp_all_fishing_rec_boat_spear.tif",
-               rec_shore = "hi_otp_all_fishing_rec_shore.tif", 
-               rec_shore_line = "hi_otp_all_fishing_rec_shore_line.tif",
-               rec_shore_net = "hi_otp_all_fishing_rec_shore_net.tif", 
-               rec_shore_spear = "hi_otp_all_fishing_rec_shore_spear.tif"
-               
-               
-               )
+                #com_spear = "hi_otp_all_fishing_com_spear.tif", 
+                #"hi_otp_all_fishing_rec.tif", 
+                #rec_boat = "hi_otp_all_fishing_rec_boat.tif",
+                #rec_boat_spear = "hi_otp_all_fishing_rec_boat_spear.tif",
+                #rec_shore = "hi_otp_all_fishing_rec_shore.tif", 
+                #rec_shore_line = "hi_otp_all_fishing_rec_shore_line.tif",
+                #rec_shore_net = "hi_otp_all_fishing_rec_shore_net.tif", 
+                #rec_shore_spear = "hi_otp_all_fishing_rec_shore_spear.tif"
+                
+                
+  )
 
 #turn year column into a factor-- 10 levels 09,10,11,12,13,14,15,16,17,19
 spc_reduced$year <- as.factor(spc_reduced$year)
@@ -228,15 +240,17 @@ library(tidyr)
 columns_to_modify <- c(
   "otp_all_coastal_mod", 
   "otp_all_effluent",
-  "com_line",
+  #"com_line",
   "com_net",
-  "com_spear",
-  "rec_boat",
-  "rec_boat_spear",
-  "rec_shore",
-  "rec_shore_line",
-  "rec_shore_net",
-  "rec_shore_spear"
+  #"com_spear",
+  #"rec_boat",
+  #"rec_boat_spear",
+  #"rec_shore",
+  #"rec_shore_line",
+  #"rec_shore_net",
+  #"rec_shore_spear",
+  "MHI_Boat_Spear_hr.tif",
+  "MHI_Shore_Spear_hr.tif"
 )
 spc_reduced <- spc_reduced %>%
   mutate(across(all_of(columns_to_modify), ~ ifelse(region == "NWHI" & is.na(.), 0, .)))
@@ -251,6 +265,11 @@ save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc
 
 #saverds
 saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited")
+
+#SAVE JUST MHI
+spc_reduced = subset(spc_reduced, region == "MHI")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI.RData")
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI")
 
 ###################### END ###################
      

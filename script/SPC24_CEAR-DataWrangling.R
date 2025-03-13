@@ -55,7 +55,7 @@ df <- df %>%
 #save .RData
 #save(df, file ="/Users/mayaotsu/Downloads/calibr_CEAR_abund.RData")
 saveRDS(df, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR")
-save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR.RData")
+save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData")
 
 ############### END ###################
 

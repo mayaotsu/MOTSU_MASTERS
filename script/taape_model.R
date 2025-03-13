@@ -5,7 +5,7 @@ library(matrixStats)
 library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI") 
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
@@ -14,13 +14,15 @@ colnames(df)
 set.seed(101) 
 Random <- rnorm(nrow(df))
 df$Random = Random
-Predictors<-c(2,5,6,11, 14, 17, 19, 20:28,30,32:35) #rugosity 14, bathymetry 15
-# (2, 11,14, 17, 19, 20:28,30,32:34)
+Predictors<-c(2,11, 14, 17, 19, 20:22, 24:29) 
+#rugosity 14, bathymetry 15
 #re-add year (factor variable) 11
-#depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q05&951yrSSTCRW,
-#nearshore sediment, coastal mod, effluent, coral cover,
-#com line, com net, com spear, rec boat spear, rec shore line, rec shore net, rec shore spear
+#depth2, lat5, lon6, year11, rugosity14, mean 1 mo chla ESA17, mean 1 mo sst CRW19, q05&951yrSSTCRW20&21,
+#nearshore sediment22, effluent24, MHI boat spear25, MHI shore spear26, coral cover27, commerial net28
+#random29
+boxplot(taape$density ~ taape$year)
 
+Response<-which(colnames(df) %in% c("presence") )
 # Test predictors for colinearity using correlation matrix chart -- SAL and SLA are very correlated (cor = 0.74)
 library(PerformanceAnalytics)
 #preds<-which(!colnames(df) %in% c("biom","PA", "species", "sci", "Island", "subregion", "Year", "Lat","Lon", "PA","random"))
@@ -154,7 +156,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/taape_pa_trial_0.01_bf0.75_JUSTMHI.png", res = 300, height = 10, width = 10, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/taape_pa_trial_0.01_bf0.75_JUSTMHI_2.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(4,4))
 mn_part_plot<-list()  
 for(y in Num_Preds){

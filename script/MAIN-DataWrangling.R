@@ -6,7 +6,7 @@ library(ggplot2)
 #load spc
 load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Downloads/calibr_LUFU_abund.RData"); df2 = df
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR.RData"); df3 = df
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
 
 spc = rbind(rbind(df1, df2), df3) %>% 
   filter(method == "nSPC")

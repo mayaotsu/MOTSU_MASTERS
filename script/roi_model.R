@@ -6,13 +6,19 @@ library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
 
-
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited")
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
-Predictors<-c(2,5,6,11, 14, 17, 19, 20:28,30,32:35)
+colnames(df)
+Predictors<-c(2,11, 14, 17, 19, 20:22, 24:27, 29) 
+#rugosity 14, bathymetry 15
+#re-add year (factor variable) 11
+#depth2, lat5, lon6, year11, rugosity14, mean 1 mo chla ESA17, mean 1 mo sst CRW19, q05&951yrSSTCRW20&21,
+#nearshore sediment22, effluent24, MHI boat spear25, MHI shore spear26, coral cover27, commerial net28
+#random29
+Response<-which(colnames(df) %in% c("presence") )
 set.seed(101) 
 Random <- rnorm(nrow(df))
 df$Random = Random
@@ -30,8 +36,8 @@ df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 roi <- df[df$species=="CEAR",]
 boxplot(roi$density ~ roi$year)
-dev.off()
-PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+#dev.off()
+PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/roi_PA_model_step_0.001_bf0.75_noLATLON.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
@@ -74,19 +80,14 @@ Reduced_Predictors<-which(colnames(roi) %in% colnames(Predictors_to_Keep))
 
 #refit model
 start = Sys.time()
-PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi, 
-                                          gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi,gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/roi_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
-
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.01_0.75/roi_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
 
 #re-evaluate model fit
-
 PA_Model<-PA_Model_Reduced[[1]]
-
-
 Model_Evals_PA<-unlist(unlist(PA_Model_Reduced[[2]]))
 
 Model_PA_Eval<-matrix(,length(PA_Model),2)
@@ -149,7 +150,7 @@ boxplot(roi$density ~ roi$year)
 dev.off()
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("roi_pa_trial0.001_0.75bf_50ensemble.png", res = 300, height = 10, width = 8, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/roi_pa_trial_0.01_bf0.75_full_2.png", res = 300, height = 10, width = 8, units = "in")
 par(mfrow=c(4,4))
 mn_part_plot<-list()  
 for(y in Num_Preds){

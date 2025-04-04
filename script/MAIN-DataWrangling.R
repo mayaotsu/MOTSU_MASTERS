@@ -6,12 +6,12 @@ library(ggplot2)
 #load spc
 load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Downloads/calibr_LUFU_abund.RData"); df2 = df
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
+#load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
 
-spc = rbind(rbind(df1, df2), df3) %>% 
-  filter(method == "nSPC")
+spc = rbind(rbind(df1, df2) %>% 
+  filter(method == "nSPC"))
 
-rm(df1, df2, df3,df)
+rm(df1, df2,df) #df3
 
 colnames(spc)[5:6] = c("lat", "lon")
 
@@ -123,9 +123,9 @@ spc = left_join(spc, dynamic)
 rm(df, dynamic)
 
 #take a look
-#spc %>% 
-  #ggplot(aes(mean_Sea_Surface_Temperature_CRW_daily_01dy, density, fill = density)) + 
- # geom_point(shape = 21)
+# spc %>%
+# ggplot(aes(mean_Sea_Surface_Temperature_CRW_daily_01dy, density, fill = density)) +
+# geom_point(shape = 21)
 
 #load TKE, less tke vals because starts in 2009
 TKE <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spcdata_tke.rds")
@@ -186,7 +186,7 @@ spc_reduced <- spc %>%
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01mo" ,
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01yr" , #kd490
                 # mean_1day_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01dy", taken out bc correlated with monthly sst 0.94
-                mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
+                #mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
                 #  "mean_Sea_Surface_Temperature_CRW_daily_01yr", 
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01mo",
@@ -231,9 +231,11 @@ spc_reduced <- spc %>%
                 
   )
 
-#turn year column into a factor-- 10 levels 09,10,11,12,13,14,15,16,17,19
+#turn year and island column into a factor-- 10 levels 09,10,11,12,13,14,15,16,17,19
 spc_reduced$year <- as.factor(spc_reduced$year)
+spc_reduced$island <- as.factor(spc_reduced$island)
 class(spc_reduced$year)
+class(spc_reduced$island)
 
 #change all OTP NWHI data NAs except sedimentation data to 0
 library(tidyr)
@@ -255,9 +257,22 @@ columns_to_modify <- c(
 spc_reduced <- spc_reduced %>%
   mutate(across(all_of(columns_to_modify), ~ ifelse(region == "NWHI" & is.na(.), 0, .)))
 
+#Comine cumulative spearfishing effort (MHI_Boat_Spear_hr + MHI_Shore_Spear_hr)
+spc_reduced$MHI_spear <- spc_reduced$MHI_Boat_Spear_hr.tif + spc_reduced$MHI_Shore_Spear_hr.tif
+unique(is.na(spc_reduced$MHI_spear))
+
+#take away mhi spear and mhi boat spear columns
+spc_reduced = spc_reduced %>% 
+  dplyr::select(-MHI_Shore_Spear_hr.tif, -MHI_Boat_Spear_hr.tif)
+
 #exclude midway 
 spc_reduced <- spc_reduced %>% filter(island!= "Midway")
 unique(spc_reduced$island)
+
+#SAVE CUMULATIVE LAYER
+spc_reduced_spearcumulative <- spc_reduced[!duplicated(spc_reduced),]
+save(spc_reduced_spearcumulative, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative.RData")
+saveRDS(spc_reduced_spearcumulative, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative")
 
 #save rdata
 spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
@@ -268,8 +283,8 @@ saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_ed
 
 #SAVE JUST MHI
 spc_reduced = subset(spc_reduced, region == "MHI")
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI.RData")
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI.RData")
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulativeta_JUSTMHI")
 
 ###################### END ###################
      

@@ -5,7 +5,7 @@ library(matrixStats)
 library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited") 
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_cumulativeta_JUSTMHI") 
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
@@ -14,7 +14,7 @@ colnames(df)
 set.seed(101) 
 Random <- rnorm(nrow(df))
 df$Random = Random
-Predictors<-c(2,11, 14, 17, 19, 20:22, 24:29) 
+Predictors<-c(2,14,19:21,23:26) 
 #rugosity 14, bathymetry 15
 #re-add year (factor variable) 11
 #depth2, lat5, lon6, year11, rugosity14, mean 1 mo chla ESA17, mean 1 mo sst CRW19, q05&951yrSSTCRW20&21,

@@ -193,7 +193,7 @@ spc_reduced <- spc %>%
                 q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01mo" ,
-                q95_1yr_sst_CRW ="q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
+    # get rid q95_1yr_sst_CRW ="q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
                 #  "mean_Wind_Speed_ASCAT_daily_01dy",
                 #  "mean_Wind_Speed_ASCAT_daily_01mo",
                 #  "mean_Wind_Speed_ASCAT_daily_01yr",
@@ -210,7 +210,7 @@ spc_reduced <- spc %>%
                 #"gpw_v4_population_density_rev11_2pt5_min.nc",  #60 km,
                 #"gpw_v4_population_density_rev11_30_min.nc",# 110 km 
                 otp_nearshore_sediment = "hi_otp_all_nearshore_sediment.tif" , #nearshore sediment (urban runoff?)
-                otp_all_coastal_mod = "hi_otp_all_coastal_mod.tif" , #coastal mod
+                #otp_all_coastal_mod = "hi_otp_all_coastal_mod.tif" , #coastal mod
                 otp_all_effluent = "hi_otp_all_osds_effluent.tif", #effluent
                 "MHI_Boat_Spear_hr.tif", #spearfishing
                 "MHI_Shore_Spear_hr.tif",
@@ -240,7 +240,7 @@ class(spc_reduced$island)
 #change all OTP NWHI data NAs except sedimentation data to 0
 library(tidyr)
 columns_to_modify <- c(
-  "otp_all_coastal_mod", 
+  #"otp_all_coastal_mod", 
   "otp_all_effluent",
   #"com_line",
   "com_net",
@@ -269,22 +269,31 @@ spc_reduced = spc_reduced %>%
 spc_reduced <- spc_reduced %>% filter(island!= "Midway")
 unique(spc_reduced$island)
 
+#set sediment and comm net NAs to 0s
+spc_reduced <- spc_reduced %>%
+  mutate(com_net = replace_na(com_net, 0),
+         otp_nearshore_sediment = replace_na(otp_nearshore_sediment, 0)
+  )
+
+#get rid of remaining rows with NAs
+spc_reduced <- na.omit(spc_reduced)
+
 #SAVE CUMULATIVE LAYER
 spc_reduced_spearcumulative <- spc_reduced[!duplicated(spc_reduced),]
 save(spc_reduced_spearcumulative, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative.RData")
 saveRDS(spc_reduced_spearcumulative, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative")
 
 #save rdata
-spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited.RData")
+#spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
+#save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited.RData")
 
 #saverds
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited")
+#saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited")
 
 #SAVE JUST MHI
 spc_reduced = subset(spc_reduced, region == "MHI")
 save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI.RData")
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulativeta_JUSTMHI")
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI")
 
 ###################### END ###################
      

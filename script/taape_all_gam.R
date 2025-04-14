@@ -30,7 +30,7 @@ taape_MHI_Gam <-gam(presence~s(depth )+year+s(rugosity )+island+s(mean_1mo_chla_
                      +s(otp_nearshore_sediment )+s(otp_all_effluent )+s(MHI_spear )+
                      +s(coral_cover ),
                    data = taape_MHI, family = binomial)
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_MHI_gam_2.png", res = 300, height = 10, width = 10, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_MHI_gam_nok4.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(3,5))
 plot(taape_MHI_Gam)
 dev.off()
@@ -39,7 +39,7 @@ gam.check(taape_MHI_Gam)
 
 #TRY TOAU
 toau <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_cumulative") 
-toau <- toau[toau$species=="LUKA",]
+toau <- toau[toau$species=="LUFU",]
 toau$island <- as.factor(toau$island)
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
@@ -52,7 +52,7 @@ toau_full_Gam <-gam(presence~s(depth )+year+s(rugosity )+island+s(mean_1mo_chla_
                     +s(coral_cover ),
                     data = toau, family = binomial)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/toau_full_gam_2.png", res = 300, height = 10, width = 10, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/toau_full_gam_nok4.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(3,5))
 plot(toau_full_Gam)
 dev.off()

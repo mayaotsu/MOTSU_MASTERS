@@ -51,10 +51,11 @@ dredge_mhi <- dredge(taape_MHI_Gam, trace = 5)
 head(dredge_mhi)
 saveRDS(dredge_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_mhi_dredge_2.rds")
 
-model.sel(dredge_mhi)[1:10]
-sw(dredge_mhi)
-best_model_2 <- get.models(dredge_mhi, 1)[[1]]
-summary(best_model_2)
+taape_mhi_dredge_2 = readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_mhi_dredge_2.rds")
+model.sel(taape_mhi_dredge_2)[1:10]
+sw(taape_mhi_dredge_2)
+best_model_2 <- get.models(taape_mhi_dredge_2, 1)[[1]]
+oh thanksummary(best_model_2)
 library(effects)
 plot(allEffects(best_model_2))
 draw(best_model_2, parametric = TRUE)

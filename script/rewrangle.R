@@ -6,20 +6,29 @@ library(ggplot2)
 #load spc
 load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Downloads/calibr_LUFU_abund.RData"); df2 = df
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
-
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = dfrm(df1)
 spc = rbind(rbind(df1, df2, df3) %>% 
-  filter(method == "nSPC"))
+              filter(method == "nSPC"))
 
 rm(df1, df2,df,df3)
 
 colnames(spc)[5:6] = c("lat", "lon")
 
 #load eds-static variables, do not forget to transform lon range to 0-360
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_bathymetry_rugosity.Rdata") #eds_bathymetry_rugosity.Rdata, eds_climatologies.csv
-static <- df
-static$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
-static = static[,c(3:13)]
+static1 = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-04-04.RData") #eds_bathymetry_rugosity.Rdata
+colnames(static1)
+
+#keep certain columns
+static1 <- static1 %>%
+  select(Bathymetry_CRM_vol10_3s, Bathymetry_CRM_vol10_3s_all_units_rugosity.nc,
+         Bathymetry_HMRG_MHI_50m,Bathymetry_HMRG_MHI_50m_all_units_rugosity.nc,
+         Bathymetry_HURL_NWHI_60m, bath)
+
+
+
+static$lon = ifelse(static$lon < 0, static$lon + 360, static$lon)
+colnames(static1)
+static = static[,c(3:54)]
 
 # make sure decimal places are same
 spc = spc %>% 
@@ -69,7 +78,7 @@ replace_deep_values <- function(df, threshold = -30, distance_threshold = 0.24) 
                                        df$lat >= (lat - distance_threshold) & 
                                        df$lat <= (lat + distance_threshold) &
                                        df$bathymetry >= threshold]
-      
+        
         # Check if there are any valid nearby values to calculate the mean
         if(length(nearby_values) > 0) {
           mean(nearby_values, na.rm = TRUE)
@@ -89,22 +98,8 @@ spc <- replace_deep_values(spc)
 spc = spc %>% as.data.frame()
 summary(spc$rugosity)
 
-#take a look, can also do with just presence data
-#spc %>% 
- # ggplot(aes(lon, lat, fill = rugosity)) + 
- # geom_point(shape = 21)
-
-#spc %>% 
- # ggplot(aes(rugosity, density, fill = rugosity)) + 
-  #geom_point(shape = 21)
-
-#spc %>% 
- # ggplot(aes(depth, density, fill = rugosity)) + 
-  #geom_point(shape = 21)
-
 #load dynamic variables
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
-dynamic <- df
+dynamic = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
 dynamic = dynamic[,c(3:346)]
 
 #make a "date" column in spc, make sure it's same format
@@ -137,7 +132,7 @@ spc <- left_join(spc, TKE[, !names(TKE) %in% c("longitude", "latitude", "longwes
 rm(TKE)
 
 #load otp
-otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp.csv")
+otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_new.csv")
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 otp = otp %>% 
   mutate(lon = round(lon, 3),
@@ -147,14 +142,10 @@ spc <- left_join(spc, otp)
 #increased from 8848 to 8880 observations
 #spc_test2 <- left_join(spc, otp, by = c("lat", "lon", "date", "year", "month", "day"))
 rm(otp)
-#saveRDS(spc, "spcdata_full")
-
-#get rid of unneeded columns from otp, eds
-#spc_reduced$log_mean_1mo_chla_ESA <- log(spc_reduced$mean_1mo_chla_ESA)
 
 #call in coral cover, left join by lat and lon
 #increased from 8880 to 8944
-cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
+cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv")
 cca = cca %>% 
   mutate(lon = round(lon, 3),
          lat = round(lat, 3))
@@ -193,7 +184,7 @@ spc_reduced <- spc %>%
                 q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01mo" ,
-    # get rid q95_1yr_sst_CRW ="q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
+                # get rid q95_1yr_sst_CRW ="q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
                 #  "mean_Wind_Speed_ASCAT_daily_01dy",
                 #  "mean_Wind_Speed_ASCAT_daily_01mo",
                 #  "mean_Wind_Speed_ASCAT_daily_01yr",
@@ -296,4 +287,3 @@ save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc
 saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI")
 
 ###################### END ###################
-     

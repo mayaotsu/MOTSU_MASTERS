@@ -14,19 +14,21 @@ taape <- taape[taape$species=="LUKA",]
 # not including com_net because all NA for NWHI
 taape_full_Gam <-gam(presence~s(depth)+year+s(rugosity)+island+s(mean_1mo_chla_ESA)
                    +s(q05_1yr_sst_CRW)
-                   +s(otp_nearshore_sediment)+s(otp_all_effluent)+s(MHI_spear)+
+                   +s(otp_nearshore_sediment)
+                   +s(otp_all_effluent)
+                   +s(MHI_spear)+
                    +s(coral_cover),
                      data = taape, family = binomial)
 
 #dredge function
 options(na.action = "na.fail")
-dredge_model <- dredge(taape_full_Gam, trace = 5)
-dredge_model
-saveRDS(dredge_model, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_full_dredge_2.rds")
+dredge_taape_full <- dredge(taape_full_Gam, trace = 5)
+dredge_taape_full
+saveRDS(dredge_taape_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_full_dredge_2.rds")
 
-model.sel(dredge_model)[1:10]
-sw(dredge_model)
-best_model_1 <- get.models(dredge_model, 1)[[1]]
+model.sel(dredge_taape_full)[1:10]
+sw(dredge_taape_full)
+best_model_1 <- get.models(dredge_taape_full, 1)[[1]]
 summary(best_model_1)
 library(gratia)
 draw(best_model_1)
@@ -38,13 +40,14 @@ dev.off()
 
 df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI") 
 taape_MHI <- df[df$species=="LUKA",]
-taape_MHI$island <- as.factor(taape_MHI$island)
 taape_MHI_Gam <-gam(presence~s(depth)+year+s(rugosity)+island+s(mean_1mo_chla_ESA)
                     +s(q05_1yr_sst_CRW)
                     +s(otp_nearshore_sediment)+s(otp_all_effluent)+s(MHI_spear)+
                       +s(coral_cover),
                     data = taape_MHI, family = binomial)
-dredge_mhi <- dredge(taape_full_Gam, trace = 5)
+
+options(na.action = "na.fail")
+dredge_mhi <- dredge(taape_MHI_Gam, trace = 5)
 head(dredge_mhi)
 saveRDS(dredge_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_mhi_dredge_2.rds")
 

@@ -6,7 +6,7 @@ library(ggplot2)
 #load spc
 load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Downloads/calibr_LUFU_abund.RData"); df2 = df
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = dfrm(df1)
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
 spc = rbind(rbind(df1, df2, df3) %>% 
               filter(method == "nSPC"))
 
@@ -15,20 +15,10 @@ rm(df1, df2,df,df3)
 colnames(spc)[5:6] = c("lat", "lon")
 
 #load eds-static variables, do not forget to transform lon range to 0-360
-static1 = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-04-04.RData") #eds_bathymetry_rugosity.Rdata
-colnames(static1)
-
-#keep certain columns
-static1 <- static1 %>%
-  select(Bathymetry_CRM_vol10_3s, Bathymetry_CRM_vol10_3s_all_units_rugosity.nc,
-         Bathymetry_HMRG_MHI_50m,Bathymetry_HMRG_MHI_50m_all_units_rugosity.nc,
-         Bathymetry_HURL_NWHI_60m, bath)
-
-
-
-static$lon = ifelse(static$lon < 0, static$lon + 360, static$lon)
-colnames(static1)
-static = static[,c(3:54)]
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-04-16.RData") #eds_bathymetry_rugosity.Rdata
+static <- df
+static$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
+static = static[,c(3:13)]
 
 # make sure decimal places are same
 spc = spc %>% 

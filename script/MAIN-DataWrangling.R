@@ -16,7 +16,8 @@ rm(df1, df2,df,df3)
 colnames(spc)[5:6] = c("lat", "lon")
 
 #load eds-static variables, do not forget to transform lon range to 0-360
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_bathymetry_rugosity.Rdata") #eds_bathymetry_rugosity.Rdata, eds_climatologies.csv
+#load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-04-16.RData") #eds_bathymetry_rugosity.Rdata
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_bathymetry_rugosity.RData")
 static <- df
 static$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
 static = static[,c(3:13)]
@@ -103,15 +104,18 @@ summary(spc$rugosity)
   #geom_point(shape = 21)
 
 #load dynamic variables
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
-dynamic <- df
-dynamic = dynamic[,c(3:346)]
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
+#df <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
+dynamic <- df[, 3:346]
+#if Rdata:
+#dynamic = df
+#dynamic = dynamic[,c(3:346)] how to keep thiscode but change for a csv file instead of rdata
 
 #make a "date" column in spc, make sure it's same format
 spc$date = paste(spc$year, spc$month, spc$day, sep = "-")
 spc$date = as.character(spc$date)
-class(df$date)
-class(spc$date)
+#class(df$date)
+#class(spc$date)
 
 #add eds dynamic variables to spc, make sure decimal places are same
 spc = spc %>% 
@@ -137,7 +141,7 @@ spc <- left_join(spc, TKE[, !names(TKE) %in% c("longitude", "latitude", "longwes
 rm(TKE)
 
 #load otp
-otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp.csv")
+otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_old.csv")
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 otp = otp %>% 
   mutate(lon = round(lon, 3),
@@ -147,14 +151,13 @@ spc <- left_join(spc, otp)
 #increased from 8848 to 8880 observations
 #spc_test2 <- left_join(spc, otp, by = c("lat", "lon", "date", "year", "month", "day"))
 rm(otp)
-#saveRDS(spc, "spcdata_full")
 
 #get rid of unneeded columns from otp, eds
-#spc_reduced$log_mean_1mo_chla_ESA <- log(spc_reduced$mean_1mo_chla_ESA)
 
 #call in coral cover, left join by lat and lon
 #increased from 8880 to 8944
-cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
+cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv")
+#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
 cca = cca %>% 
   mutate(lon = round(lon, 3),
          lat = round(lat, 3))
@@ -279,9 +282,9 @@ spc_reduced <- spc_reduced %>%
 spc_reduced <- na.omit(spc_reduced)
 
 #SAVE CUMULATIVE LAYER
-spc_reduced_spearcumulative <- spc_reduced[!duplicated(spc_reduced),]
-save(spc_reduced_spearcumulative, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative.RData")
-saveRDS(spc_reduced_spearcumulative, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative")
+spc_reduced_spearcumulative_roi <- spc_reduced[!duplicated(spc_reduced),]
+save(spc_reduced_spearcumulative_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative.RData")
+saveRDS(spc_reduced_spearcumulative_roi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative")
 
 #save rdata
 #spc_reduced <- spc_reduced[!duplicated(spc_reduced),]
@@ -291,9 +294,9 @@ saveRDS(spc_reduced_spearcumulative, "/Users/mayaotsu/Documents/Github/MOTSU_MAS
 #saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited")
 
 #SAVE JUST MHI
-spc_reduced = subset(spc_reduced, region == "MHI")
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI.RData")
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI")
+spc_reduced_roi = subset(spc_reduced, region == "MHI")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI_roi.RData")
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI_roi")
 
 ###################### END ###################
      

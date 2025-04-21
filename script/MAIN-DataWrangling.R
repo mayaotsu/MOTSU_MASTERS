@@ -4,8 +4,8 @@ library(dplyr)
 library(ggplot2)
 
 #load spc
-load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData"); df1 = df
-load("/Users/mayaotsu/Downloads/calibr_LUFU_abund.RData"); df2 = df
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUKA_abund.RData"); df1 = df
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUFU_abund.RData"); df2 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
 #spc <- filter(df1, method == "nSPC")
 
@@ -105,12 +105,12 @@ summary(spc$rugosity)
   #geom_point(shape = 21)
 
 #load dynamic variables
-#load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
-df <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
-dynamic <- df[, 3:346]
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
+saveRDS(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RDate")
+
 #if Rdata:
-#dynamic = df
-#dynamic = dynamic[,c(3:346)] how to keep thiscode but change for a csv file instead of rdata
+dynamic = df
+dynamic = dynamic[,c(3:346)] #how to keep thiscode but change for a csv file instead of rdata
 
 spc = spc %>% select(-date_)
 
@@ -170,7 +170,7 @@ rm(cca)
 colnames(spc)
 
 spc_reduced <- spc %>% 
-  dplyr::select(1:13, 
+  dplyr::select(1:14, 
                 "depth",
                 "rugosity",
                 #"bathymetry", 

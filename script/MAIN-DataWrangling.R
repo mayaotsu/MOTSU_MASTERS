@@ -105,11 +105,9 @@ summary(spc$rugosity)
   #geom_point(shape = 21)
 
 #load dynamic variables
-#df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
+df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
 save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
-
-#if Rdata:
 dynamic = df
 dynamic = dynamic[,c(3:346)] #how to keep thiscode but change for a csv file instead of rdata
 

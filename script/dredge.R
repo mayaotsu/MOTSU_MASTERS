@@ -94,8 +94,10 @@ best_model_3 <- get.models(dredge_toau_full, 1)[[1]]
 
 draw(best_model_3, parametric = TRUE)
 #png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/draw/toau_full_draw.png", res = 300, height = 10, width = 10, units = "in")
-dev.off()
+
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_full_plot.png", res = 300, height = 10, width = 10, units = "in")
 plot(best_model_3, pages =1)
+dev.off()
 
 ##### toau mhi dredge model #####
 toau_mhi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
@@ -122,12 +124,15 @@ model.sel(dredge_toau_mhi)[1:10]
 sw(dredge_toau_mhi)
 best_model_4 <- get.models(dredge_toau_mhi, 1)[[1]]
 draw(best_model_4, parametric = TRUE)
-#png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/draw/toau_mhi_draw.png", res = 300, height = 10, width = 10, units = "in")
-par(mfrow=c(3,3))
-draw(best_model_4, ylimit=c(-5,5))
-dev.off()
-plot(best_model_4)
 
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/draw/toau_mhi_draw.png", res = 300, height = 10, width = 10, units = "in")
+par(mfrow=c(3,3))
+draw(best_model_4, parametric = TRUE)
+dev.off()
+
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_mhi_plot.png", res = 300, height = 10, width = 10, units = "in")
+plot(best_model_4)
+dev.off()
 
 ### ROI FULL #########
 roi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
@@ -150,12 +155,47 @@ saveRDS(dredge_roi_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/
 
 model.sel(dredge_roi_full)[1:10] #best 10 models
 sw(dredge_roi_full) #sum of weights across all models for each predictor
-best_model_1 <- get.models(dredge_roi_full, 1)[[1]]
-summary(best_model_1)
+best_model_5 <- get.models(dredge_roi_full, 1)[[1]]
+summary(best_model_5)
 
-
-library(gratia)
 #png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/draw/roi_full_draw.png", res = 300, height = 10, width = 10, units = "in")
-draw(best_model_1)
+draw(best_model_5)
 dev.off()
-plot(best_model_1, pages = 1)
+
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/roi_full_plot.png", res = 300, height = 10, width = 10, units = "in")
+plot(best_model_5, pages = 1)
+dev.off()
+
+### dredge roi mhi ######
+roi_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
+roi_MHI <- roi_MHI[roi_MHI$species=="CEAR",]
+roi_MHI <- roi_MHI[roi_MHI$region=="MHI",]
+roi_MHI_Gam <-gam(presence~s(depth)+year+s(rugosity, k =6)+island
+                    +s(mean_1mo_chla_ESA, k =6)
+                    +s(q05_1yr_sst_CRW, k=6)
+                    +s(otp_nearshore_sediment, k=6)
+                    +s(otp_all_effluent, k=6)
+                    +s(MHI_spear, k=6)+
+                      +s(coral_cover, k=6)
+                    +s(com_net, k=6),
+                    data = roi_MHI, family = binomial)
+
+options(na.action = "na.fail")
+dredge_roi_mhi <- dredge(roi_MHI_Gam, trace = 5)
+head(dredge_roi_mhi)
+saveRDS(dredge_roi_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_roi_mhi.rds")
+
+model.sel(dredge_roi_mhi)[1:10]
+sw(dredge_roi_mhi)
+best_model_6 <- get.models(dredge_roi_mhi, 1)[[1]]
+summary(best_model_6)
+
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/draw/roi_mhi_draw.png", res = 300, height = 10, width = 10, units = "in")
+par(mfrow=c(3,5))
+draw(best_model_6, parametric = TRUE)
+dev.off()
+
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/roi_mhi_plot.png", res = 300, height = 10, width = 10, units = "in")
+par(mfrow=c(3,5))
+plot(best_model_6, pages = 1)
+dev.off()

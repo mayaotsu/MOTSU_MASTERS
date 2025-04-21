@@ -89,7 +89,7 @@ spc = spc %>% as.data.frame()
 summary(spc$rugosity)
 
 #load dynamic variables
-dynamic = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
+dynamic = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv") #eds_time.Rdata
 dynamic = dynamic[,c(3:346)]
 
 #make a "date" column in spc, make sure it's same format

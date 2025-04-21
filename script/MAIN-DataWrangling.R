@@ -105,8 +105,9 @@ summary(spc$rugosity)
   #geom_point(shape = 21)
 
 #load dynamic variables
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
-saveRDS(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RDate")
+#df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
+save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
 
 #if Rdata:
 dynamic = df

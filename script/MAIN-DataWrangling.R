@@ -98,15 +98,10 @@ summary(spc$rugosity)
 
 #spc %>% 
  # ggplot(aes(rugosity, density, fill = rugosity)) + 
-  #geom_point(shape = 21)
-
-#spc %>% 
- # ggplot(aes(depth, density, fill = rugosity)) + 
-  #geom_point(shape = 21)
 
 #load dynamic variables
-df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
-save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
+#df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
+#save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
 dynamic = df
 dynamic = dynamic[,c(3:346)] #how to keep thiscode but change for a csv file instead of rdata
@@ -137,9 +132,9 @@ rm(df, dynamic)
 # rm(TKE)
 
 #load otp
-otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_old.csv")
+otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_new.csv")
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
-otp = otp %>% select(-date_r, -year, -month, -day, -date)
+#otp = otp %>% select( date_r, -year, -month, -day, -date) 
 
 # otp = otp %>% 
 #   mutate(lon = round(lon, 3),
@@ -147,14 +142,12 @@ otp = otp %>% select(-date_r, -year, -month, -day, -date)
 
 spc <- left_join(spc, otp)
 
-#increased from 8848 to 8880 observations
 #spc_test2 <- left_join(spc, otp, by = c("lat", "lon", "date", "year", "month", "day"))
 rm(otp)
 
 #get rid of unneeded columns from otp, eds
 
 #call in coral cover, left join by lat and lon
-#increased from 8880 to 8944
 #cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
 cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
 cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
@@ -169,11 +162,11 @@ rm(cca)
 colnames(spc)
 
 spc_reduced <- spc %>% 
-  dplyr::select(1:14, 
-                "depth",
-                "rugosity",
+  dplyr::select(1:14, #island, depth, method, lat, lon, species, density, presence, region, y, m, d, rugosity, date
+                #"depth",
+                #"rugosity",
                 #"bathymetry", 
-                "date", #rugosity and bathymetry
+                #"date",
                 # "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy", 
                 mean_1mo_chla_ESA = "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo", 
                 # "log_mean_1mo_chla_ESA", 
@@ -291,11 +284,11 @@ spc_reduced <- na.omit(spc_reduced)
 #get rid of two row duplicates, avg values between thee two duplicate rows to keep one
 colnames(spc_reduced)
 spc_reduced = spc_reduced %>% 
-  group_by(island, method, date_, lat, lon, species, date, presence, region, year, month, day) %>% 
+  group_by(island, method, lat, lon, species, date, presence, region, year, month, day) %>% 
   summarise(density = mean(density, na.rm = T),
             depth = mean(depth, na.rm = T),
             rugosity = mean(rugosity, na.rm = T),
-            bathymetry = mean(bathymetry, na.rm = T), 
+            #bathymetry = mean(bathymetry, na.rm = T), 
             mean_1mo_chla_ESA = mean(mean_1mo_chla_ESA, na.rm = T),
             q95_1yr_chla_ESA = mean(q95_1yr_chla_ESA, na.rm = T),
             q05_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
@@ -305,11 +298,11 @@ spc_reduced = spc_reduced %>%
             com_net = mean(com_net, na.rm = T),
             MHI_spear = mean(MHI_spear, na.rm = T)
   ) %>%
-  select(island, depth, method, date_, lat, lon, species, density, presence,
-         region, year, month, day, rugosity, bathymetry, date,
+  select(island, depth, method, lat, lon, species, density, presence,
+         region, year, month, day, rugosity, date,
          mean_1mo_chla_ESA, q95_1yr_chla_ESA, q05_1yr_sst_CRW,
          otp_nearshore_sediment, otp_all_effluent, coral_cover,
-         com_net, MHI_spear)
+         com_net, MHI_spear) #bathymetry
 
 
 #SAVE CUMULATIVE LAYER

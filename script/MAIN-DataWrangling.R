@@ -279,7 +279,7 @@ spc_reduced <- spc_reduced %>%
   )
 
 #get rid of remaining rows with NAs
-spc_reduced <- na.omit(spc_reduced)
+spc_reduced <- na.omit(spc_reduced)is
 
 #get rid of two row duplicates, avg values between thee two duplicate rows to keep one
 colnames(spc_reduced)

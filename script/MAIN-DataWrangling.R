@@ -333,6 +333,7 @@ saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mh
 
 ###################### END ###################
      
+colSums(is.na(spc_reduced))
 
 spc_reduced %>%
   group_by(island) %>%

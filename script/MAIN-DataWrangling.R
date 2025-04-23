@@ -150,8 +150,8 @@ rm(otp, df)
 #get rid of unneeded columns from otp, eds
 
 #call in coral cover, left join by lat and lon
-#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
-cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
+cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
+#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
 cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
 
 # cca = cca %>% 
@@ -274,6 +274,9 @@ unique(is.na(spc_reduced$MHI_spear))
 spc_reduced = spc_reduced %>% 
   dplyr::select(-MHI_Shore_Spear_hr.tif, -MHI_Boat_Spear_hr.tif)
 
+#Change kahoolawe MHI spearfish and comm_net to 0
+spc_reduced$MHI_spear[spc_reduced$island == "Kahoolawe"] <- 0
+
 #exclude midway 
 spc_reduced <- spc_reduced %>% filter(island!= "Midway")
 unique(spc_reduced$island)
@@ -331,6 +334,13 @@ saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mh
 ###################### END ###################
      
 
+spc_reduced %>%
+  group_by(island) %>%
+  summarise(
+    total_rows = n(),
+    na_coral_cover = sum(is.na(coral_cover)),
+    percent_na = round(100 * sum(is.na(coral_cover)) / n(), 2)
+  )
 
 missing_coral <- spc_reduced[is.na(spc_reduced$coral_cover), ]
 ggplot(missing_coral, aes(x = lon, y = lat)) +

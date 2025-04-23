@@ -132,7 +132,9 @@ rm(df, dynamic)
 # rm(TKE)
 
 #load otp
-otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_new.csv")
+#otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_new.csv")
+otp = load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Climatologies_NonERDDAP_2025-04-21.RData")
+otp <- df   
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 #otp = otp %>% select( date_r, -year, -month, -day, -date) 
 
@@ -143,7 +145,7 @@ otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 spc <- left_join(spc, otp)
 
 #spc_test2 <- left_join(spc, otp, by = c("lat", "lon", "date", "year", "month", "day"))
-rm(otp)
+rm(otp, df)
 
 #get rid of unneeded columns from otp, eds
 
@@ -234,13 +236,16 @@ spc_reduced <- spc %>%
 
 rm(spc)
 
+#get rid of duplicates
+spc_reduced <- spc_reduced[!duplicated(spc_reduced), ]
+
 #turn year and island column into a factor-- 10 levels 09,10,11,12,13,14,15,16,17,19
 spc_reduced$year <- as.factor(spc_reduced$year)
 spc_reduced$island <- as.factor(spc_reduced$island)
 class(spc_reduced$year)
 class(spc_reduced$island)
 
-#change all OTP NWHI data NAs except sedimentation data to 0
+#change all OTP NWHI data NAs to 0
 library(tidyr)
 columns_to_modify <- c(
   #"otp_all_coastal_mod", 
@@ -255,7 +260,8 @@ columns_to_modify <- c(
   #"rec_shore_net",
   #"rec_shore_spear",
   "MHI_Boat_Spear_hr.tif",
-  "MHI_Shore_Spear_hr.tif"
+  "MHI_Shore_Spear_hr.tif",
+  "otp_nearshore_sediment"
 )
 spc_reduced <- spc_reduced %>%
   mutate(across(all_of(columns_to_modify), ~ ifelse(region == "NWHI" & is.na(.), 0, .)))
@@ -278,10 +284,17 @@ spc_reduced <- spc_reduced %>%
          otp_nearshore_sediment = replace_na(otp_nearshore_sediment, 0)
   )
 
-#get rid of remaining rows with NAs
-spc_reduced <- na.omit(spc_reduced)is
+#NAs in each row 
+colSums(is.na(spc_reduced))
 
-#get rid of two row duplicates, avg values between thee two duplicate rows to keep one
+#how many presence values in presence column before na.omit
+sum(spc_reduced$presence == 1, na.rm = TRUE) #2554
+
+#get rid of remaining rows with NAs
+spc_reduced <- na.omit(spc_reduced)
+sum(spc_reduced$presence == 1, na.rm = TRUE) #1654
+
+#avg values between thee two duplicate rows to keep one
 colnames(spc_reduced)
 spc_reduced = spc_reduced %>% 
   group_by(island, method, lat, lon, species, date, presence, region, year, month, day) %>% 
@@ -317,3 +330,20 @@ saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mh
 
 ###################### END ###################
      
+
+
+missing_coral <- spc_reduced[is.na(spc_reduced$coral_cover), ]
+ggplot(missing_coral, aes(x = lon, y = lat)) +
+  geom_point(color = "darkorange", size = 3) +
+  labs(title = "Missing Coral Cover Data",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+missing_spear <- spc_reduced[is.na(spc_reduced$MHI_spear), ]
+ggplot(missing_spear, aes(x = lon, y = lat)) +
+  geom_point(color = "darkgreen", size = 3) +
+  labs(title = "Missing MHI Spearfishing Data",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+

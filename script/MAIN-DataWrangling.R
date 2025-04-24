@@ -150,8 +150,8 @@ rm(otp, df)
 #get rid of unneeded columns from otp, eds
 
 #call in coral cover, left join by lat and lon
-cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
-#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
+#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
+cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
 cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
 
 # cca = cca %>% 
@@ -189,7 +189,7 @@ spc_reduced <- spc %>%
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01mo" ,
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01yr" , #kd490
                 # mean_1day_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01dy", taken out bc correlated with monthly sst 0.94
-                #mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
+                  mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
                 #  "mean_Sea_Surface_Temperature_CRW_daily_01yr", 
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01mo",
@@ -275,7 +275,8 @@ spc_reduced = spc_reduced %>%
   dplyr::select(-MHI_Shore_Spear_hr.tif, -MHI_Boat_Spear_hr.tif)
 
 #Change kahoolawe MHI spearfish and comm_net to 0
-spc_reduced$MHI_spear[spc_reduced$island == "Kahoolawe"] <- 0
+spc_reduced[spc_reduced$island == "Kahoolawe", c("MHI_spear", "com_net")] <- 0
+unique(spc_reduced[spc_reduced$island == "Kahoolawe", c("MHI_spear", "com_net")])
 
 #exclude midway 
 spc_reduced <- spc_reduced %>% filter(island!= "Midway")
@@ -357,4 +358,19 @@ ggplot(missing_spear, aes(x = lon, y = lat)) +
        x = "Longitude", y = "Latitude") +
   theme_minimal()
 
+missing_net <- spc_reduced[is.na(spc_reduced$com_net), ]
+ggplot(missing_net, aes(x = lon, y = lat)) +
+  geom_point(color = "darkgreen", size = 3) +
+  labs(title = "Missing com net Data",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
 
+missing_sed <- spc_reduced[is.na(spc_reduced$otp_nearshore_sediment), ]
+ggplot(missing_sed, aes(x = lon, y = lat)) +
+  geom_point(color = "darkgreen", size = 3) +
+  labs(title = "Missing sediment Data",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+unique(spc_reduced$island[which(spc_reduced$q05_1yr_sst_CRW>50)])
+plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[which(spc_reduced$q05_1yr_sst_CRW>50)]))

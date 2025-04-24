@@ -103,11 +103,15 @@ summary(spc$rugosity)
 #df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
 #save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
+load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Timeseries_Sea_Surface_Temperature_CRW_Daily.Rdata")
 dynamic = df
-dynamic = dynamic[,c(3:346)] #how to keep thiscode but change for a csv file instead of rdata
+dynamic = dynamic[,c(3:82)] #346
 
 spc = spc %>% select(-date_)
 
+colnames(df)
+subset <- df[, c("q05_Sea_Surface_Temperature_CRW_Daily_YR01", 
+                 "mean_Sea_Surface_Temperature_CRW_Daily_YR01")]
 #make a "date" column in spc, make sure it's same format
 spc$date = paste(spc$year, spc$month, spc$day, sep = "-")
 spc$date = as.character(spc$date)
@@ -170,7 +174,7 @@ spc_reduced <- spc %>%
                 #"bathymetry", 
                 #"date",
                 # "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy", 
-                mean_1mo_chla_ESA = "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo", 
+          #      mean_1mo_chla_ESA = "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo", 
                 # "log_mean_1mo_chla_ESA", 
                 #  "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr",
                 #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy",
@@ -178,7 +182,7 @@ spc_reduced <- spc %>%
                 #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr",
                 #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy",
                 #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo" ,
-                q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
+          #      q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
                 #  "mean_Kd490_ESA_OC_CCI_monthly_01dy",
                 # mean_1mo_kd490_ESA = "mean_Kd490_ESA_OC_CCI_monthly_01mo" , correlated with 1mochla 0.89
                 #  "mean_Kd490_ESA_OC_CCI_monthly_01yr", 
@@ -189,11 +193,11 @@ spc_reduced <- spc %>%
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01mo" ,
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01yr" , #kd490
                 # mean_1day_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01dy", taken out bc correlated with monthly sst 0.94
-                  mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
+                  mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_Daily_MO01" , 
                 #  "mean_Sea_Surface_Temperature_CRW_daily_01yr", 
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01mo",
-                q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
+                q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_Daily_YR01" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01mo" ,
     # get rid q95_1yr_sst_CRW ="q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
@@ -282,11 +286,11 @@ unique(spc_reduced[spc_reduced$island == "Kahoolawe", c("MHI_spear", "com_net")]
 spc_reduced <- spc_reduced %>% filter(island!= "Midway")
 unique(spc_reduced$island)
 
-#set sediment and comm net NAs to 0s
-spc_reduced <- spc_reduced %>%
-  mutate(com_net = replace_na(com_net, 0),
-         otp_nearshore_sediment = replace_na(otp_nearshore_sediment, 0)
-  )
+# #set sediment and comm net NAs to 0s
+# spc_reduced <- spc_reduced %>%
+#   mutate(com_net = replace_na(com_net, 0),
+#          otp_nearshore_sediment = replace_na(otp_nearshore_sediment, 0)
+#   )
 
 #NAs in each row 
 colSums(is.na(spc_reduced))

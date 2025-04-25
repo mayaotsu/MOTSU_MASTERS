@@ -7,6 +7,10 @@ library(ggplot2)
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUFU_abund.RData"); df2 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
+
+#trim df3 to 2007-2019 (presence observations only go to 2019)
+df3 <- df3 %>% filter(year <= 2019)
+
 #spc <- filter(df1, method == "nSPC")
 
 spc = rbind(rbind(df1, df2, df3)) %>% 
@@ -96,10 +100,14 @@ summary(spc$rugosity)
  # ggplot(aes(lon, lat, fill = rugosity)) + 
  # geom_point(shape = 21)
 
+spc <- spc %>%
+  mutate(lat = round(lat, 3),
+         lon = round(lon, 3))
+
 #load dynamic variables
 #df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
 #save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time (1).Rdata")
 #load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Timeseries_Sea_Surface_Temperature_CRW_Daily.Rdata")
 dynamic = df
 dynamic = dynamic[,c(3:346)] #87
@@ -284,7 +292,7 @@ colSums(is.na(spc_reduced))
 #how many presence values in presence column before na.omit
 sum(spc_reduced$presence == 1, na.rm = TRUE) #2554
 
-#get rid of remaining rows with NAs
+##### NA OMIT !!!! #####
 spc_reduced <- na.omit(spc_reduced)
 sum(spc_reduced$presence == 1, na.rm = TRUE) #1910
 
@@ -396,7 +404,7 @@ spc_reduced %>%
   group_by(island) %>%
   summarize(
     total_obs = n(),
-    na_count = sum(is.na(mean_1mo_sst_CRW)),
+    na_count = sum(is.na(q05_1yr_sst_CRW)),
     percent_na = round((na_count / total_obs) * 100, 2)
   )
 
@@ -412,9 +420,17 @@ spc_reduced %>%
   group_by(year) %>%
   summarize(
     total_obs = n(),
-    na_count = sum(is.na(com_net)),
+    na_count = sum(is.na(q05_1yr_sst_CRW)),
     percent_na = round((na_count / total_obs) * 100, 2)
   )
+
 colnames(spc_reduced)
 unique(spc_reduced$island[which(spc_reduced$q05_1yr_sst_CRW>50)])
 plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[which(spc_reduced$q05_1yr_sst_CRW>50)]))
+
+#presences in each year 
+df1 %>%
+  filter(presence == 1) %>%
+  group_by(year) %>%
+  summarize(n_presence = n()) %>%
+  arrange(year)

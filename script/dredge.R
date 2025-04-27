@@ -6,14 +6,15 @@ taape <- taape[taape$species=="LUKA",]
 colSums(is.na(taape))
 
 ########  dredge taape full #########
-taape_full_Gam <-gam(presence~s(depth)+year+s(rugosity, k =6)
+taape_full_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
                    +island+s(mean_1mo_chla_ESA, k =6)
+                   +s(q05_1yr_sst_CRW, k=6)
                    +s(q05_1yr_sst_CRW, k=6)
                    +s(otp_nearshore_sediment, k=6)
                    +s(otp_all_effluent, k=6)
                    +s(MHI_spear, k=6)
-                   +s(coral_cover, k=6)
-                   +s(com_net, k=6),
+                   +s(coral_cover, k=6),
+                   #+s(com_net, k=6)
                      data = taape, family = binomial)
 
 #dredge function
@@ -40,14 +41,15 @@ dev.off()
 taape_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
 taape_MHI <- taape_MHI[taape_MHI$species=="LUKA",]
 taape_MHI <- taape_MHI[taape_MHI$region=="MHI",]
-taape_MHI_Gam <-gam(presence~s(depth)+year+s(rugosity, k =6)+island
-                    +s(mean_1mo_chla_ESA, k =6)
+taape_MHI_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
+                    +island+s(mean_1mo_chla_ESA, k =6)
+                    +s(q05_1yr_sst_CRW, k=6)
                     +s(q05_1yr_sst_CRW, k=6)
                     +s(otp_nearshore_sediment, k=6)
                     +s(otp_all_effluent, k=6)
-                    +s(MHI_spear, k=6)+
-                    +s(coral_cover, k=6)
-                    +s(com_net, k=6),
+                    +s(MHI_spear, k=6)
+                    +s(coral_cover, k=6),
+                    #+s(com_net, k=6)
                     data = taape_MHI, family = binomial)
 
 options(na.action = "na.fail")
@@ -57,7 +59,7 @@ saveRDS(dredge_taape_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output
 
 #taape_mhi_dredge_2 = readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_mhi_dredge_2.rds")
 model.sel(dredge_taape_mhi)[1:10]
-sw(dredge_taape_mhi)
+sw(dredge_taape_mhi) #sum of weights
 best_model_2 <- get.models(dredge_taape_mhi, 1)[[1]]
 summary(best_model_2)
 
@@ -75,14 +77,15 @@ dev.off()
 toau_full <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
 toau_full <- toau_full[toau_full$species=="LUFU",]
 
-toau_full_Gam <-gam(presence~s(depth)+year+s(rugosity, k =6)
-                        +island+s(mean_1mo_chla_ESA, k =6)
-                        +s(q05_1yr_sst_CRW, k=6)
-                        +s(otp_nearshore_sediment, k=6)
-                        +s(otp_all_effluent, k=6)
-                        +s(MHI_spear, k=6)
-                        +s(coral_cover, k=6)
-                        +s(com_net, k=6),
+toau_full_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
+                    +island+s(mean_1mo_chla_ESA, k =6)
+                    +s(q05_1yr_sst_CRW, k=6)
+                    +s(q05_1yr_sst_CRW, k=6)
+                    +s(otp_nearshore_sediment, k=6)
+                    +s(otp_all_effluent, k=6)
+                    +s(MHI_spear, k=6)
+                    +s(coral_cover, k=6),
+                    #+s(com_net, k=6)
                         data = toau_full, family = binomial)
 dredge_toau_full <- dredge(toau_full_Gam, trace = 5)
 dredge_toau_full
@@ -96,7 +99,7 @@ draw(best_model_3, parametric = TRUE)
 #png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/draw/toau_full_draw.png", res = 300, height = 10, width = 10, units = "in")
 
 png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_full_plot.png", res = 300, height = 10, width = 10, units = "in")
-plot(best_model_3, pages =1)
+plot(best_model_3, pages = 1)
 dev.off()
 
 ##### toau mhi dredge model #####
@@ -105,19 +108,19 @@ toau_mhi <- toau_mhi[toau_mhi$species=="LUFU",]
 toau_mhi <- toau_mhi[toau_mhi$region=="MHI",]
 toau_mhi$island <- as.factor(toau_mhi$island)
 
-toau_mhi_Gam <- gam(presence~s(depth)+year+s(rugosity, k =6)
+toau_mhi_Gam <- gam(presence~s(depth)+year+ s(rugosity, k =6)
                     +island+s(mean_1mo_chla_ESA, k =6)
+                    +s(q05_1yr_sst_CRW, k=6)
                     +s(q05_1yr_sst_CRW, k=6)
                     +s(otp_nearshore_sediment, k=6)
                     +s(otp_all_effluent, k=6)
                     +s(MHI_spear, k=6)
-                    +s(coral_cover, k=6)
-                    +s(com_net, k=6),
+                    +s(coral_cover, k=6),
+                    #+s(com_net, k=6)
                     data = toau_mhi, family = binomial)
 
 options(na.action = "na.fail")
 dredge_toau_mhi <- dredge(toau_mhi_Gam, trace = 5)
-dredge_toau_mhi
 saveRDS(dredge_toau_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_toau_mhi.rds")
 
 model.sel(dredge_toau_mhi)[1:10]
@@ -131,7 +134,7 @@ draw(best_model_4, parametric = TRUE)
 dev.off()
 
 png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_mhi_plot.png", res = 300, height = 10, width = 10, units = "in")
-plot(best_model_4)
+plot(best_model_4, pages = 1)
 dev.off()
 
 ### ROI FULL #########
@@ -142,11 +145,12 @@ colSums(is.na(roi))
 roi_full_Gam <-gam(presence~s(depth)+year+s(rugosity, k =6)
                      +island+s(mean_1mo_chla_ESA, k =6)
                      +s(q05_1yr_sst_CRW, k=6)
+                     +s(q95_1yr_sst_CRW, k=6)
                      +s(otp_nearshore_sediment, k=6)
                      +s(otp_all_effluent, k=6)
                      +s(MHI_spear, k=6)
-                     +s(coral_cover, k=6)
-                     +s(com_net, k=6),
+                     +s(coral_cover, k=6),
+                     #+s(com_net, k=6),
                      data = roi, family = binomial)
 
 options(na.action = "na.fail")
@@ -170,14 +174,15 @@ dev.off()
 roi_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
 roi_MHI <- roi_MHI[roi_MHI$species=="CEAR",]
 roi_MHI <- roi_MHI[roi_MHI$region=="MHI",]
-roi_MHI_Gam <-gam(presence~s(depth)+year+s(rugosity, k =6)+island
-                    +s(mean_1mo_chla_ESA, k =6)
-                    +s(q05_1yr_sst_CRW, k=6)
-                    +s(otp_nearshore_sediment, k=6)
-                    +s(otp_all_effluent, k=6)
-                    +s(MHI_spear, k=6)+
-                      +s(coral_cover, k=6)
-                    +s(com_net, k=6),
+roi_MHI_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
+                  +island+s(mean_1mo_chla_ESA, k =6)
+                  +s(q05_1yr_sst_CRW, k=6)
+                  +s(q05_1yr_sst_CRW, k=6)
+                  +s(otp_nearshore_sediment, k=6)
+                  +s(otp_all_effluent, k=6)
+                  +s(MHI_spear, k=6)
+                  +s(coral_cover, k=6),
+                  #+s(com_net, k=6)
                     data = roi_MHI, family = binomial)
 
 options(na.action = "na.fail")

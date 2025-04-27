@@ -99,15 +99,15 @@ summary(spc$rugosity)
 #spc %>% 
  # ggplot(aes(lon, lat, fill = rugosity)) + 
  # geom_point(shape = 21)
-
-spc <- spc %>%
-  mutate(lat = round(lat, 3),
-         lon = round(lon, 3))
+ 
+# spc <- spc %>%
+#   mutate(lat = round(lat, 3),
+#          lon = round(lon, 3))
 
 #load dynamic variables
 #df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
 #save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time (1).Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
 #load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Timeseries_Sea_Surface_Temperature_CRW_Daily.Rdata")
 dynamic = df
 dynamic = dynamic[,c(3:346)] #87
@@ -200,7 +200,7 @@ spc_reduced <- spc %>%
                 q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01mo" ,
-    # get rid q95_1yr_sst_CRW ="q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
+                q95_1yr_sst_CRW = "q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
                 #  "mean_Wind_Speed_ASCAT_daily_01dy",
                 #  "mean_Wind_Speed_ASCAT_daily_01mo",
                 #  "mean_Wind_Speed_ASCAT_daily_01yr",
@@ -221,7 +221,7 @@ spc_reduced <- spc %>%
                 otp_all_effluent = "hi_otp_all_osds_effluent.tif", #effluent
                 "MHI_Boat_Spear_hr.tif", #spearfishing
                 "MHI_Shore_Spear_hr.tif",
-          #      "coral_cover", 
+                "coral_cover", 
                 #"hi_otp_all_fishing.tif", 
                 #"hi_otp_all_fishing_com.tif", 
                 #com_line = "hi_otp_all_fishing_com_line.tif",
@@ -239,6 +239,10 @@ spc_reduced <- spc %>%
   )
 
 rm(spc)
+
+#temp 28 or less 13306 --> 11443
+spc_reduced <- spc_reduced %>%
+  filter(q05_1yr_sst_CRW <= 30, q95_1yr_sst_CRW <= 30)
 
 #get rid of duplicates
 spc_reduced <- spc_reduced[!duplicated(spc_reduced), ]
@@ -278,26 +282,28 @@ unique(is.na(spc_reduced$MHI_spear))
 spc_reduced = spc_reduced %>% 
   dplyr::select(-MHI_Shore_Spear_hr.tif, -MHI_Boat_Spear_hr.tif)
 
-#Change kahoolawe MHI spearfish and comm_net to 0
+#Change kahoolawe MHI spearfish to 0
 spc_reduced[spc_reduced$island == "Kahoolawe", c("MHI_spear")] <- 0
 unique(spc_reduced[spc_reduced$island == "Kahoolawe", c("MHI_spear")])
 
-#exclude midway 
-# spc_reduced <- spc_reduced %>% filter(island!= "Midway")
-# unique(spc_reduced$island)
+# change NAs in nearshore sediment to 0
+spc_reduced$otp_nearshore_sediment[is.na(spc_reduced$otp_nearshore_sediment)] <- 0
 
 #NAs in each row 
 colSums(is.na(spc_reduced))
 
 #how many presence values in presence column before na.omit
-sum(spc_reduced$presence == 1, na.rm = TRUE) #2554
+sum(spc_reduced$presence == 1, na.rm = TRUE) #1804
 
 ##### NA OMIT !!!! #####
 spc_reduced <- na.omit(spc_reduced)
-sum(spc_reduced$presence == 1, na.rm = TRUE) #1910
+sum(spc_reduced$presence == 1, na.rm = TRUE) #1753 --> 1579, 8805 total obs
+colSums(is.na(spc_reduced))
 
 #avg values between thee two duplicate rows to keep one, 12350--> 7151
 colnames(spc_reduced)
+
+#7151-> 5065
 spc_reduced = spc_reduced %>% 
   group_by(island, method, lat, lon, species, date, presence, region, year, month, day) %>% 
   summarise(density = mean(density, na.rm = T),
@@ -307,16 +313,17 @@ spc_reduced = spc_reduced %>%
             mean_1mo_chla_ESA = mean(mean_1mo_chla_ESA, na.rm = T),
             #q95_1yr_chla_ESA = mean(q95_1yr_chla_ESA, na.rm = T),
             q05_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
+            q95_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
             otp_nearshore_sediment = mean(otp_nearshore_sediment, na.rm = T),
             otp_all_effluent = mean(otp_all_effluent, na.rm = T),
-            #coral_cover = mean(coral_cover, na.rm = T),
+            coral_cover = mean(coral_cover, na.rm = T),
             #com_net = mean(com_net, na.rm = T),
             MHI_spear = mean(MHI_spear, na.rm = T)
   ) %>%
   select(island, depth, method, lat, lon, species, density, presence,
          region, year, month, day, rugosity, date,
-         mean_1mo_chla_ESA, q05_1yr_sst_CRW,
-         otp_nearshore_sediment, otp_all_effluent, MHI_spear) #bathymetry
+         mean_1mo_chla_ESA, q05_1yr_sst_CRW, q95_1yr_sst_CRW,
+         otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) #bathymetry
 
 
 #SAVE CUMULATIVE LAYER

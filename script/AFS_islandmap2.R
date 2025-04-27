@@ -1,4 +1,5 @@
 # load survey data, adjust columns, create id
+rm(list = ls()) 
 df = readRDS("/Users/mayaotsu/Downloads/NCRMP_fish_site_20102019.rds")
 library(dplyr)
 library(ggplot2)
@@ -68,10 +69,25 @@ df2 = df2 %>%
   # subset(response < quantile(response, prob = 0.999)) %>%
   na.omit()
 
+df3 = df %>%
+  # subset(ISLAND %in% islands) %>%
+  subset(REGION %in% c("MHI", "NWHI")) %>%
+  subset(Response == "Abund_m2") %>%
+  select(id, names(df[,1:18]), names(select(df, contains("CEAR"))))
+
+df3 = df3 %>%
+  select(names(df3[,1:20])) %>%
+  mutate(DATE = as.numeric(as.POSIXct(df3$DATE_)),
+         YEAR = substr(DATE_, 1, 4)) %>%
+  group_by(LON, LAT, DATE, YEAR, ISLAND) %>%
+  summarise(response = sum(CEAR, na.rm = T)*100) %>%
+  # subset(response < quantile(response, prob = 0.999)) %>%
+  na.omit()
+
 df1$sp = "LUFU"
 df2$sp = "LUKA"
-
-df = rbind(df1, df2)
+df3$sp = "CEAR"
+df = rbind(df1, df2, df3)
 
 scale_x_longitude <- function(xmin = -180, xmax = 180, step = 0.2, ...) {
   ewbrks <- seq(xmin,xmax,step)
@@ -146,6 +162,37 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.2, ...) {
     theme(legend.position = c(0.15, 0.3),
           legend.background = element_blank()) +
     labs(tag = "(b)"))
+
+(fc = df %>%
+    filter(sp == "CEAR") %>%
+    filter(response > 0) %>%
+    mutate(lon = round(LON, 1),
+           lat = round(LAT, 1)) %>%
+    group_by(lon, lat, ISLAND, sp) %>%
+    summarise(n = (mean(response+1)), na.rm = T) %>%
+    ggplot(aes(lon, lat)) +
+    geom_point(aes(size = n, fill = n, color = n), shape = 21, alpha = 0.7) +
+    #coord_fixed() +
+    # scale_fill_viridis_c(guide = "legend", begin = 0, end = 0.8) +
+    # scale_color_viridis_c(guide = "legend", begin = 0, end = 0.8) +
+    scale_color_gradientn(colours = matlab.like(100), guide = "legend") +
+    scale_fill_gradientn(colours = matlab.like(100), guide = "legend") +
+    #annotation_map(map_data("world")) + 
+    # theme_light() +
+    facet_wrap(.~sp, scales = "free", ncol = 4) +
+    coord_cartesian(xlim = range(df$LON), ylim = range(df$LAT)) +  
+    # scale_y_latitude() +
+    # scale_x_longitude() +
+    # ylab("Latitude (dec deg)") + xlab("Longitude (dec deg)") +
+    labs(x = expression(paste("Longitude ", degree, "W", sep = "")),
+         y = expression(paste("Latitude ", degree, "N", sep = ""))) +
+    guides(color = guide_legend(expression("Individuals per 100" ~ m^2~"")),
+           fill = guide_legend(expression("Individuals per 100" ~ m^2~"")),
+           size = guide_legend(expression("Individuals per 100" ~ m^2~""))) +
+    theme(legend.position = c(0.15, 0.3),
+          legend.background = element_blank()) +
+    labs(tag = "(c)"))
+
 fa / fb
 png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/proposal_plot.png", units = "in", height = 8, width = 10, res = 500)
 grid.arrange(fa, fb, ncol = 1)

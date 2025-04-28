@@ -34,6 +34,7 @@ gam_crossvalidation <- function(dataInput, response, model, iterations) {
   #averages indivdual models , not permanently trained to df 
   
   #install pROC
+  library(pROC)
   ROC <- roc(DataInput_test[,c(response)], prediction)
   
   AUC[[i]] <- auc(ROC)
@@ -45,20 +46,20 @@ gam_crossvalidation <- function(dataInput, response, model, iterations) {
 # Loading the required models and response
 response <- "presence"
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full.RData")
-#dataInput <- spc_reduced  # Ensure this dataset is available and loaded
+dataInput <- spc_reduced  # Ensure this dataset is available and loaded
 
 #load in the model we want to use 
 
-# dredge_taape_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_taape_full.rds")
+ dredge_taape_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_taape_full.rds")
 # dredge_taape_mhi <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_taape_mhi.rds")
 # dredge_toau_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_toau_full.rds")
 # dredge_toau_mhi <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_toau_mhi.rds")
 # dredge_roi_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_roi_full.rds")
- dredge_roi_mhi <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_roi_mhi.rds")
+# dredge_roi_mhi <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_roi_mhi.rds")
  
  ####### taape full #####
  taape <- subset(spc_reduced, species == "LUKA") #if doing mhi, make sure to subset
- taape_full_auc <- gam_crossvalidation(dataInput = taape_full, response = "presence", model = dredge_taape_full, iterations = 50)
+ taape_full_auc <- gam_crossvalidation(dataInput = taape, response = "presence", model = dredge_taape_full, iterations = 50)
  # extract the numbers
  taape_full_auc_num <- sapply(taape_full_auc[[1]], function(x) {
    as.numeric(sub("Area under the curve: ", "", x))

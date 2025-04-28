@@ -1,30 +1,25 @@
 #running models
 #example running of BRTs using Kole distribution from SPC data for MHI
-rm(list=ls())
+rm(list = ls())
 library(matrixStats)
 library(fmsb)
-#getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
 
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR_JUSTMHI")
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
-colnames(df)
-Predictors<-c(2,11, 14, 17, 19, 20:22, 24:27, 29) 
-#rugosity 14, bathymetry 15
-#re-add year (factor variable) 11
-#depth2, lat5, lon6, year11, rugosity14, mean 1 mo chla ESA17, mean 1 mo sst CRW19, q05&951yrSSTCRW20&21,
-#nearshore sediment22, effluent24, MHI boat spear25, MHI shore spear26, coral cover27, commerial net28
-#random29
-Response<-which(colnames(df) %in% c("presence") )
 set.seed(101) 
 Random <- rnorm(nrow(df))
 df$Random = Random
-#depth, lat, lon, year, rugosity, mean 1 mo chla ESA, mean 1 mo sst CRW, q951yrSSTCRW,
-#TKE, nearshore sediment, coastal mod, effluent, MHI boat spear, MHI shore spear, coral cover
+colnames(df)
+Predictors<-c(2,10, 13,15:22) 
+#re-add year (factor variable) 10
+#depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
+#nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
 
+Response<-which(colnames(df) %in% c("presence") )
 # Look at predictor covariance and plot predictors across space to make sure they look right
 # Test predictors for colinearity using correlation matrix chart -- SAL and SLA are very correlated (cor = 0.74)
 library(PerformanceAnalytics)
@@ -34,11 +29,15 @@ chart.Correlation(preds)
 
 df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
+
+#specify domain for full or mhi 
 roi <- df[df$species=="CEAR",]
-boxplot(roi$density ~ roi$year)
+roi <- df[df$species == "CEAR" & df$region == "MHI", ]
+
+#boxplot(roi$density ~ roi$year)
 #dev.off()
-PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/roi_PA_model_step_0.001_bf0.75_noLATLON.Rdata"))
+PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_step_0.001_0.75.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
 #for learning rate, at least 1000 trees, bag fraction 0.5-0.8 or 0.9 range, 0.9 is pretty high
@@ -80,11 +79,11 @@ Reduced_Predictors<-which(colnames(roi) %in% colnames(Predictors_to_Keep))
 
 #refit model
 start = Sys.time()
-PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi,gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi,gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.01_0.75/roi_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -133,7 +132,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/roi_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
+saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_percentcont.Rdata"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -150,8 +149,8 @@ boxplot(roi$density ~ roi$year)
 dev.off()
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/roi_pa_trial_0.01_bf0.75_JUSTMHI.png", res = 300, height = 10, width = 8, units = "in")
-par(mfrow=c(4,4))
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_pdp.png", res = 300, height = 10, width = 8, units = "in")
+par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
   id<-which(colnames(part_plot[[1]])==Variable_List$Variables[y])

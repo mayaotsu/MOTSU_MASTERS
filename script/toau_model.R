@@ -1,21 +1,24 @@
 #running models
 #example running of BRTs using Kole distribution from SPC data for MHI
-rm(list=ls())
+rm(list = ls())
 library(matrixStats)
 library(fmsb)
-#getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_cumulativeta_JUSTMHI")
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
+
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
-Predictors<-c(2,14,19:21,23:26) 
-#rugosity 14, bathymetry 15
-#re-add year (factor variable) 11
-#depth2, lat5, lon6, year11, rugosity14, mean 1 mo chla ESA17, mean 1 mo sst CRW19, q05&951yrSSTCRW20&21,
-#nearshore sediment22, effluent24, MHI boat spear25, MHI shore spear26, coral cover27, commerial net28
-#random29
+colnames(df)
+set.seed(101) 
+Random <- rnorm(nrow(df))
+df$Random = Random
+colnames(df)
+Predictors<-c(2,10, 13,15:22) 
+#re-add year (factor variable) 10
+#depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
+#nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
 
 Response<-which(colnames(df) %in% c("presence") )
 # Look at predictor covariance and plot predictors across space to make sure they look right
@@ -27,11 +30,15 @@ chart.Correlation(preds)
 
 df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
-toau <- df[df$species=="LUFU",]
+
+#specify for full or MHI
+#toau <- df[df$species=="LUFU",]
+toau <- df[df$species == "LUFU" & df$region == "MHI", ]
+
 boxplot(toau$density ~ toau$year)
 
-PA_Model_Step<-fit.brt.n_eval_Balanced(toau, gbm.x=Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/toau_PA_model_step_0.001_bf0.75_noLATLON.Rdata"))
+PA_Model_Step<-fit.brt.n_eval_Balanced(toau, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_step_0.001_0.75.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
 #for learning rate, at least 1000 trees, bag fraction 0.5-0.8 or 0.9 range, 0.9 is pretty high
@@ -74,11 +81,11 @@ Reduced_Predictors<-which(colnames(toau) %in% colnames(Predictors_to_Keep))
 #refit model
 start = Sys.time()
 PA_Model_Reduced<-fit.brt.n_eval_Balanced(toau, 
-                                          gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+                                          gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/toau_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_0.001_0.75.Rdata"))
 
 
 #re-evaluate model fit
@@ -129,7 +136,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/toau_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
+saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_percentcont.Rdata"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -146,8 +153,8 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/toau_pa_trial_0.01_bf0.75_JUSTMHI_2.png", res = 300, height = 10, width = 8, units = "in")
-par(mfrow=c(4,4))
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_pdp.png", res = 300, height = 10, width = 8, units = "in")
+par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
   id<-which(colnames(part_plot[[1]])==Variable_List$Variables[y])

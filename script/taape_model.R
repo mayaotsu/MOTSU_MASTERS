@@ -5,7 +5,7 @@ library(matrixStats)
 library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_cumulative_JUSTMHI") 
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
 
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
@@ -15,12 +15,11 @@ colnames(df)
 set.seed(101) 
 Random <- rnorm(nrow(df))
 df$Random = Random
-Predictors<-c(2,14,19:21,22, 23:26, 27) 
-#rugosity 14, bathymetry 15
-#re-add year (factor variable) 11
-#depth2, lat5, lon6, year11, rugosity14, mean 1 mo chla ESA17, mean 1 mo sst CRW19, q05&951yrSSTCRW20&21,
-#nearshore sediment22, effluent24, MHI boat spear25, MHI shore spear26, coral cover27, commerial net28
-#random29
+colnames(df)
+Predictors<-c(2, 10, 13,15:21, 22) 
+#re-add year (factor variable) 10
+#depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
+#nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
 boxplot(taape$density ~ taape$year)
 
 Response<-which(colnames(df) %in% c("presence") )
@@ -155,7 +154,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
 png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/taape_pa_trial_0.01_bf0.75_full_5.png", res = 300, height = 10, width = 10, units = "in")
-par(mfrow=c(4,4))
+par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
   id<-which(colnames(part_plot[[1]])==Variable_List$Variables[y])

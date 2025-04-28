@@ -110,9 +110,9 @@ summary(spc$rugosity)
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
 #load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Timeseries_Sea_Surface_Temperature_CRW_Daily.Rdata")
 dynamic = df
-dynamic = dynamic[,c(3:346)] #87
+dynamic = dynamic[,c(3:346)] #87 #346
 
-spc = spc %>% select(-date_)
+spc = spc %>% dplyr::select(-date_)
 
 #make a "date" column in spc, make sure it's same format
 spc$date = paste(spc$year, spc$month, spc$day, sep = "-")
@@ -313,18 +313,23 @@ spc_reduced = spc_reduced %>%
             mean_1mo_chla_ESA = mean(mean_1mo_chla_ESA, na.rm = T),
             #q95_1yr_chla_ESA = mean(q95_1yr_chla_ESA, na.rm = T),
             q05_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
-            q95_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
+            q95_1yr_sst_CRW = mean(q95_1yr_sst_CRW, na.rm = T),
             otp_nearshore_sediment = mean(otp_nearshore_sediment, na.rm = T),
             otp_all_effluent = mean(otp_all_effluent, na.rm = T),
             coral_cover = mean(coral_cover, na.rm = T),
             #com_net = mean(com_net, na.rm = T),
             MHI_spear = mean(MHI_spear, na.rm = T)
   ) %>%
-  select(island, depth, method, lat, lon, species, density, presence,
+  dplyr::select(island, depth, method, lat, lon, species, density, presence,
          region, year, month, day, rugosity, date,
          mean_1mo_chla_ESA, q05_1yr_sst_CRW, q95_1yr_sst_CRW,
          otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) #bathymetry
 
+# sanity checks 
+# dup <- spc_reduced[duplicated(spc_reduced[c("island", "method", "lat", "lon", "species", "date", "presence", "region", "year", "month", "day")]) | duplicated(spc_reduced[c("island", "method", "lat", "lon", "species", "date", "presence", "region", "year", "month", "day")], fromLast=T),]
+# # how many extra rows do we have? 
+# sum(duplicated(spc_reduced[c("island", "method", "lat", "lon", "species", "date", "presence", "region", "year", "month", "day")]))
+# # 3740 which is the same as nrow(test)-nrow(spc_reduced)
 
 #SAVE CUMULATIVE LAYER
 spc_full <- spc_reduced[!duplicated(spc_reduced),] #spc_reduced_spearcumulative_roi

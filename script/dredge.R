@@ -9,7 +9,7 @@ colSums(is.na(taape))
 taape_full_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
                    +island+s(mean_1mo_chla_ESA, k =6)
                    +s(q05_1yr_sst_CRW, k=6)
-                   +s(q05_1yr_sst_CRW, k=6)
+                   +s(q95_1yr_sst_CRW, k=6)
                    +s(otp_nearshore_sediment, k=6)
                    +s(otp_all_effluent, k=6)
                    +s(MHI_spear, k=6)
@@ -37,6 +37,7 @@ par(mfrow=c(3,5))
 plot(best_model_1, pages = 1)
 dev.off()
 
+rm(list=ls())
 ########  dredge taape mhi #########
 taape_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
 taape_MHI <- taape_MHI[taape_MHI$species=="LUKA",]
@@ -44,7 +45,7 @@ taape_MHI <- taape_MHI[taape_MHI$region=="MHI",]
 taape_MHI_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
                     +island+s(mean_1mo_chla_ESA, k =6)
                     +s(q05_1yr_sst_CRW, k=6)
-                    +s(q05_1yr_sst_CRW, k=6)
+                    +s(q95_1yr_sst_CRW, k=6)
                     +s(otp_nearshore_sediment, k=6)
                     +s(otp_all_effluent, k=6)
                     +s(MHI_spear, k=6)
@@ -73,6 +74,7 @@ par(mfrow=c(3,5))
 plot(best_model_2, pages = 1)
 dev.off()
 
+rm(list=ls())
 ##### toau full dredge model #####
 toau_full <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
 toau_full <- toau_full[toau_full$species=="LUFU",]
@@ -80,7 +82,7 @@ toau_full <- toau_full[toau_full$species=="LUFU",]
 toau_full_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
                     +island+s(mean_1mo_chla_ESA, k =6)
                     +s(q05_1yr_sst_CRW, k=6)
-                    +s(q05_1yr_sst_CRW, k=6)
+                    +s(q95_1yr_sst_CRW, k=6)
                     +s(otp_nearshore_sediment, k=6)
                     +s(otp_all_effluent, k=6)
                     +s(MHI_spear, k=6)
@@ -102,6 +104,7 @@ png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_full_p
 plot(best_model_3, pages = 1)
 dev.off()
 
+rm(list=ls())
 ##### toau mhi dredge model #####
 toau_mhi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
 toau_mhi <- toau_mhi[toau_mhi$species=="LUFU",]
@@ -111,7 +114,7 @@ toau_mhi$island <- as.factor(toau_mhi$island)
 toau_mhi_Gam <- gam(presence~s(depth)+year+ s(rugosity, k =6)
                     +island+s(mean_1mo_chla_ESA, k =6)
                     +s(q05_1yr_sst_CRW, k=6)
-                    +s(q05_1yr_sst_CRW, k=6)
+                    +s(q95_1yr_sst_CRW, k=6)
                     +s(otp_nearshore_sediment, k=6)
                     +s(otp_all_effluent, k=6)
                     +s(MHI_spear, k=6)
@@ -137,6 +140,7 @@ png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_mhi_pl
 plot(best_model_4, pages = 1)
 dev.off()
 
+rm(list=ls())
 ### ROI FULL #########
 roi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
 roi <- roi[roi$species=="CEAR",]
@@ -170,6 +174,7 @@ png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/roi_full_pl
 plot(best_model_5, pages = 1)
 dev.off()
 
+rm(list=ls())
 ### dredge roi mhi ######
 roi_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi") 
 roi_MHI <- roi_MHI[roi_MHI$species=="CEAR",]
@@ -177,7 +182,7 @@ roi_MHI <- roi_MHI[roi_MHI$region=="MHI",]
 roi_MHI_Gam <-gam(presence~s(depth)+year+ s(rugosity, k =6)
                   +island+s(mean_1mo_chla_ESA, k =6)
                   +s(q05_1yr_sst_CRW, k=6)
-                  +s(q05_1yr_sst_CRW, k=6)
+                  +s(q95_1yr_sst_CRW, k=6)
                   +s(otp_nearshore_sediment, k=6)
                   +s(otp_all_effluent, k=6)
                   +s(MHI_spear, k=6)

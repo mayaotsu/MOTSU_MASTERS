@@ -16,7 +16,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(2, 10, 13,15:21, 22) 
+Predictors<-c(2,10, 13,15:22) 
 #re-add year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
@@ -34,11 +34,11 @@ Response<-which(colnames(df) %in% c("presence") )
 taape <- df[df$species=="LUKA",]
 
 start = Sys.time()
-PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Response), lr=0.01, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=5, 3)
+PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/taape_PA_model_step_0.001_bf0.75_noLATLON.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_full_step_0.001_0.75.Rdata"))
 
 #lr 0.001
 #try bag fractions 0.6, 0.75
@@ -86,7 +86,7 @@ PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/taape_PA_model_reduced_0.001_bf0.75_noLATLON.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_full_reduced_0.001_0.75.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -136,7 +136,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75_50ensemble/taapePA_0.001_0.75_AllPercentCont_NOLATLON.rds"))
+saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_full_reduced_0.001_0.75.rds"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -153,7 +153,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/pdp/taape_pa_trial_0.01_bf0.75_full_5.png", res = 300, height = 10, width = 10, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_full_reduced_0.001_0.75_pdp.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
@@ -179,7 +179,7 @@ for(y in Num_Preds){
 dev.off()
 
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/forest_plots/taape_PA_0.001_0.75_5ensemble.png"), units = "in", height = 5, width = 5, res = 500)
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_full_reduced_0.001_0.75_forestplot.png"), units = "in", height = 5, width = 5, res = 500)
 PA_sp = data.frame(predictor = taapePA_0.001_0.75_AllPercentCont[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", taapePA_0.001_0.75_AllPercentCont[,2])),
                    sd = as.numeric(substr(taapePA_0.001_0.75_AllPercentCont[,2], nchar(taapePA_0.001_0.75_AllPercentCont[,2])-4+1, nchar(taapePA_0.001_0.75_AllPercentCont[,2]))),

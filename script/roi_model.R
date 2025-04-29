@@ -14,7 +14,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(2,10, 13,15:22) 
+Predictors<-c(1, 2,10, 13,15:22) 
 #re-add year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
@@ -32,12 +32,12 @@ Response<-which(colnames(df) %in% c("presence") )
 
 #specify domain for full or mhi 
 roi <- df[df$species=="CEAR",]
-roi <- df[df$species == "CEAR" & df$region == "MHI", ]
+#roi <- df[df$species == "CEAR" & df$region == "full", ]
 
 #boxplot(roi$density ~ roi$year)
 #dev.off()
 PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_step_0.001_0.75.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_full_step_0.001_0.75.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
 #for learning rate, at least 1000 trees, bag fraction 0.5-0.8 or 0.9 range, 0.9 is pretty high
@@ -83,7 +83,8 @@ PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi,gbm.x=Reduced_Predictors, gbm.y= c
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75.Rdata"))
+
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_full_reduced_0.001_0.75.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -132,7 +133,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_percentcont.Rdata"))
+saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_full_reduced_0.001_0.75_percentcont.Rdata"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -149,7 +150,7 @@ boxplot(roi$density ~ roi$year)
 dev.off()
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_pdp.png", res = 300, height = 10, width = 8, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_full_reduced_0.001_0.75_pdp.png", res = 300, height = 10, width = 8, units = "in")
 par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
@@ -176,20 +177,19 @@ dev.off()
 
 ###
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/forest_plots/roi_PA_0.001_0.75_50ensemble.png"), units = "in", height = 5, width = 5, res = 500)
-PA_sp = data.frame(predictor = roiPA_0.001_0.75_AllPercentCont[,1],
-                   percent_imp = as.numeric(sub("\\ .*", "", roiPA_0.001_0.75_AllPercentCont[,2])),
-                   sd = as.numeric(substr(roiPA_0.001_0.75_AllPercentCont[,2], nchar(roiPA_0.001_0.75_AllPercentCont[,2])-4+1, nchar(roiPA_0.001_0.75_AllPercentCont[,2]))),
-                   color = c("gray","red", "blue", "blue", 
-                   "red", "gray", "red", "red",
-                   "red", "blue", "gray", "gray",
-                   "red", "blue"))
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/roi_full_reduced_0.001_0.75_forestplot.png.png"), units = "in", height = 5, width = 5, res = 500)
+PA_sp = data.frame(predictor = All_percent_contribution[,1],
+                   percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
+                   sd = as.numeric(substr(All_percent_contribution[,2], nchar(All_percent_contribution[,2])-4+1,
+                  nchar(All_percent_contribution[,2]))),
+                   color = c("gray","gray", "red", "red", 
+                   "blue", "blue", "blue"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'PA', x='Percent Contribution', y = '') +
+  labs(title = 'Roi (Full)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
 dev.off()

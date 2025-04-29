@@ -16,11 +16,11 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(2,10, 13,15:22) 
-#re-add year (factor variable) 10
+Predictors<-c(1, 2,10, 13,15:22) 
+#re-add island (1), year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
-boxplot(taape$density ~ taape$year)
+#boxplot(taape$density ~ taape$year)
 
 Response<-which(colnames(df) %in% c("presence") )
 # Test predictors for colinearity using correlation matrix chart -- SAL and SLA are very correlated (cor = 0.74)
@@ -106,10 +106,7 @@ for (i in 1:length(PA_Model)){
 print(summary(Model_PA_Eval[,1]))
 print(summary(Model_PA_Eval[,2]))
 
-
-
 #recalculate variable importance for the reduced model
-#
 var_tested<-names(taape[,Reduced_Predictors])
 
 percent_contrib<-NULL
@@ -182,22 +179,24 @@ for(y in Num_Preds){
 dev.off()
 
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_full_reduced_0.001_0.75_forestplot.png"), units = "in", height = 5, width = 5, res = 500)
-PA_sp = data.frame(predictor = taapePA_0.001_0.75_AllPercentCont[,1],
-                   percent_imp = as.numeric(sub("\\ .*", "", taapePA_0.001_0.75_AllPercentCont[,2])),
-                   sd = as.numeric(substr(taapePA_0.001_0.75_AllPercentCont[,2], nchar(taapePA_0.001_0.75_AllPercentCont[,2])-4+1, nchar(taapePA_0.001_0.75_AllPercentCont[,2]))),
-                   color = c("red","blue", "gray", "blue", 
-                             "gray", "red", "red", "red",
-                             "red", "blue", "red", "blue",
-                             "red", "blue"))
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_mhi_reduced_0.001_0.75_forestplot.png"), units = "in", height = 5, width = 5, res = 500)
+#taapePA_0.001_0.75_AllPercentCont
+PA_sp = data.frame(predictor = taape_mhi_reduced_0.001_0.75_precentcont[,1],
+                   percent_imp = as.numeric(sub("\\ .*", "", taape_mhi_reduced_0.001_0.75_precentcont[,2])),
+                   sd = as.numeric(substr(taape_mhi_reduced_0.001_0.75_precentcont[,2], nchar(taape_mhi_reduced_0.001_0.75_precentcont[,2])-4+1, 
+                   nchar(taape_mhi_reduced_0.001_0.75_precentcont[,2]))),
+                   color = c("gray","blue", "gray", "red", 
+                             "red", "red", "gray", "gray",
+                             "blue", "gray"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'PA', x='Percent Contribution', y = '') +
+  labs(title = 'L. kasmira (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
+
 dev.off()
 
 

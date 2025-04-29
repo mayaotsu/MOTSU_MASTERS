@@ -15,7 +15,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(2,10, 13,15:22) 
+Predictors<-c(1, 2,10, 13,15:22) 
 #re-add year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
@@ -87,7 +87,6 @@ end - start
 
 save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_0.001_0.75.Rdata"))
 
-
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
 
@@ -136,7 +135,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_percentcont.Rdata"))
+save(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_percentcont.Rdata"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -180,20 +179,21 @@ dev.off()
 
 ###
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/forest_plots/toau_PA_0.001_0.75_50ensemble.png"), units = "in", height = 5, width = 5, res = 500)
-PA_sp = data.frame(predictor = toauPA_0.001_0.75_AllPercentCont[,1],
-                   percent_imp = as.numeric(sub("\\ .*", "", toauPA_0.001_0.75_AllPercentCont[,2])),
-                   sd = as.numeric(substr(toauPA_0.001_0.75_AllPercentCont[,2], nchar(toauPA_0.001_0.75_AllPercentCont[,2])-4+1, nchar(toauPA_0.001_0.75_AllPercentCont[,2]))),
-                   color = c("gray","red", "blue", "blue", 
-                   "red", "gray", "red", "red",
-                   "red", "blue", "gray", "gray",
-                   "red", "blue"))
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/toau_mhi_reduced_0.001_0.75_forestplot.png.png"), units = "in", height = 5, width = 5, res = 500)
+PA_sp = data.frame(predictor = All_percent_contribution[,1],
+                   percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
+                   sd = as.numeric(substr(All_percent_contribution[,2], 
+                  nchar(All_percent_contribution[,2])-4+1, 
+                  nchar(All_percent_contribution[,2]))),
+                   color = c("gray","red", "gray", "red", 
+                           "red", "gray", "blue", "gray"
+                           ))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'PA', x='Percent Contribution', y = '') +
+  labs(title = 'Toau (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
 dev.off()

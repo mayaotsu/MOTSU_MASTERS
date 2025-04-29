@@ -441,8 +441,38 @@ unique(spc_reduced$island[which(spc_reduced$q05_1yr_sst_CRW>50)])
 plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[which(spc_reduced$q05_1yr_sst_CRW>50)]))
 
 #presences in each year 
-df1 %>%
-  filter(presence == 1) %>%
-  group_by(year) %>%
-  summarize(n_presence = n()) %>%
-  arrange(year)
+# df1 %>%
+#   filter(presence == 1) %>%
+#   group_by(year) %>%
+#   summarize(n_presence = n()) %>%
+  
+  
+  
+  
+  
+## sst map
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+  geom_point(aes(color = q05_1yr_sst_CRW)) +
+  scale_color_viridis_c() +
+  theme_minimal() +
+  labs(title = "q05 SST (CRW)", color = "SST (°C)")
+
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = q95_1yr_sst_CRW)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(title = "q95 SST (CRW)", color = "SST (°C)")
+  
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = q95_1yr_sst_CRW)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(title = "q95 SST (CRW)", color = "SST (°C)")
+  
+  
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = q05_1yr_sst_CRW)) +
+    scale_color_viridis_c() +
+    theme_minimal() +
+    labs(title = "q05 SST (CRW)", color = "SST (°C)")
+  

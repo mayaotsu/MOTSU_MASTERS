@@ -32,7 +32,7 @@ Response<-which(colnames(df) %in% c("presence") )
 
 #specify domain for full or mhi 
 roi <- df[df$species=="CEAR",]
-#roi <- df[df$species == "CEAR" & df$region == "full", ]
+# roi <- df[df$species == "CEAR" & df$region == "MHI", ]
 
 #boxplot(roi$density ~ roi$year)
 #dev.off()
@@ -182,18 +182,20 @@ PA_sp = data.frame(predictor = All_percent_contribution[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
                    sd = as.numeric(substr(All_percent_contribution[,2], nchar(All_percent_contribution[,2])-4+1,
                   nchar(All_percent_contribution[,2]))),
-                   color = c("gray","gray", "red", "red", 
-                   "blue", "blue", "blue"))
+                   color = c("gray","gray", "blue", "red", 
+                             "red", "blue"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'Roi (Full)', x='Percent Contribution', y = '') +
+  labs(title = 'Roi (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
 dev.off()
 
+
+#full
 
 ######now make abund. only model#################
 
@@ -284,7 +286,7 @@ for(q in 1:iters){
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/roiAbun_AllPercentCont.rds"))
+save(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/MOTSU_MASTERS/models/0.001_0.75/roiAbun_AllPercentCont.rds"))
 
 
 Mean_Abund_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))

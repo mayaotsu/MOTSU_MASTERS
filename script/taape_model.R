@@ -185,9 +185,12 @@ PA_sp = data.frame(predictor = taape_mhi_reduced_0.001_0.75_precentcont[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", taape_mhi_reduced_0.001_0.75_precentcont[,2])),
                    sd = as.numeric(substr(taape_mhi_reduced_0.001_0.75_precentcont[,2], nchar(taape_mhi_reduced_0.001_0.75_precentcont[,2])-4+1, 
                    nchar(taape_mhi_reduced_0.001_0.75_precentcont[,2]))),
-                   color = c("gray","blue", "gray", "red", 
-                             "red", "red", "gray", "gray",
+                   color = c("blue","blue", "gray", "red", 
+                             "red", "red", "red", "red",
                              "blue", "gray"))
+
+
+
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
@@ -196,11 +199,17 @@ ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(p
   labs(title = 'L. kasmira (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
-
 dev.off()
 
+## taape full
+color = c("blue","blue", "gray", "red", 
+          "red", "blue", "blue", "gray",
+          "blue", "gray"))
 
-
+#taape MHI
+color = c("gray","blue", "gray", "red", 
+          "red", "red", "gray", "gray",
+          "blue", "gray"))
 
 
 

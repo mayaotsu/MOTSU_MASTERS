@@ -197,3 +197,7 @@ fa / fb
 png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/proposal_plot.png", units = "in", height = 8, width = 10, res = 500)
 grid.arrange(fa, fb, ncol = 1)
 dev.off()
+
+hawaii_map <- map_data("state") %>% filter(region == "hawaii")
+
+

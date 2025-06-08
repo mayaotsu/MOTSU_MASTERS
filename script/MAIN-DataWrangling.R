@@ -240,7 +240,7 @@ spc_reduced <- spc %>%
 
 rm(spc)
 
-#temp 28 or less 13306 --> 11443
+#temp 28 or less 13306 --> 11443 (weird big numbres ^36)
 spc_reduced <- spc_reduced %>%
   filter(q05_1yr_sst_CRW <= 30, q95_1yr_sst_CRW <= 30)
 
@@ -424,7 +424,7 @@ spc_reduced %>%
   group_by(island) %>%
   summarize(
     total_obs = n(),
-    na_count = sum(is.na(q05_1yr_sst_CRW)),
+    na_count = sum(is.na(q95_1yr_sst_CRW)),
     percent_na = round((na_count / total_obs) * 100, 2)
   )
 
@@ -440,16 +440,10 @@ colnames(spc_reduced)
 unique(spc_reduced$island[which(spc_reduced$q05_1yr_sst_CRW>50)])
 plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[which(spc_reduced$q05_1yr_sst_CRW>50)]))
 
-#presences in each year 
-# df1 %>%
-#   filter(presence == 1) %>%
-#   group_by(year) %>%
-#   summarize(n_presence = n()) %>%
   
   
   
-  
-  
+
 ## sst map
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
   geom_point(aes(color = q05_1yr_sst_CRW)) +

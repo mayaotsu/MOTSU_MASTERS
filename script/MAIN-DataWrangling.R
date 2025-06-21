@@ -457,16 +457,91 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
     theme_minimal() +
     labs(title = "q95 SST (CRW)", color = "SST (°C)")
   
+#pa by lat/lon SST q05
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
-    geom_point(aes(color = q95_1yr_sst_CRW)) +
-    scale_color_viridis_c() +
+    geom_point(aes(color = q05_1yr_sst_CRW, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "q05 SST (°C)", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
     theme_minimal() +
-    labs(title = "q95 SST (CRW)", color = "SST (°C)")
+    labs(title = "Presence/Absence and q05 SST",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
   
-  
+#sst q95
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
-    geom_point(aes(color = q05_1yr_sst_CRW)) +
-    scale_color_viridis_c() +
+    geom_point(aes(color = q95_1yr_sst_CRW, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "q95 SST (°C)", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
     theme_minimal() +
-    labs(title = "q05 SST (CRW)", color = "SST (°C)")
+    labs(title = "Presence/Absence and q95 SST",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
+  
+#rugosity
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = rugosity, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "rugosity", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
+    theme_minimal() +
+    labs(title = "Presence/Absence and rugosity",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
+  
+#mean 1mo chla
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = mean_1mo_chla_ESA, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "chla mean 1mo", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
+    theme_minimal() +
+    labs(title = "Presence/Absence and chla",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
+  
+#nearshore sediment
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = otp_nearshore_sediment, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "nearshores sediment", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
+    theme_minimal() +
+    labs(title = "Presence/Absence and chla",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
+  
+#effluent
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = otp_all_effluent, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "effluent", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
+    theme_minimal() +
+    labs(title = "Presence/Absence and effluent",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
+  
+#coral cover
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = coral_cover, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "coral cover", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
+    theme_minimal() +
+    labs(title = "Presence/Absence and coral cover",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
+  
+#spear
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+    geom_point(aes(color = MHI_spear, shape = factor(presence)), size = 2, alpha = 0.7) +
+    scale_color_viridis_c(name = "spear", option = "C") +
+    scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
+    theme_minimal() +
+    labs(title = "Presence/Absence and spear",
+         x = "Longitude",
+         y = "Latitude") +
+    theme(legend.position = "right")
   

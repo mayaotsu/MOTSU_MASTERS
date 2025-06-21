@@ -22,6 +22,16 @@ options(na.action = "na.fail")
 dredge_taape_full <- dredge(taape_full_Gam, trace = 5)
 saveRDS(dredge_taape_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_taape_full.rds")
 
+#model average
+avg_model <- model.avg(dredge_taape_full, subset = delta < 2)
+
+new_data <- data.frame(
+  x1 = seq(min(taape$x1), max(taape$x1), length.out = 100),
+  x2 = mean(taape$x2, na.rm = TRUE),
+  x3 = mean(taape$x3, na.rm = TRUE)
+)
+
+#ignore
 model.sel(dredge_taape_full)[1:10] #best 10 models
 sw(dredge_taape_full) #sum of weights across all models for each predictor
 best_model_1 <- get.models(dredge_taape_full, 1)[[1]]

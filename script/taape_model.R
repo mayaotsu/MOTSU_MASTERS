@@ -37,7 +37,7 @@ Response<-which(colnames(df) %in% c("presence") )
 taape <- df[df$species == "LUKA" & df$region == "MHI", ]
 
 start = Sys.time()
-PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds= 50, 3)
+PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds= 10, 50)
 end = Sys.time()
 end - start 
 
@@ -85,7 +85,7 @@ Reduced_Predictors<-which(colnames(taape) %in% colnames(Predictors_to_Keep))
 
 #refit model
 start = Sys.time()
-PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.75, n.folds=50, 3)
+PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y= c(Response), lr=0.001, tc=3, family = "bernoulli",bag.fraction=0.60, n.folds=10, 50)
 end = Sys.time()
 end - start 
 

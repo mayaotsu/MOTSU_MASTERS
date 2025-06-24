@@ -2,15 +2,29 @@
 rm(list = ls()) 
 library(dplyr)
 library(ggplot2)
+select=dplyr::select
 
 #load spc
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUFU_abund.RData"); df2 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
-spc = rbind(rbind(df1, df2, df3)) %>% 
-  filter(method == "nSPC") %>% 
-  filter(region %in% c("MHI", "NWHI")) %>% 
+
+spc = rbind(rbind(df1, df2, df3)) %>%
+  filter(method == "nSPC") %>%
+  filter(region %in% c("MHI", "NWHI")) %>%
   filter(year >= 2009)
+
+
+# df = rbind(rbind(df1, df2, df3)) %>% 
+#   filter(method == "nSPC") %>% 
+#   filter(region %in% c("MHI", "NWHI")) %>% 
+#   filter(year >= 2009) %>% 
+#   select(longitude, latitude, day, month, year) %>% 
+#   distinct()
+# rm(df1,df2,df3)
+# save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/eds_rerun.RData")
+# 
+# # rerun eds with eds_rerun df
 
 rm(df1, df2,df,df3)
 
@@ -96,9 +110,9 @@ summary(spc$rugosity)
  # ggplot(aes(lon, lat, fill = rugosity)) + 
  # geom_point(shape = 21)
  
-spc <- spc %>%
-  mutate(lat = round(lat, 3),
-         lon = round(lon, 3))
+# spc <- spc %>%
+#   mutate(lat = round(lat, 3),
+#          lon = round(lon, 3))
 
 #load dynamic variables
 #df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
@@ -117,9 +131,9 @@ class(df$date)
 class(spc$date)
 
 #add eds dynamic variables to spc, make sure decimal places are same
- spc = spc %>% 
-   mutate(lon = round(lon, 3),
-          lat = round(lat, 3))
+ # spc = spc %>% 
+ #   mutate(lon = round(lon, 3),
+ #          lat = round(lat, 3))
 
 spc = left_join(spc, dynamic)
 rm(df, dynamic)
@@ -140,9 +154,9 @@ otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_g
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 #otp = otp %>% select( date_r, -year, -month, -day, -date) 
 
- otp = otp %>% 
-   mutate(lon = round(lon, 3),
-          lat = round(lat, 3))
+ # otp = otp %>% 
+ #   mutate(lon = round(lon, 3),
+ #          lat = round(lat, 3))
 
 spc <- left_join(spc, otp)
 
@@ -151,12 +165,13 @@ rm(otp)
 
 #call in coral cover, left join by lat and lon
 #cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
-cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
+cca1 <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
+cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv")
 cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
 
-cca = cca %>%
-  mutate(lon = round(lon, 3),
-         lat = round(lat, 3))
+# cca = cca %>%
+#   mutate(lon = round(lon, 3),
+#          lat = round(lat, 3))
 
 spc = left_join(spc, cca)
 rm(cca)
@@ -520,7 +535,7 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
     theme(legend.position = "right")
   
 #coral cover
-  ggplot(spc_reduced, aes(x = lon, y = lat)) +
+  ggplot(spc, aes(x = lon, y = lat)) +
     geom_point(aes(color = coral_cover, shape = factor(presence)), size = 2, alpha = 0.7) +
     scale_color_viridis_c(name = "coral cover", option = "C") +
     scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +

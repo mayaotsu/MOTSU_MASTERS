@@ -11,6 +11,10 @@ colnames(df)
 #species <- c("LUKA", "CEAR", "LUFU")[2]
 #nSPC <- c("nSPC")
 
+# df <- df %>% filter(METHOD == "nSPC")
+# df <- df %>% filter(SPECIES == "CEAR")
+# df <- df %>% filter(REGION_NAME %in% c("Main Hawaiian Islands", "Northwestern Hawaiian Islands" ))
+
 #rename columns 
 df <- df %>%
   rename(
@@ -19,6 +23,7 @@ df <- df %>%
 
 #transform lon
 df$longitude = ifelse(df$longitude < 0, df$longitude + 360, df$longitude)
+
 #lat and lon decimal places
 df <- df %>%
   mutate(longitude = round(longitude, 4),
@@ -32,17 +37,20 @@ df <- df %>%
     day = day(date_)
   )
 
+#create a new column called x (if species is CEAR, then x will be equal to value density, if not then 0)
 df$x = ifelse(df$species == "CEAR", df$density, 0)
 
-#make a presence column
 df = df %>%
   #mutate(x = ifelse(species == "CEAR", density, 0)) %>% 
   group_by(island, depth, method, date_, latitude, longitude, region, year, month, day) %>%  # Grouping by year before summarizing
   summarise(density = sum(x, na.rm = TRUE)) #%>% 
  # mutate(presence = ifelse(x > 0, 1, 0))
 
+#create new column, if species is CEAR, x will take value from density column
+#if species is not CEAR, x set to 0
 df$presence = ifelse(df$density>0,1,0)
 df$species <- "CEAR"
+#df <- df %>% filter(species == "CEAR")
 boxplot(df$presence[df$species=='CEAR' & (df$year>2009)] ~ df$year[df$species=='CEAR'& (df$year>2009)])
 
 #filter out for only CEAR, islands, and spc in method
@@ -58,4 +66,6 @@ saveRDS(df, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edit
 save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData")
 
 ############### END ###################
+
+ggplot(df %>% filter(presence>0) , aes(x = longitude, y = latitude, fill = presence)) + geom_point(shape=21)+facet_wrap(~year)
 

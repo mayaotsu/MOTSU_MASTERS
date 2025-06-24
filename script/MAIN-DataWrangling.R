@@ -7,14 +7,10 @@ library(ggplot2)
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUKA_abund.RData"); df1 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/calibr_LUFU_abund.RData"); df2 = df
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df3 = df
-
-#trim df3 to 2007-2019 (presence observations only go to 2019)
-df3 <- df3 %>% filter(year <= 2019)
-
-#spc <- filter(df1, method == "nSPC")
-
 spc = rbind(rbind(df1, df2, df3)) %>% 
-  filter(method == "nSPC")
+  filter(method == "nSPC") %>% 
+  filter(region %in% c("MHI", "NWHI")) %>% 
+  filter(year >= 2009)
 
 rm(df1, df2,df,df3)
 
@@ -100,9 +96,9 @@ summary(spc$rugosity)
  # ggplot(aes(lon, lat, fill = rugosity)) + 
  # geom_point(shape = 21)
  
-# spc <- spc %>%
-#   mutate(lat = round(lat, 3),
-#          lon = round(lon, 3))
+spc <- spc %>%
+  mutate(lat = round(lat, 3),
+         lon = round(lon, 3))
 
 #load dynamic variables
 #df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
@@ -121,9 +117,9 @@ class(df$date)
 class(spc$date)
 
 #add eds dynamic variables to spc, make sure decimal places are same
-# spc = spc %>% 
-#   mutate(lon = round(lon, 3),
-#          lat = round(lat, 3))
+ spc = spc %>% 
+   mutate(lon = round(lon, 3),
+          lat = round(lat, 3))
 
 spc = left_join(spc, dynamic)
 rm(df, dynamic)
@@ -144,9 +140,9 @@ otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_g
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 #otp = otp %>% select( date_r, -year, -month, -day, -date) 
 
-# otp = otp %>% 
-#   mutate(lon = round(lon, 3),
-#          lat = round(lat, 3))
+ otp = otp %>% 
+   mutate(lon = round(lon, 3),
+          lat = round(lat, 3))
 
 spc <- left_join(spc, otp)
 
@@ -158,9 +154,9 @@ rm(otp)
 cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
 cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
 
-# cca = cca %>% 
-#   mutate(lon = round(lon, 3),
-#          lat = round(lat, 3))
+cca = cca %>%
+  mutate(lon = round(lon, 3),
+         lat = round(lat, 3))
 
 spc = left_join(spc, cca)
 rm(cca)
@@ -241,8 +237,8 @@ spc_reduced <- spc %>%
 rm(spc)
 
 #temp 28 or less 13306 --> 11443 (weird big numbres ^36)
-spc_reduced <- spc_reduced %>%
-  filter(q05_1yr_sst_CRW <= 30, q95_1yr_sst_CRW <= 30)
+#spc_reduced <- spc_reduced %>%
+#  filter(q05_1yr_sst_CRW <= 30, q95_1yr_sst_CRW <= 30)
 
 #get rid of duplicates
 spc_reduced <- spc_reduced[!duplicated(spc_reduced), ]

@@ -3,7 +3,7 @@
 ### Revised & Maintained by K.R.Tanaka & T.A.Oliver.          ###
 ### POC: kisei.tanaka@noaa.gov, thomas.oliver@noaa.gov,       ###
 ### jessica.perelman@noaa.gov, juliette.verstaen@noaa.gov     ###
-#################################################################
+################################################################# ##### bathymetry and rugosity
 
 rm(list = ls())
 
@@ -13,13 +13,14 @@ getwd()
 # Import EDS functions
 source("scripts/eds_functions.R")
 source("scripts/HelperCode/ExpandingExtract.R")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/eds_rerun.RData")
 
 # Import survey data, SM = master REA survey file, subset if necessary 
-load('data/SURVEY_MASTER.RData')
-table(df$region)
-df$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
-# df = subset(df, region == "MARIAN")
-
+# load('data/SURVEY_MASTER.RData')
+# table(df$region)
+# df$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
+# # df = subset(df, region == "MARIAN")
+# 
 # Remove NAs in lat & lon columns. Convert into a spatial object
 df = df[complete.cases(df[,c("lon", "lat")]), ]
 df_sp = df; df_sp = as.data.frame(df_sp)

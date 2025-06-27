@@ -13,7 +13,7 @@ spc = rbind(rbind(df1, df2, df3)) %>%
   filter(method == "nSPC") %>%
   filter(region %in% c("MHI", "NWHI")) %>%
   filter(year >= 2009)
-
+rm(df, df1,df2,df3)
 
 # df = rbind(rbind(df1, df2, df3)) %>% 
 #   filter(method == "nSPC") %>% 
@@ -23,19 +23,18 @@ spc = rbind(rbind(df1, df2, df3)) %>%
 #   distinct()
 # rm(df1,df2,df3)
 # save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/eds_rerun.RData")
-# 
+# rm(df1, df2,df,df3)
 # # rerun eds with eds_rerun df
-
-rm(df1, df2,df,df3)
 
 colnames(spc)[5:6] = c("lat", "lon")
 
 #load eds-static variables, do not forget to transform lon range to 0-360
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-04-16.RData") #eds_bathymetry_rugosity.Rdata
-#load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_bathymetry_rugosity.RData")
+#df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-06-25.csv")
+#save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-06-25.RData")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/EDS_Climatologies_2025-06-25.RData") #eds_bathymetry_rugosity.Rdata
 static <- df
 static$lon = ifelse(df$lon < 0, df$lon + 360, df$lon)
-static = static[,c(3,4,6,9,11,13)]
+static = static[,c(3,4,6,9,11,13)] #lat, lon, 
 
 # make sure decimal places are same
 #spc = spc %>% 
@@ -58,13 +57,6 @@ spc = spc %>%
   mutate(rugosity = ifelse(is.na(rugosity), Bathymetry_CRM_vol10_3s_all_units_rugosity.nc, rugosity)) %>% #only mains
   mutate(rugosity = ifelse(is.na(rugosity), Bathymetry_HURL_NWHI_60m_all_units_rugosity.nc, rugosity)) %>% #nwhi
   mutate(rugosity = ifelse(is.na(rugosity), Bathymetry_ETOPO_2022_v1_15s_all_units_rugosity.nc, rugosity)) #both
-
-#add bathymetry
-#spc = spc %>% 
-#  mutate(bathymetry = Bathymetry_HMRG_MHI_50m) %>% 
-  # mutate(bathymetry = ifelse(is.na(bathymetry), Bathymetry_CRM_vol10_3s, bathymetry)) %>% 
-  # mutate(bathymetry = ifelse(is.na(bathymetry), Bathymetry_HURL_NWHI_60m, bathymetry)) %>% 
-  # mutate(bathymetry = ifelse(is.na(bathymetry), Bathymetry_ETOPO_2022_v1_15s, bathymetry)) 
 
 #only keep what you need
 spc = spc %>% 
@@ -104,30 +96,25 @@ replace_deep_values <- function(df, threshold = 30, distance_threshold = 0.24) {
 spc <- replace_deep_values(spc)
 spc = spc %>% as.data.frame()
 summary(spc$rugosity)
-
-#take a look, can also do with just presence data
-#spc %>% 
- # ggplot(aes(lon, lat, fill = rugosity)) + 
- # geom_point(shape = 21)
  
 # spc <- spc %>%
 #   mutate(lat = round(lat, 3),
 #          lon = round(lon, 3))
 
 #load dynamic variables
-#df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.csv")
-#save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.RData")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time.Rdata")
-#load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Timeseries_Sea_Surface_Temperature_CRW_Daily.Rdata")
+# df = read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time_06.25.csv")
+# save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time_06.25.RData")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time_06.25.Rdata")
 dynamic = df
 dynamic = dynamic[,c(3:346)] #87 #346
+dynamic$date = as.POSIXct(dynamic$date, origin = "1970-01-01", tz = "UTC")
 
-spc = spc %>% dplyr::select(-date_)
+#spc = spc %>% dplyr::select(-date)
 
 #make a "date" column in spc, make sure it's same format
-spc$date = paste(spc$year, spc$month, spc$day, sep = "-")
-spc$date = as.character(spc$date)
-class(df$date)
+spc$date <- as.Date(spc$date_)
+dynamic$date <- as.Date(dynamic$date)
+class(dynamic$date)
 class(spc$date)
 
 #add eds dynamic variables to spc, make sure decimal places are same
@@ -135,7 +122,8 @@ class(spc$date)
  #   mutate(lon = round(lon, 3),
  #          lat = round(lat, 3))
 
-spc = left_join(spc, dynamic)
+spc <- left_join(spc, dynamic, by = c("lat", "lon", "date"))
+#spc = left_join(spc, dynamic)
 rm(df, dynamic)
 
 #load TKE, less tke vals because starts in 2009
@@ -148,9 +136,8 @@ rm(df, dynamic)
 # rm(TKE)
 
 #load otp
-otp <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_sedac_gfw_otp_new.csv")
-#otp = load("/Users/mayaotsu/Documents/Github/env_data_summary/outputs/EDS_Climatologies_NonERDDAP_2025-04-21.RData")
-#otp <- df   
+otp = load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/EDS_Climatologies_NonERDDAP_2025-06-25.RData")
+otp = df
 otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 #otp = otp %>% select( date_r, -year, -month, -day, -date) 
 
@@ -160,26 +147,30 @@ otp$lon = ifelse(otp$lon < 0, otp$lon + 360, otp$lon)
 
 spc <- left_join(spc, otp)
 
-#spc_test2 <- left_join(spc, otp, by = c("lat", "lon", "date", "year", "month", "day"))
-rm(otp)
+rm(otp,df)
 
 #call in coral cover, left join by lat and lon
-#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv") #old
-cca1 <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover.csv")
-cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_coral_cover.csv")
+#cca <- read.csv("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover_new.csv")
+#save(cca, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover_new.RData")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_coral_cover_new.RData")
 cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
+cca$date <- as.Date(cca$date)
+spc$date <- as.Date(spc$date_)
 
+class(cca$date)
+class(spc$date)
 # cca = cca %>%
 #   mutate(lon = round(lon, 3),
 #          lat = round(lat, 3))
 
-spc = left_join(spc, cca)
+spc <- left_join(spc, cca, by = c("island", "lat", "lon", "region", "year", "month", "day", "date"))
+#pc = left_join(spc, cca)
 rm(cca)
 
 colnames(spc)
 
 spc_reduced <- spc %>% 
-  dplyr::select(1:14, #island, depth, method, lat, lon, species, density, presence, region, y, m, d, rugosity, date
+  dplyr::select(1:15, #island, depth, method, lat, lon, species, density, presence, region, y, m, d, rugosity, date
                 #"depth",
                 #"rugosity",
                 #"bathymetry", 
@@ -204,14 +195,16 @@ spc_reduced <- spc %>%
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01mo" ,
                 #  "q95_Kd490_ESA_OC_CCI_monthly_01yr" , #kd490
                 # mean_1day_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01dy", taken out bc correlated with monthly sst 0.94
-          #        mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
+                #  mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
                 #  "mean_Sea_Surface_Temperature_CRW_daily_01yr", 
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q05_Sea_Surface_Temperature_CRW_daily_01mo",
-                q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
+                q05_1yr_sst_jpl = "q05_Sea_Surface_Temperature_jplMUR_daily_01yr",
+                q95_1yr_sst_jpl = "q95_Sea_Surface_Temperature_jplMUR_daily_01yr",
+                #q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01dy" ,
                 #  "q95_Sea_Surface_Temperature_CRW_daily_01mo" ,
-                q95_1yr_sst_CRW = "q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
+                #q95_1yr_sst_CRW = "q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
                 #  "mean_Wind_Speed_ASCAT_daily_01dy",
                 #  "mean_Wind_Speed_ASCAT_daily_01mo",
                 #  "mean_Wind_Speed_ASCAT_daily_01yr",
@@ -251,10 +244,6 @@ spc_reduced <- spc %>%
 
 rm(spc)
 
-#temp 28 or less 13306 --> 11443 (weird big numbres ^36)
-#spc_reduced <- spc_reduced %>%
-#  filter(q05_1yr_sst_CRW <= 30, q95_1yr_sst_CRW <= 30)
-
 #get rid of duplicates
 spc_reduced <- spc_reduced[!duplicated(spc_reduced), ]
 
@@ -264,34 +253,21 @@ spc_reduced$island <- as.factor(spc_reduced$island)
 class(spc_reduced$year)
 class(spc_reduced$island)
 
-#change all OTP NWHI data NAs to 0
-library(tidyr)
-columns_to_modify <- c(
-  #"otp_all_coastal_mod", 
-  "otp_all_effluent",
-  #"com_line",
-  #"com_net",
-  #"com_spear",
-  #"rec_boat",
-  #"rec_boat_spear",
-  #"rec_shore",
-  #"rec_shore_line",
-  #"rec_shore_net",
-  #"rec_shore_spear",
-  "MHI_Boat_Spear_hr.tif",
-  "MHI_Shore_Spear_hr.tif",
-  "otp_nearshore_sediment"
-)
-spc_reduced <- spc_reduced %>%
-  mutate(across(all_of(columns_to_modify), ~ ifelse(region == "NWHI" & is.na(.), 0, .)))
-
-#Comine cumulative spearfishing effort (MHI_Boat_Spear_hr + MHI_Shore_Spear_hr)
+#Combine cumulative spearfishing effort (MHI_Boat_Spear_hr + MHI_Shore_Spear_hr)
 spc_reduced$MHI_spear <- spc_reduced$MHI_Boat_Spear_hr.tif + spc_reduced$MHI_Shore_Spear_hr.tif
 unique(is.na(spc_reduced$MHI_spear))
 
 #take away mhi spear and mhi boat spear columns
 spc_reduced = spc_reduced %>% 
   dplyr::select(-MHI_Shore_Spear_hr.tif, -MHI_Boat_Spear_hr.tif)
+
+#change all OTP NWHI data NAs to 0
+spc_reduced <- spc_reduced %>%
+  mutate(
+    otp_all_effluent = ifelse(region == "NWHI" & is.na(otp_all_effluent), 0, otp_all_effluent),
+    MHI_spear = ifelse(region == "NWHI" & is.na(MHI_spear), 0, MHI_spear),
+    otp_nearshore_sediment = ifelse(region == "NWHI" & is.na(otp_nearshore_sediment), 0, otp_nearshore_sediment)
+  )
 
 #Change kahoolawe MHI spearfish to 0
 spc_reduced[spc_reduced$island == "Kahoolawe", c("MHI_spear")] <- 0
@@ -307,14 +283,14 @@ colSums(is.na(spc_reduced))
 sum(spc_reduced$presence == 1, na.rm = TRUE) #1804
 
 ##### NA OMIT !!!! #####
-spc_reduced <- na.omit(spc_reduced)
+spc_reduced<- na.omit(spc_reduced)
 sum(spc_reduced$presence == 1, na.rm = TRUE) #1753 --> 1579, 8805 total obs
 colSums(is.na(spc_reduced))
 
 #avg values between thee two duplicate rows to keep one, 12350--> 7151
 colnames(spc_reduced)
 
-#7151-> 5065
+#get mean of values that have different depths but identical all other values
 spc_reduced = spc_reduced %>% 
   group_by(island, method, lat, lon, species, date, presence, region, year, month, day) %>% 
   summarise(density = mean(density, na.rm = T),
@@ -323,24 +299,21 @@ spc_reduced = spc_reduced %>%
             #bathymetry = mean(bathymetry, na.rm = T), 
             mean_1mo_chla_ESA = mean(mean_1mo_chla_ESA, na.rm = T),
             #q95_1yr_chla_ESA = mean(q95_1yr_chla_ESA, na.rm = T),
-            q05_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
-            q95_1yr_sst_CRW = mean(q95_1yr_sst_CRW, na.rm = T),
+            #q05_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
+            #q95_1yr_sst_CRW = mean(q95_1yr_sst_CRW, na.rm = T),
             otp_nearshore_sediment = mean(otp_nearshore_sediment, na.rm = T),
             otp_all_effluent = mean(otp_all_effluent, na.rm = T),
             coral_cover = mean(coral_cover, na.rm = T),
             #com_net = mean(com_net, na.rm = T),
-            MHI_spear = mean(MHI_spear, na.rm = T)
+            MHI_spear = mean(MHI_spear, na.rm = T), 
+            q05_1yr_sst_jpl = mean(q05_1yr_sst_jpl, na.rm =T),
+            q95_1yr_sst_jpl = mean(q95_1yr_sst_jpl, na.rm =T)
   ) %>%
+  print() %>% 
   dplyr::select(island, depth, method, lat, lon, species, density, presence,
          region, year, month, day, rugosity, date,
-         mean_1mo_chla_ESA, q05_1yr_sst_CRW, q95_1yr_sst_CRW,
+         mean_1mo_chla_ESA, q05_1yr_sst_jpl, q95_1yr_sst_jpl,
          otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) #bathymetry
-
-# sanity checks 
-# dup <- spc_reduced[duplicated(spc_reduced[c("island", "method", "lat", "lon", "species", "date", "presence", "region", "year", "month", "day")]) | duplicated(spc_reduced[c("island", "method", "lat", "lon", "species", "date", "presence", "region", "year", "month", "day")], fromLast=T),]
-# # how many extra rows do we have? 
-# sum(duplicated(spc_reduced[c("island", "method", "lat", "lon", "species", "date", "presence", "region", "year", "month", "day")]))
-# # 3740 which is the same as nrow(test)-nrow(spc_reduced)
 
 #SAVE CUMULATIVE LAYER
 spc_full <- spc_reduced[!duplicated(spc_reduced),] #spc_reduced_spearcumulative_roi
@@ -453,7 +426,6 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
 
   
   
-  
 
 ## sst map
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
@@ -470,7 +442,7 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
   
 #pa by lat/lon SST q05
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
-    geom_point(aes(color = q05_1yr_sst_CRW, shape = factor(presence)), size = 2, alpha = 0.7) +
+    geom_point(aes(color = q05_1yr_sst_jpl, shape = factor(presence)), size = 2, alpha = 0.7) +
     scale_color_viridis_c(name = "q05 SST (°C)", option = "C") +
     scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
     theme_minimal() +
@@ -555,4 +527,7 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
          x = "Longitude",
          y = "Latitude") +
     theme(legend.position = "right")
+  
+  
+
   

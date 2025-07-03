@@ -1,5 +1,5 @@
 # clean desktop
-rm(list = ls()) 
+rm(list= ls()) 
 library(dplyr)
 library(ggplot2)
 select=dplyr::select
@@ -12,7 +12,7 @@ load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData"); df
 spc = rbind(rbind(df1, df2, df3)) %>%
   filter(method == "nSPC") %>%
   filter(region %in% c("MHI", "NWHI")) %>%
-  filter(year >= 2009)
+  filter(year >= 2009 & year < 2024)
 rm(df, df1,df2,df3)
 
 # df = rbind(rbind(df1, df2, df3)) %>% 
@@ -106,7 +106,7 @@ summary(spc$rugosity)
 # save(df, file = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time_06.25.RData")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/eds_time_06.25.Rdata")
 dynamic = df
-dynamic = dynamic[,c(3:346)] #87 #346
+dynamic = dynamic[,c(3:346)] 
 dynamic$date = as.POSIXct(dynamic$date, origin = "1970-01-01", tz = "UTC")
 
 #spc = spc %>% dplyr::select(-date)
@@ -163,7 +163,7 @@ class(spc$date)
 #   mutate(lon = round(lon, 3),
 #          lat = round(lat, 3))
 
-spc <- left_join(spc, cca, by = c("island", "lat", "lon", "region", "year", "month", "day", "date"))
+spc <- left_join(spc, cca, by = c("island", "lon", "lat", "region", "year", "month", "day", "date"))
 #pc = left_join(spc, cca)
 rm(cca)
 
@@ -175,71 +175,25 @@ spc_reduced <- spc %>%
                 #"rugosity",
                 #"bathymetry", 
                 #"date",
-                # "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy", 
                 mean_1mo_chla_ESA = "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo", 
-                # "log_mean_1mo_chla_ESA", 
-                #  "mean_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr",
-                #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy",
-                #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo",
-                #  "q05_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr",
-                #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01dy",
-                #  "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01mo" ,
           #      q95_1yr_chla_ESA = "q95_Chlorophyll_A_ESA_OC_CCI_v6.0_monthly_01yr", #removed bc correlated with mean 1mo chla, 0.76
-                #  "mean_Kd490_ESA_OC_CCI_monthly_01dy",
                 # mean_1mo_kd490_ESA = "mean_Kd490_ESA_OC_CCI_monthly_01mo" , correlated with 1mochla 0.89
-                #  "mean_Kd490_ESA_OC_CCI_monthly_01yr", 
-                #  "q05_Kd490_ESA_OC_CCI_monthly_01dy", 
-                #  "q05_Kd490_ESA_OC_CCI_monthly_01mo", 
-                #  "q05_Kd490_ESA_OC_CCI_monthly_01yr" ,
-                #  "q95_Kd490_ESA_OC_CCI_monthly_01dy" , 
-                #  "q95_Kd490_ESA_OC_CCI_monthly_01mo" ,
-                #  "q95_Kd490_ESA_OC_CCI_monthly_01yr" , #kd490
                 # mean_1day_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01dy", taken out bc correlated with monthly sst 0.94
                 #  mean_1mo_sst_CRW = "mean_Sea_Surface_Temperature_CRW_daily_01mo" , 
-                #  "mean_Sea_Surface_Temperature_CRW_daily_01yr", 
-                #  "q05_Sea_Surface_Temperature_CRW_daily_01dy" ,
-                #  "q05_Sea_Surface_Temperature_CRW_daily_01mo",
                 q05_1yr_sst_jpl = "q05_Sea_Surface_Temperature_jplMUR_daily_01yr",
                 q95_1yr_sst_jpl = "q95_Sea_Surface_Temperature_jplMUR_daily_01yr",
                 #q05_1yr_sst_CRW = "q05_Sea_Surface_Temperature_CRW_daily_01yr" ,
-                #  "q95_Sea_Surface_Temperature_CRW_daily_01dy" ,
-                #  "q95_Sea_Surface_Temperature_CRW_daily_01mo" ,
                 #q95_1yr_sst_CRW = "q95_Sea_Surface_Temperature_CRW_daily_01yr" , #crw sst
-                #  "mean_Wind_Speed_ASCAT_daily_01dy",
-                #  "mean_Wind_Speed_ASCAT_daily_01mo",
-                #  "mean_Wind_Speed_ASCAT_daily_01yr",
-                #  "q05_Wind_Speed_ASCAT_daily_01dy" ,
-                #  "q05_Wind_Speed_ASCAT_daily_01mo", 
-                #  "q05_Wind_Speed_ASCAT_daily_01yr",
-                #  "q95_Wind_Speed_ASCAT_daily_01dy" ,
-                #  "q95_Wind_Speed_ASCAT_daily_01mo" ,
-                #  "q95_Wind_Speed_ASCAT_daily_01yr" , #wind
                 # "TKE", #TKE
                 #  "date_r" ,
                 # pop_density = "gpw_v4_population_density_rev11_15_min.nc" , #5 km, #pop density, removed, correlated with MHI Shore spear 0.79
-                #"gpw_v4_population_density_rev11_1_deg.nc" , #30 km,
-                #"gpw_v4_population_density_rev11_2pt5_min.nc",  #60 km,
-                #"gpw_v4_population_density_rev11_30_min.nc",# 110 km 
                 otp_nearshore_sediment = "hi_otp_all_nearshore_sediment.tif" , #nearshore sediment (urban runoff?)
                 #otp_all_coastal_mod = "hi_otp_all_coastal_mod.tif" , #coastal mod
                 otp_all_effluent = "hi_otp_all_osds_effluent.tif", #effluent
                 "MHI_Boat_Spear_hr.tif", #spearfishing
                 "MHI_Shore_Spear_hr.tif",
                 "coral_cover", 
-                #"hi_otp_all_fishing.tif", 
-                #"hi_otp_all_fishing_com.tif", 
-                #com_line = "hi_otp_all_fishing_com_line.tif",
           #      com_net = "hi_otp_all_fishing_com_net.tif",
-                #com_spear = "hi_otp_all_fishing_com_spear.tif", 
-                #"hi_otp_all_fishing_rec.tif", 
-                #rec_boat = "hi_otp_all_fishing_rec_boat.tif",
-                #rec_boat_spear = "hi_otp_all_fishing_rec_boat_spear.tif",
-                #rec_shore = "hi_otp_all_fishing_rec_shore.tif", 
-                #rec_shore_line = "hi_otp_all_fishing_rec_shore_line.tif",
-                #rec_shore_net = "hi_otp_all_fishing_rec_shore_net.tif", 
-                #rec_shore_spear = "hi_otp_all_fishing_rec_shore_spear.tif"
-                
-                
   )
 
 rm(spc)
@@ -282,9 +236,123 @@ colSums(is.na(spc_reduced))
 #how many presence values in presence column before na.omit
 sum(spc_reduced$presence == 1, na.rm = TRUE) #1804
 
+####################################
+#fix mhi spear and effluent rasters
+####################################
+library(raster)
+library(dplyr)
+library(ggplot2)
+
+#function
+fill_missing_column <- function(main_df, patch_df, join_cols, var_to_fill) {
+  patched <- main_df %>%
+    left_join(
+      patch_df %>% select(all_of(c(join_cols, var_to_fill))),
+      by = join_cols,
+      suffix = c("", ".new")
+    ) %>%
+    mutate(
+      {{ var_to_fill }} := coalesce(.data[[var_to_fill]], .data[[paste0(var_to_fill, ".new")]])
+    ) %>%
+    select(-all_of(paste0(var_to_fill, ".new")))
+  
+  return(patched)
+}
+
+boat_raster <- raster("/Users/mayaotsu/Downloads/MHI_Boat_Spear_hr.tif")
+shore_raster <- raster("/Users/mayaotsu/Downloads/MHI_Shore_Spear_hr.tif")
+spear_raster2 <- resample(shore_raster, boat_raster, method = "bilinear")
+
+combined_spear <- boat_raster + spear_raster2
+rm(boat_raster, shore_raster, spear_raster2)
+
+#create df with NA points from original spc_reduced
+na_points_spear <- spc_reduced %>% filter(is.na(MHI_spear))
+#na_points$lon <- ifelse(na_points$lon < 0, na_points$lon + 360, na_points$lon)
+na_points_spear$lon <- ifelse(na_points_spear$lon > 0, na_points_spear$lon - 360, na_points_spear$lon)
+
+#convert na points to spatial points
+na_spatial_spear <- na_points_spear[, c("lon", "lat")]
+#4points <- SpatialPoints(na_spatial, proj4string = CRS(proj4string(combined_spear)))
+points_spear <- sp::SpatialPoints(na_spatial_spear, proj4string = raster::crs(combined_spear))
+
+rm(na_spatial_spear)
+
+#extract raster values
+extracted_vals_spear <- raster::extract(combined_spear, points_spear)
+#reattach extracted values to NA points
+na_points_spear$MHI_spear <- extracted_vals_spear
+
+##check
+sum(!is.na(na_points_spear$MHI_spear))  # should be > 0, 1514
+sum(is.na(na_points_spear$MHI_spear))   # should be < original 1742, 220
+
+#unique pts to avoid duplicates
+na_points_unique_spear <- na_points_spear %>%
+  filter(!is.na(MHI_spear)) %>%
+  distinct(lat, lon, year, month, day, species, .keep_all = TRUE)
+
+na_points_unique_spear$lon <- ifelse(na_points_unique_spear$lon < 0, na_points_unique_spear$lon + 360, na_points_unique_spear$lon)
+
+#fix in spc reduced
+# spc_filled <- spc_reduced %>%
+#   rows_update(na_points_unique_spear, by = c("lat", "lon", "year", "month", "day", "species"), unmatched = "ignore")
+
+spc_filled <- fill_missing_column(
+  main_df = spc_reduced,
+  patch_df = na_points_unique_spear,
+  join_cols = c("lat", "lon", "year", "month", "day", "species"),
+  var_to_fill = "MHI_spear"
+)
+##################
+#####EFFLUENT#####
+##################
+effluent_raster <- raster("/Users/mayaotsu/Downloads/hi_otp_all_osds_effluent.tif")
+na_points_eff <- spc_reduced %>% filter(is.na(otp_all_effluent))
+na_points_eff$lon <- ifelse(na_points_eff$lon > 0, na_points_eff$lon - 360, na_points_eff$lon)
+
+#spc_reduced$lon <- ifelse(spc_reduced$lon > 180, spc_reduced$lon - 360, spc_reduced$lon)
+
+na_spatial_eff <- na_points_eff[, c("lon", "lat")]
+points_eff <- sp::SpatialPoints(na_spatial_eff, proj4string = raster::crs(effluent_raster))
+
+rm(na_spatial_eff)
+
+extracted_vals_eff <- raster::extract(effluent_raster, points_eff)
+na_points_eff$otp_all_effluent <- extracted_vals_eff
+
+##check
+sum(!is.na(na_points_eff$otp_all_effluent))  # should be > 0 (1700)
+sum(is.na(na_points_eff$otp_all_effluent))   # should be < original 1742 (18)
+
+#unique pts to avoid duplicates
+na_points_unique_eff <- na_points_eff %>%
+  filter(!is.na(otp_all_effluent)) %>%
+  distinct(lat, lon, year, month, day, species, .keep_all = TRUE)
+
+na_points_unique_eff$lon <- ifelse(na_points_unique_eff$lon < 0, na_points_unique_eff$lon + 360, na_points_unique_eff$lon)
+
+#fix in spc reduced
+# spc_filled <- spc_filled %>%
+#   rows_update(na_points_unique_eff, by = c("lat", "lon", "year", "month", "day", "species"), unmatched = "ignore")
+
+spc_filled <- fill_missing_column(
+  main_df = spc_filled,
+  patch_df = na_points_unique_eff,
+  join_cols = c("lat", "lon", "year", "month", "day", "species"),
+  var_to_fill = "otp_all_effluent")
+
+#final check
+plot(spc_filled$MHI_spear, spc_reduced$MHI_spear)
+plot(spc_filled$otp_all_effluent, spc_reduced$otp_all_effluent)
+
+#saveRDS(spc_filled, "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_filled.rds")
+spc_reduced <- spc_filled
+rm(spc_filled)
+
 ##### NA OMIT !!!! #####
 spc_reduced<- na.omit(spc_reduced)
-sum(spc_reduced$presence == 1, na.rm = TRUE) #1753 --> 1579, 8805 total obs
+sum(spc_reduced$presence == 1, na.rm = TRUE) 
 colSums(is.na(spc_reduced))
 
 #avg values between thee two duplicate rows to keep one, 12350--> 7151
@@ -309,7 +377,6 @@ spc_reduced = spc_reduced %>%
             q05_1yr_sst_jpl = mean(q05_1yr_sst_jpl, na.rm =T),
             q95_1yr_sst_jpl = mean(q95_1yr_sst_jpl, na.rm =T)
   ) %>%
-  print() %>% 
   dplyr::select(island, depth, method, lat, lon, species, density, presence,
          region, year, month, day, rugosity, date,
          mean_1mo_chla_ESA, q05_1yr_sst_jpl, q95_1yr_sst_jpl,
@@ -317,13 +384,13 @@ spc_reduced = spc_reduced %>%
 
 #SAVE CUMULATIVE LAYER
 spc_full <- spc_reduced[!duplicated(spc_reduced),] #spc_reduced_spearcumulative_roi
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full.RData")#spc_edited_cumulative.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_06.25.RData")#spc_edited_cumulative.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_06.25")
 
 #SAVE JUST MHI
 spc_mhi = subset(spc_reduced, region == "MHI")
-save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi")
+save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_06.25.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_06.25")
 
 ###################### END ###################
      
@@ -507,7 +574,7 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
     theme(legend.position = "right")
   
 #coral cover
-  ggplot(spc, aes(x = lon, y = lat)) +
+  ggplot(spc_reduced, aes(x = lon, y = lat)) +
     geom_point(aes(color = coral_cover, shape = factor(presence)), size = 2, alpha = 0.7) +
     scale_color_viridis_c(name = "coral cover", option = "C") +
     scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +

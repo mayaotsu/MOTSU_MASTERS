@@ -237,7 +237,7 @@ colSums(is.na(spc_reduced))
 sum(spc_reduced$presence == 1, na.rm = TRUE) #1804
 
 ####################################
-#fix mhi spear and effluent rasters
+#fix mhi spear and effluent NA values, raster extract
 ####################################
 library(raster)
 library(dplyr)
@@ -304,6 +304,8 @@ spc_filled <- fill_missing_column(
   join_cols = c("lat", "lon", "year", "month", "day", "species"),
   var_to_fill = "MHI_spear"
 )
+rm(combined_spear, na_points_spear, na_points_unique_spear, points_spear, filled_rows_MHI)
+rm(filled_rows, filled_rows_MHI, changed_rows, filled_count, filled_MHI, unchanged)
 ##################
 #####EFFLUENT#####
 ##################
@@ -346,6 +348,9 @@ spc_filled <- fill_missing_column(
 plot(spc_filled$MHI_spear, spc_reduced$MHI_spear)
 plot(spc_filled$otp_all_effluent, spc_reduced$otp_all_effluent)
 
+rm(effluent_raster, na_points_eff, na_points_unique_eff, points_eff)
+rm(unchanged)
+
 #saveRDS(spc_filled, "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_filled.rds")
 spc_reduced <- spc_filled
 rm(spc_filled)
@@ -383,14 +388,14 @@ spc_reduced = spc_reduced %>%
          otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) #bathymetry
 
 #SAVE CUMULATIVE LAYER
-spc_full <- spc_reduced[!duplicated(spc_reduced),] #spc_reduced_spearcumulative_roi
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_06.25.RData")#spc_edited_cumulative.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_06.25")
+spc_full <- spc_reduced[!duplicated(spc_reduced),] 
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.02.RData")#spc_edited_cumulative.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.02")
 
 #SAVE JUST MHI
 spc_mhi = subset(spc_reduced, region == "MHI")
-save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_06.25.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_06.25")
+save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.02.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.02")
 
 ###################### END ###################
      

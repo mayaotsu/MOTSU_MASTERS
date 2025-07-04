@@ -193,3 +193,8 @@ filled_both <- spc_reduced %>%
   select(lat, lon, date_, species, mhi_old, mhi_new, effluent_old, effluent_new)
 
 saveRDS(spc_filled, "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_filled_spear_effluent.rds")
+
+#final check
+plot(spc_filled$MHI_spear, spc_reduced$MHI_spear)
+plot(spc_filled$otp_all_effluent, spc_reduced$otp_all_effluent)
+

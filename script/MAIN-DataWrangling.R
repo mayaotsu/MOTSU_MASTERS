@@ -157,6 +157,9 @@ cca$lon = ifelse(cca$lon < 0, cca$lon + 360, cca$lon)
 cca$date <- as.Date(cca$date)
 spc$date <- as.Date(spc$date_)
 
+#replace _ with spaces for pearl and hermes
+cca$island <- gsub("_", " ", cca$island)
+
 class(cca$date)
 class(spc$date)
 # cca = cca %>%
@@ -497,21 +500,8 @@ unique(spc_reduced$island[which(spc_reduced$q05_1yr_sst_CRW>50)])
 plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[which(spc_reduced$q05_1yr_sst_CRW>50)]))
 
   
-  
-
 ## sst map
-  ggplot(spc_reduced, aes(x = lon, y = lat)) +
-  geom_point(aes(color = q05_1yr_sst_CRW)) +
-  scale_color_viridis_c() +
-  theme_minimal() +
-  labs(title = "q05 SST (CRW)", color = "SST (°C)")
 
-  ggplot(spc_reduced, aes(x = lon, y = lat)) +
-    geom_point(aes(color = q95_1yr_sst_CRW)) +
-    scale_color_viridis_c() +
-    theme_minimal() +
-    labs(title = "q95 SST (CRW)", color = "SST (°C)")
-  
 #pa by lat/lon SST q05
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
     geom_point(aes(color = q05_1yr_sst_jpl, shape = factor(presence)), size = 2, alpha = 0.7) +

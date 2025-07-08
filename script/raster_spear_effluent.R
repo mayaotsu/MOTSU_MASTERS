@@ -6,15 +6,30 @@ library(ggplot2)
 fill_missing_column <- function(main_df, patch_df, join_cols, var_to_fill) {
   patched <- main_df %>%
     left_join(
-      patch_df %>% select(all_of(c(join_cols, var_to_fill))),
+      patch_df %>% dplyr::select(all_of(c(join_cols, var_to_fill))),
       by = join_cols,
       suffix = c("", ".new")
     ) %>%
     mutate(
       {{ var_to_fill }} := coalesce(.data[[var_to_fill]], .data[[paste0(var_to_fill, ".new")]])
     ) %>%
-    select(-all_of(paste0(var_to_fill, ".new")))
+    dplyr::select(-all_of(paste0(var_to_fill, ".new")))
   
+  return(patched)
+}
+
+fill_missing_column <- function(main_df, patch_df, join_cols, var_to_fill) {
+  patched <- dplyr::left_join(
+    main_df,
+    dplyr::select(patch_df, dplyr::all_of(c(join_cols, var_to_fill))),
+    by = join_cols,
+    suffix = c("", ".new")
+  ) %>%
+    dplyr::mutate(
+      !!var_to_fill := dplyr::coalesce(.data[[var_to_fill]], .data[[paste0(var_to_fill, ".new")]])
+    ) %>%
+    dplyr::select(-dplyr::all_of(paste0(var_to_fill, ".new")))
+
   return(patched)
 }
 
@@ -45,6 +60,13 @@ na_points_spear$MHI_spear <- extracted_vals_spear
 ##check
 sum(!is.na(na_points_spear$MHI_spear))  # should be > 0, 1514
 sum(is.na(na_points_spear$MHI_spear))   # should be < original 1742, 220
+
+
+# normalize_lon <- function(lon) {
+#   ifelse(lon > 180, lon - 360, lon)
+# }
+# spc_reduced <- spc_reduced %>% mutate(lon = normalize_lon(lon))
+# na_points_unique_spear <- na_points_unique_spear %>% mutate(lon = normalize_lon(lon))
 
 #unique pts to avoid duplicates
 na_points_unique_spear <- na_points_spear %>%

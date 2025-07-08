@@ -248,16 +248,16 @@ library(ggplot2)
 
 #function
 fill_missing_column <- function(main_df, patch_df, join_cols, var_to_fill) {
-  patched <- main_df %>%
-    left_join(
-      patch_df %>% select(all_of(c(join_cols, var_to_fill))),
-      by = join_cols,
-      suffix = c("", ".new")
+  patched <- dplyr::left_join(
+    main_df,
+    dplyr::select(patch_df, dplyr::all_of(c(join_cols, var_to_fill))),
+    by = join_cols,
+    suffix = c("", ".new")
+  ) %>%
+    dplyr::mutate(
+      !!var_to_fill := dplyr::coalesce(.data[[var_to_fill]], .data[[paste0(var_to_fill, ".new")]])
     ) %>%
-    mutate(
-      {{ var_to_fill }} := coalesce(.data[[var_to_fill]], .data[[paste0(var_to_fill, ".new")]])
-    ) %>%
-    select(-all_of(paste0(var_to_fill, ".new")))
+    dplyr::select(-dplyr::all_of(paste0(var_to_fill, ".new")))
   
   return(patched)
 }
@@ -307,8 +307,9 @@ spc_filled <- fill_missing_column(
   join_cols = c("lat", "lon", "year", "month", "day", "species"),
   var_to_fill = "MHI_spear"
 )
-rm(combined_spear, na_points_spear, na_points_unique_spear, points_spear, filled_rows_MHI)
-rm(filled_rows, filled_rows_MHI, changed_rows, filled_count, filled_MHI, unchanged)
+
+rm(combined_spear, na_points_spear, na_points_unique_spear, points_spear)
+#rm(filled_rows, filled_rows_MHI, changed_rows, filled_count, filled_MHI, unchanged)
 ##################
 #####EFFLUENT#####
 ##################
@@ -355,10 +356,12 @@ rm(effluent_raster, na_points_eff, na_points_unique_eff, points_eff)
 rm(unchanged)
 
 #saveRDS(spc_filled, "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_filled.rds")
+colSums(is.na(spc_filled))
 spc_reduced <- spc_filled
 rm(spc_filled)
 
 ##### NA OMIT !!!! #####
+colSums(is.na(spc_reduced))
 spc_reduced<- na.omit(spc_reduced)
 sum(spc_reduced$presence == 1, na.rm = TRUE) 
 colSums(is.na(spc_reduced))
@@ -366,39 +369,36 @@ colSums(is.na(spc_reduced))
 #avg values between thee two duplicate rows to keep one, 12350--> 7151
 colnames(spc_reduced)
 
-#get mean of values that have different depths but identical all other values
+library(dplyr)
+#get mean of values that have different depths but identical all other values #6147 values
 spc_reduced = spc_reduced %>% 
-  group_by(island, method, lat, lon, species, date, presence, region, year, month, day) %>% 
-  summarise(density = mean(density, na.rm = T),
+  group_by(island, method, lat, lon, species, date_, presence, region, year, month, day) %>% 
+  dplyr::summarise(
+            density = mean(density, na.rm = T),
             depth = mean(depth, na.rm = T),
             rugosity = mean(rugosity, na.rm = T),
-            #bathymetry = mean(bathymetry, na.rm = T), 
             mean_1mo_chla_ESA = mean(mean_1mo_chla_ESA, na.rm = T),
-            #q95_1yr_chla_ESA = mean(q95_1yr_chla_ESA, na.rm = T),
-            #q05_1yr_sst_CRW = mean(q05_1yr_sst_CRW, na.rm = T),
-            #q95_1yr_sst_CRW = mean(q95_1yr_sst_CRW, na.rm = T),
             otp_nearshore_sediment = mean(otp_nearshore_sediment, na.rm = T),
             otp_all_effluent = mean(otp_all_effluent, na.rm = T),
             coral_cover = mean(coral_cover, na.rm = T),
-            #com_net = mean(com_net, na.rm = T),
             MHI_spear = mean(MHI_spear, na.rm = T), 
             q05_1yr_sst_jpl = mean(q05_1yr_sst_jpl, na.rm =T),
             q95_1yr_sst_jpl = mean(q95_1yr_sst_jpl, na.rm =T)
   ) %>%
-  dplyr::select(island, depth, method, lat, lon, species, density, presence,
-         region, year, month, day, rugosity, date,
+  dplyr::select(depth, method, date_, lat, lon, species, density, presence,
+         region, year, month, day, rugosity,
          mean_1mo_chla_ESA, q05_1yr_sst_jpl, q95_1yr_sst_jpl,
          otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) #bathymetry
 
 #SAVE CUMULATIVE LAYER
 spc_full <- spc_reduced[!duplicated(spc_reduced),] 
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.02.RData")#spc_edited_cumulative.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.02")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.07.RData")#spc_edited_cumulative.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.07")
 
 #SAVE JUST MHI
 spc_mhi = subset(spc_reduced, region == "MHI")
-save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.02.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.02")
+save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.07.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.07")
 
 ###################### END ###################
      

@@ -178,7 +178,7 @@ for(y in Num_Preds){
 dev.off()
 
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png"), units = "in", height = 5, width = 5, res = 500)
+#png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png"), units = "in", height = 5, width = 5, res = 500)
 #taapePA_0.001_0.75_AllPercentCont
 PA_sp = data.frame(predictor = taape_full_reduced_0.001_0.75_precentcont07.7[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", taape_full_reduced_0.001_0.75_precentcont07.7[,2])),
@@ -191,9 +191,11 @@ ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(p
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'L. kasmira (Full)', x='Percent Contribution', y = '') +
+  labs(title = 'L. kasmira (Full Archipelago)', x='Percent Contribution', y = '') +
+  scale_x_continuous(limits = c(0, 40))+
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png", width = 5, height = 5, units = "in")
 dev.off()
 
 ## taape full

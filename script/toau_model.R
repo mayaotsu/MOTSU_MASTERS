@@ -180,7 +180,7 @@ dev.off()
 
 ###
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/toau_mhi_reduced_0.001_0.75_forestplot_07.7.png"), units = "in", height = 5, width = 5, res = 500)
+#png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/toau_mhi_reduced_0.001_0.75_forestplot_07.7.png"), units = "in", height = 5, width = 5, res = 500)
 PA_sp = data.frame(predictor = All_percent_contribution[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
                    sd = as.numeric(substr(All_percent_contribution[,2], 
@@ -192,21 +192,21 @@ PA_sp = data.frame(predictor = All_percent_contribution[,1],
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
-  scale_fill_discrete() +
+  scale_fill_discrete() +  
+  scale_x_continuous(limits = c(0, 40))+
   labs(title = 'Toau (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/forest/toau_mhi_reduced_0.001_0.75_forestplot07.7.png", width = 5, height = 5, units = "in")
 dev.off()
 
 #fulll
 color = c("blue","red", "gray", "red", 
-          "red", "blue", "blue", "gray", "blue", "gray"
-))
+          "blue", "blue", "red", "blue", "gray"))
 
 #mhi
-color = c("gray","red", "gray", "red", 
-          "red", "gray", "blue", "gray"
-))
+color = c("blue","red", "gray", "red", 
+          "blue", "red", "red", "blue", "gray"))
 
 ######now make abund. only model#################
 

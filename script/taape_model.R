@@ -5,21 +5,20 @@ library(matrixStats)
 library(fmsb)
 #getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full") 
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.07") 
 
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
 df$Random <- rnorm(nrow(df))
-colnames(df)
 set.seed(101) 
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(1, 2,10, 13,15:22) 
+Predictors<-c( 1,2,11, 14,16:22) 
 #re-add island (1), year (factor variable) 10
-#depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
-#nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
+#depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTjpl16&17,
+#nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 22
 #boxplot(taape$density ~ taape$year)
 
 Response<-which(colnames(df) %in% c("presence") )
@@ -41,7 +40,7 @@ PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Respons
 end = Sys.time()
 end - start 
 
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_step_0.001_0.75.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_step_0.001_0.75_07.7.Rdata"))
 
 #lr 0.001
 #try bag fractions 0.6, 0.75
@@ -89,7 +88,7 @@ PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75_07.7.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -136,7 +135,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75_precentcont.rds"))
+saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75_precentcont07.7.rds"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -153,8 +152,8 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75_pdp.png", res = 300, height = 10, width = 10, units = "in")
-par(mfrow=c(3,3))
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75_pdp_07.7.png", res = 300, height = 10, width = 10, units = "in")
+par(mfrow=c(3,4))
 mn_part_plot<-list()  
 for(y in Num_Preds){
   id<-which(colnames(part_plot[[1]])==Variable_List$Variables[y])
@@ -179,44 +178,31 @@ for(y in Num_Preds){
 dev.off()
 
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_mhi_reduced_0.001_0.75_forestplot.png"), units = "in", height = 5, width = 5, res = 500)
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png"), units = "in", height = 5, width = 5, res = 500)
 #taapePA_0.001_0.75_AllPercentCont
-PA_sp = data.frame(predictor = taape_mhi_reduced_0.001_0.75_precentcont[,1],
-                   percent_imp = as.numeric(sub("\\ .*", "", taape_mhi_reduced_0.001_0.75_precentcont[,2])),
-                   sd = as.numeric(substr(taape_mhi_reduced_0.001_0.75_precentcont[,2], nchar(taape_mhi_reduced_0.001_0.75_precentcont[,2])-4+1, 
-                   nchar(taape_mhi_reduced_0.001_0.75_precentcont[,2]))),
+PA_sp = data.frame(predictor = taape_full_reduced_0.001_0.75_precentcont07.7[,1],
+                   percent_imp = as.numeric(sub("\\ .*", "", taape_full_reduced_0.001_0.75_precentcont07.7[,2])),
+                   sd = as.numeric(substr(taape_full_reduced_0.001_0.75_precentcont07.7[,2], nchar(taape_full_reduced_0.001_0.75_precentcont07.7[,2])-4+1, 
+                   nchar(taape_full_reduced_0.001_0.75_precentcont07.7[,2]))),
                    color = c("blue","blue", "gray", "red", 
-                             "red", "red", "red", "red",
-                             "blue", "gray"))
-
-
-
+                             "blue", "red", "blue", "gray"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'L. kasmira (MHI)', x='Percent Contribution', y = '') +
+  labs(title = 'L. kasmira (Full)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
 dev.off()
 
 ## taape full
 color = c("blue","blue", "gray", "red", 
-          "red", "blue", "blue", "gray",
-          "blue", "gray"))
+          "blue", "red", "blue", "gray"))
 
 #taape MHI
-color = c("gray","blue", "gray", "red", 
-          "red", "red", "gray", "gray",
-          "blue", "gray"))
-
-
-
-
-
-
-
+color = c("blue","blue", "gray", "red", 
+          "red", "red", "blue", "gray"))
 
 
 ######now make abund. only model#################

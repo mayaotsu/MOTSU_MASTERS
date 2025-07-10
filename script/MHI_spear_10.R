@@ -57,7 +57,7 @@ prob_plus <- rowMeans(plus_preds)
 #predicted probability when spear decreased by 10%
 prob_minus <- rowMeans(minus_preds)
 
-#diff_plus: prob+10-base change in predicted probability if effort increases by 10
+#diff_plus: prob+10- base change in predicted probability if effort increases by 10
 #diff_minus: prob-10-base change in predicted probability of occurence if effort decreases by 10
 #df of results
 
@@ -74,23 +74,85 @@ toau_results <- df_base %>%
 saveRDS(toau_results, 
         file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_shift_preds.rds")
 
+rm(list= ls()) 
+taape_spear_shift_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_shift_preds.rds")
+toau_spear_shift_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_shift_preds.rds")
 
-#increase in probability
+taape_spear_shift_preds$species <- "taape"
+toau_spear_shift_preds$species <- "toau"
+combined <- bind_rows(taape_spear_shift_preds, toau_spear_shift_preds)
+
+# +10% summary
+plus_summary <- combined %>%
+  dplyr::group_by(island, species) %>%
+  dplyr::summarize(
+    mean_diff = mean(diff_plus, na.rm = TRUE),
+    sd_diff = sd(diff_plus, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(scenario = "+10% Spearfishing")
+
+minus_summary <- combined %>%
+  dplyr::group_by(island, species) %>%
+  dplyr::summarize(
+    mean_diff = mean(diff_minus, na.rm = TRUE),
+    sd_diff = sd(diff_minus, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(scenario = "–10% Spearfishing")
+
+summary_all <- bind_rows(plus_summary, minus_summary)
+colnames(summary_all)
+
+summary_all$island <- factor(summary_all$island, levels = c(
+  "Niihau", "Kauai", "Oahu", "Molokai", "Lanai", "Kahoolawe", "Maui", "Hawaii"
+))
+
+summary_all %>%  filter(island %in% c("Hawaii", "Kahoolawe", "Kauai", "Lanai", "Maui", 
+                                      "Molokai", "Niihau", "Oahu")) %>% 
+  ggplot( aes(x = island, y = mean_diff, color = species)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  geom_errorbar(aes(ymin = mean_diff - sd_diff, ymax = mean_diff + sd_diff),
+                width = 0.2, position = position_dodge(width = 0.5)) +
+  facet_wrap(~scenario) +
+  labs(title = "Change in Predicted Occurrence by Island and Species",
+       x = "Island", y = "Mean Change in Probability (Δ)") +
+  theme_minimal(base_size = 14) +
+  scale_color_manual(values = c("taape" = "blue", "toau" = "red"))
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/mhi_10spear.png", width = 12, height = 5, units = "in", bg = "white")
+
+#toau increase in probability
 ggplot(toau_results, aes(x = lon, y = lat, color = diff_plus)) +
   geom_point(size = 2) +
   scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0,
                         name = "Δ Probability") +
   labs(title = "Change in Predicted Occurrence (+10% Spearfishing)",
        x = "Longitude", y = "Latitude") +
+  coord_cartesian(xlim = c(195, 207), ylim = c(19, 24)) +
   theme_minimal()
 
-#decrease in probability
+#toau decrease in probability
 ggplot(toau_results, aes(x = lon, y = lat, color = diff_minus)) +
   geom_point(size = 2) +
   scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0,
                         name = "Δ Probability") +
   labs(title = "Change in Predicted Occurrence (–10% Spearfishing)",
        x = "Longitude", y = "Latitude") +
+  coord_cartesian(xlim = c(198, 206), ylim = c(19, 23)) +
+  theme_classic() +
+  theme(
+    plot.background = element_rect(fill = "gray80", color = NA),
+    panel.background = element_rect(fill = "gray80", color = NA)
+  )
+
+#taape decrease in spear
+ggplot(taape_spear_shift_preds, aes(x = lon, y = lat, color = diff_minus)) +
+  geom_point(size = 2) +
+  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0,
+                        name = "Δ Probability") +
+  labs(title = "Change in Predicted Occurrence (–10% Spearfishing)",
+       x = "Longitude", y = "Latitude") +
+  coord_cartesian(xlim = c(195, 207), ylim = c(19, 24)) +
   theme_minimal()
 
 #boxplot by island

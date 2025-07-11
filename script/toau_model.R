@@ -32,7 +32,7 @@ df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 
 #specify for full or MHI
-#toau <- df[df$species=="LUFU",]
+toau <- df[df$species=="LUFU",]
 toau <- df[df$species == "LUFU" & df$region == "MHI", ]
 
 boxplot(toau$density ~ toau$year)
@@ -153,7 +153,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_pdp_07.07.png", res = 300, height = 10, width = 8, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/toau_mhi_reduced_pdp_07.07.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){

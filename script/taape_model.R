@@ -32,7 +32,7 @@ df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 
 #specify running for full or MHI
-#taape <- df[df$species=="LUKA",]
+taape <- df[df$species=="LUKA",]
 taape <- df[df$species == "LUKA" & df$region == "MHI", ]
 
 start = Sys.time()
@@ -153,7 +153,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
 png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/taape_mhi_reduced_0.001_0.75_pdp_07.7.png", res = 300, height = 10, width = 10, units = "in")
-par(mfrow=c(3,4))
+par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
   id<-which(colnames(part_plot[[1]])==Variable_List$Variables[y])

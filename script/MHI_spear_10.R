@@ -35,6 +35,7 @@ n <- nrow(df_base)
 base_preds <- matrix(NA, nrow = n, ncol = 50)
 plus_preds <- matrix(NA, nrow = n, ncol = 50)
 minus_preds <- matrix(NA, nrow = n, ncol = 50)
+
 # 
 # for (k in 1:50) {
 #   model_k <- PA_Model_Reduced[[1]][[k]]
@@ -49,7 +50,7 @@ minus_preds <- matrix(NA, nrow = n, ncol = 50)
 
 #predicted probability of occurrence (presence) using original MHI_spear values,
 #acts as baseline and what the model predicts under current or observed conditions
-prob_base <- rowMeans(base_preds)  
+prob_base <- rowMeans(base_preds)  # we have 50 predicted probablities for each row of the data; we are using rowMeans to average them
 
 #predicted probability of occurrence when MHI spear increased by 10%
 prob_plus <- rowMeans(plus_preds)
@@ -61,15 +62,15 @@ prob_minus <- rowMeans(minus_preds)
 #diff_minus: prob-10-base change in predicted probability of occurence if effort decreases by 10
 #df of results
 
-toau_results <- df_base %>%
-  dplyr::select(lat, lon, island, region, MHI_spear) %>%
-  mutate(
-    prob_base = prob_base,
-    prob_plus10 = prob_plus,
-    prob_minus10 = prob_minus,
-    diff_plus = prob_plus10 - prob_base,
-    diff_minus = prob_minus10 - prob_base
-  )
+# toau_results <- df_base %>%
+#   dplyr::select(lat, lon, island, region, MHI_spear) %>%
+#   mutate(
+#     prob_base = prob_base,
+#     prob_plus10 = prob_plus,
+#     prob_minus10 = prob_minus,
+#     diff_plus = prob_plus10 - prob_base,
+#     diff_minus = prob_minus10 - prob_base
+#   )
 
 saveRDS(toau_results, 
         file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_shift_preds.rds")
@@ -80,21 +81,29 @@ toau_spear_shift_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTER
 ########################################
 ##### for loop for -100 to +100 by 10###
 ########################################
-
+df_base_oahu <- subset(df_base, island == "Oahu") 
+df_result <- df_base_oahu %>%
+  dplyr::select(lat, lon, island) 
 library(dplyr)
 
-percent_changes <- seq(-100, 100, by = 10)
+base_preds_oahu <- matrix(NA, nrow = nrow(df_base_oahu), ncol = 50)
+ 
+for (k in 1:50) {
+  model_k <- PA_Model_Reduced[[1]][[k]]
+  base_preds_oahu[,k] <- predict.gbm(model_k, df_base_oahu,
+                                n.trees = model_k$gbm.call$best.trees, type = "response")
+  print(paste("Completed", k, "of 50"))
+}
+
+percent_multiplier <- c(seq(-2,-1.1,0.1),0,seq(1.1,2,0.1))
 n_models <- 50
 
-# Empty list to hold per-percent-change results
-results_list <- list()
 
-for (i in seq_along(percent_changes)) {
-  pct <- percent_changes[i]
-  multiplier <- 1 + pct / 100
+for (i in seq_along(percent_multiplier)) {
+  pct <- percent_multiplier[i]
   
-  df_temp <- df_base %>%
-    mutate(MHI_spear = MHI_spear * multiplier)
+  df_temp <- df_base_oahu %>%
+    mutate(MHI_spear = MHI_spear * pct)
   
   # Predict across all 50 models
   temp_preds <- matrix(NA, nrow = nrow(df_temp), ncol = 50)
@@ -107,22 +116,22 @@ for (i in seq_along(percent_changes)) {
   }
   
   # Compute mean change from baseline
-  mean_base <- rowMeans(base_preds)
+  mean_base <- rowMeans(base_preds_oahu)
   mean_temp <- rowMeans(temp_preds)
   delta <- mean_temp - mean_base
   
   # Store results with island and lat/lon
-  df_result <- df_base %>%
-   dplyr::select(lat, lon, island) %>%
-    mutate(
-      percent_change = pct,
-      delta_prob = delta
-    )
-  
-  results_list[[i]] <- df_result
+  # df_result <- df_base_oahu %>%
+  #  dplyr::select(lat, lon, island) %>%
+  #   mutate(
+  #     percent_change = pct,
+  #     delta_prob = delta
+  #   )
+  df_result[[as.character(pct)]] <- delta
+  #results_list[[i]] <- df_result
   
   # ✅ Print progress
-  print(paste("Completed percent change:", pct, "%"))
+  print(paste("Completed percent change:", pct))
 }
 
 

@@ -273,8 +273,6 @@ ggplot(toau_results, aes(x = island, y = diff_plus)) +
   theme_minimal()
 
 
-
-
 #model estimates creating number of rows same as df, and 50 ensembel
 # 4 loop takes each individual model and predicts over that dataset
 
@@ -293,37 +291,48 @@ for (i in 1:length(Relevant_Models)){
   print(paste("completed", Relevant_Species[i],i, "of", length(Relevant_Models)))
   rm(Model_Estimates)
   
-  #how different predicted probability of occurence is if using individual data compared to the plus or minus spearfishing
-  
+#plot
   library(reshape2)
+  library(dplyr)
   library(ggplot2)
   
-  # Melt the data to long format
-  df_long <- melt(df_result_toau, 
-                  id.vars = c("lat", "lon", "island", "species"),
-                  variable.name = "percent_change", 
-                  value.name = "delta_prob")
+  # Melt both datasets
+  long_toau <- melt(df_result_toau,
+                    id.vars = c("lat", "lon", "island", "species"),
+                    variable.name = "percent_change",
+                    value.name = "delta_prob")
   
-  # Convert percent_change to numeric (it's character from column names like "-100")
+  long_taape <- melt(df_result_taape,
+                     id.vars = c("lat", "lon", "island", "species"),
+                     variable.name = "percent_change",
+                     value.name = "delta_prob")
+  
+  # Combine
+  df_long <- bind_rows(long_toau, long_taape)
+  
+ # Convert percent_change to numeric
   df_long$percent_change <- as.numeric(as.character(df_long$percent_change))
-  
-  # Optional: summarize by mean change per percent effort
+
   df_summary <- df_long %>%
-    group_by(percent_change) %>%
+    group_by(species, percent_change) %>%
     summarise(mean_delta = mean(delta_prob, na.rm = TRUE),
-              sd_delta = sd(delta_prob, na.rm = TRUE))
-  
-  # Plot: Mean change in probability vs. % change in spearfishing effort
-  ggplot(df_summary, aes(x = percent_change, y = mean_delta)) +
-    geom_line(color = "steelblue") +
+              sd_delta = sd(delta_prob, na.rm = TRUE),
+              .groups = "drop")
+
+  ggplot(df_summary, aes(x = percent_change, y = mean_delta, color = species, fill = species)) +
+    geom_line() +
     geom_point() +
+    geom_ribbon(aes(ymin = mean_delta - sd_delta,
+                    ymax = mean_delta + sd_delta),
+                alpha = 0.2, color = NA) +
     geom_hline(yintercept = 0, linetype = "dashed") +
-    geom_ribbon(aes(ymin = mean_delta - sd_delta, ymax = mean_delta + sd_delta), 
-                alpha = 0.2, fill = "steelblue") +
     labs(
-      title = "Effect of Spearfishing Effort on Toʻau Presence Probability",
+      title = "Effect of Spearfishing Effort on Predicted Observability on Oʻahu",
       x = "% Change in Spearfishing Effort",
-      y = "Mean Δ Predicted Probability of Presence"
+      y = "Δ Probability of Presence",
+      color = "Species",
+      fill = "Species"
     ) +
     theme_minimal()
-}
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/predicted_spear_loop.png", width = 12, height = 5, units = "in", bg = "white")
+  

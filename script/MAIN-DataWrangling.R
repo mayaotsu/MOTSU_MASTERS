@@ -211,8 +211,9 @@ class(spc_reduced$year)
 class(spc_reduced$island)
 
 #Combine cumulative spearfishing effort (MHI_Boat_Spear_hr + MHI_Shore_Spear_hr)
-spc_reduced$MHI_spear <- spc_reduced$MHI_Boat_Spear_hr.tif + spc_reduced$MHI_Shore_Spear_hr.tif
-unique(is.na(spc_reduced$MHI_spear))
+spc_reduced$MHI_spear <- apply(spc_reduced[, c("MHI_Boat_Spear_hr.tif", "MHI_Shore_Spear_hr.tif")], 1, function(x) {
+  if (all(is.na(x))) NA else sum(x, na.rm = TRUE)}) #rowSums(spc_reduced[, c("MHI_Boat_Spear_hr.tif", "MHI_Shore_Spear_hr.tif")], na.rm = TRUE)
+
 
 #take away mhi spear and mhi boat spear columns
 spc_reduced = spc_reduced %>% 
@@ -264,8 +265,17 @@ fill_missing_column <- function(main_df, patch_df, join_cols, var_to_fill) {
 
 boat_raster <- raster("/Users/mayaotsu/Downloads/MHI_Boat_Spear_hr.tif")
 shore_raster <- raster("/Users/mayaotsu/Downloads/MHI_Shore_Spear_hr.tif")
-spear_raster2 <- resample(shore_raster, boat_raster, method = "bilinear")
+spear_raster2 <- resample(shore_raster, boat_raster, method = "bilinear") # replace shore raster
 
+stacked <- stack(boat_raster, spear_raster2)
+# using calc() keeps niihau in 
+calc_spear <- calc(stacked, fun = function(x) {
+  if (all(is.na(x))) {
+    NA
+  } else {
+    sum(x, na.rm = TRUE)
+  }
+})
 combined_spear <- boat_raster + spear_raster2
 rm(boat_raster, shore_raster, spear_raster2)
 
@@ -282,18 +292,19 @@ points_spear <- sp::SpatialPoints(na_spatial_spear, proj4string = raster::crs(co
 rm(na_spatial_spear)
 
 #extract raster values
-extracted_vals_spear <- raster::extract(combined_spear, points_spear)
+extracted_vals_spear <- raster::extract(combined_spear, points_spear) # under this version, niihau is NAʻs 
+extracted_vals_spear_calc <- raster::extract(calc_spear, points_spear)
 #reattach extracted values to NA points
-na_points_spear$MHI_spear <- extracted_vals_spear
+na_points_spear$MHI_spear <-extracted_vals_spear_calc  #extracted_vals_spear
 
 ##check
-sum(!is.na(na_points_spear$MHI_spear))  # should be > 0, 1514
-sum(is.na(na_points_spear$MHI_spear))   # should be < original 1742, 220
+sum(!is.na(na_points_spear$MHI_spear))  # should be > 0, 1514 (number that was fixed)
+sum(is.na(na_points_spear$MHI_spear))   # should be < original 1742, 220 (number that isnʻt fixed)
 
 #unique pts to avoid duplicates
 na_points_unique_spear <- na_points_spear %>%
   filter(!is.na(MHI_spear)) %>%
-  distinct(lat, lon, year, month, day, species, .keep_all = TRUE)
+  distinct(lat, lon, year, month, day, species, .keep_all = TRUE) 
 
 na_points_unique_spear$lon <- ifelse(na_points_unique_spear$lon < 0, na_points_unique_spear$lon + 360, na_points_unique_spear$lon)
 
@@ -307,8 +318,9 @@ spc_filled <- fill_missing_column(
   join_cols = c("lat", "lon", "year", "month", "day", "species"),
   var_to_fill = "MHI_spear"
 )
+summary(spc_filled$MHI_spear)
 
-rm(combined_spear, na_points_spear, na_points_unique_spear, points_spear)
+rm(combined_spear, na_points_spear, na_points_unique_spear, points_spear, calc_spear, stacked)
 #rm(filled_rows, filled_rows_MHI, changed_rows, filled_count, filled_MHI, unchanged)
 ##################
 #####EFFLUENT#####
@@ -392,13 +404,13 @@ spc_reduced = spc_reduced %>%
 
 #SAVE CUMULATIVE LAYER
 spc_full <- spc_reduced[!duplicated(spc_reduced),] 
-save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.07.RData")#spc_edited_cumulative.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.07")
+save(spc_reduced, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.21.RData")#spc_edited_cumulative.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_full_07.21")
 
 #SAVE JUST MHI
 spc_mhi = subset(spc_reduced, region == "MHI")
-save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.07.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
-saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.07")
+save(spc_mhi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.21.RData") #spc_edited_cumulative_JUSTMHI_roi.RData
+saveRDS(spc_reduced, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/spc_mhi_07.21")
 
 ###################### END ###################
      

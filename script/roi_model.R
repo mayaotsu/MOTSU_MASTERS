@@ -4,7 +4,7 @@ rm(list = ls())
 library(matrixStats)
 library(fmsb)
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.07") 
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21") 
 
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
@@ -14,7 +14,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c( 1,2,11, 14,16:22) 
+Predictors<-c(1, 2, 11, 14:22) 
 #re-add year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
@@ -31,7 +31,7 @@ df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 
 #specify domain for full or mhi 
-#roi <- df[df$species=="CEAR",]
+roi <- df[df$species=="CEAR",]
 roi <- df[df$species == "CEAR" & df$region == "MHI", ]
 
 #boxplot(roi$density ~ roi$year)
@@ -41,7 +41,7 @@ PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_step_0.001_0.75_07.7.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_step_0.001_0.75_07.21.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
 #for learning rate, at least 1000 trees, bag fraction 0.5-0.8 or 0.9 range, 0.9 is pretty high
@@ -87,7 +87,7 @@ PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi,gbm.x=Reduced_Predictors, gbm.y= c
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_07.7.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_07.21.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -104,7 +104,6 @@ print(summary(Model_PA_Eval[,1])) #AUC
 print(summary(Model_PA_Eval[,2])) #test statistc
 
 #recalculate variable importance for the reduced model
-#
 var_tested<-names(roi[,Reduced_Predictors])
 
 percent_contrib<-NULL
@@ -134,7 +133,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_percentcont_07.7.Rdata"))
+save(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_percentcont_07.21.Rdata"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -151,7 +150,7 @@ boxplot(roi$density ~ roi$year)
 dev.off()
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/roi_mhi_reduced_0.001_0.75_pdp_07.7.png", res = 300, height = 10, width = 8, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_pdp_07.21.png", res = 300, height = 10, width = 8, units = "in")
 par(mfrow=c(3,4))
 mn_part_plot<-list()  
 for(y in Num_Preds){

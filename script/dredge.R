@@ -1,7 +1,7 @@
 rm(list=ls())
 library(mgcv)
 library(MuMIn)
-taape <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.02") 
+taape <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21") 
 taape <- taape[taape$species=="LUKA",]
 colSums(is.na(taape))
 
@@ -16,6 +16,7 @@ taape_full_Gam <-gam(presence~s(depth)+year+island
                    +s(MHI_spear, k=6)
                    +s(coral_cover, k=6),
                      data = taape, family = binomial)
+saveRDS(taape_full_Gam, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/gams/taape_full_Gam.rds")
 
 par(mfrow=c(4,4))
 plot(taape_full_Gam, pages =1)
@@ -56,7 +57,7 @@ dev.off()
 
 rm(list=ls())
 ########  dredge taape mhi #########
-taape_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.02") 
+taape_MHI<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21") 
 taape_MHI <- taape_MHI[taape_MHI$species=="LUKA",]
 taape_MHI <- taape_MHI[taape_MHI$region=="MHI",]
 taape_MHI_Gam <-gam(presence~s(depth)+year+island
@@ -69,6 +70,8 @@ taape_MHI_Gam <-gam(presence~s(depth)+year+island
                     +s(MHI_spear, k=6)
                     +s(coral_cover, k=6),
                     data = taape_MHI, family = binomial)
+
+saveRDS(taape_MHI_Gam, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_MHI_Gam.rds")
 
 options(na.action = "na.fail")
 dredge_taape_mhi <- dredge(taape_MHI_Gam, trace = 5)
@@ -88,9 +91,14 @@ par(mfrow=c(3,5))
 draw(best_model_2, parametric = TRUE)
 dev.off()
 
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/taape_mhi_plot.png", res = 300, height = 10, width = 10, units = "in")
+par(mfrow=c(3,5))
+plot(best_model_2, pages = 1)
+dev.off()
+
 rm(list=ls())
 ##### toau full dredge model #####
-toau_full <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.02") 
+toau_full <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21") 
 toau_full <- toau_full[toau_full$species=="LUFU",]
 
 toau_full_Gam <-gam(presence~s(depth)+year+island
@@ -103,6 +111,8 @@ toau_full_Gam <-gam(presence~s(depth)+year+island
                     +s(MHI_spear, k=6)
                     +s(coral_cover, k=6),
                     data = toau_full, family = binomial)
+saveRDS(toau_full_Gam, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/gams/toau_full_Gam.rds")
+
 plot(toau_full_Gam, pages = 1)
 dredge_toau_full <- dredge(toau_full_Gam, trace = 5)
 dredge_toau_full
@@ -121,7 +131,7 @@ dev.off()
 
 rm(list=ls())
 ##### toau mhi dredge model #####
-toau_mhi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.02") 
+toau_mhi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21") 
 toau_mhi <- toau_mhi[toau_mhi$species=="LUFU",]
 toau_mhi <- toau_mhi[toau_mhi$region=="MHI",]
 toau_mhi$island <- as.factor(toau_mhi$island)
@@ -136,6 +146,7 @@ toau_mhi_Gam <-gam(presence~s(depth)+year+island
                    +s(MHI_spear, k=6)
                    +s(coral_cover, k=6),
                    data = toau_mhi, family = binomial)
+saveRDS(toau_mhi_Gam, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/gams/toau_mhi_Gam.rds")
 
 plot(toau_mhi_Gam, pages=1)
 options(na.action = "na.fail")
@@ -152,10 +163,15 @@ par(mfrow=c(3,3))
 draw(best_model_4, parametric = TRUE)
 dev.off()
 
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/plot/toau_mhi_plot.png", res = 300, height = 10, width = 10, units = "in")
+par(mfrow=c(3,5))
+plot(best_model_4, pages = 1)
+dev.off()
+
 rm(list=ls())
 ### ROI FULL #########
-roi_full <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.02") 
-roi_full <- roi[roi$species=="CEAR",]
+roi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21") 
+roi <- roi[roi$species=="CEAR",]
 colSums(is.na(roi))
 
 roi_full_Gam <-gam(presence~s(depth)+year+island
@@ -167,7 +183,8 @@ roi_full_Gam <-gam(presence~s(depth)+year+island
                    +s(otp_all_effluent, k=6)
                    +s(MHI_spear, k=6)
                    +s(coral_cover, k=6),
-                   data = roi_full, family = binomial)
+                   data = roi, family = binomial)
+saveRDS(roi_full_Gam, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/gams/roi_full_Gam.rds")
 
 plot(roi_full_Gam, pages = 1)
 options(na.action = "na.fail")
@@ -189,7 +206,7 @@ dev.off()
 
 rm(list=ls())
 ### dredge roi mhi ######
-roi_mhi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.02") 
+roi_mhi <-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21") 
 roi_mhi <- roi_mhi[roi_mhi$species=="CEAR",]
 roi_mhi <- roi_mhi[roi_mhi$region=="MHI",]
 roi_mhi_Gam <-gam(presence~s(depth)+year+island
@@ -202,10 +219,11 @@ roi_mhi_Gam <-gam(presence~s(depth)+year+island
                   +s(MHI_spear, k=6)
                   +s(coral_cover, k=6),
                   data = roi_mhi, family = binomial)
+saveRDS(roi_mhi_Gam, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/gams/roi_mhi_Gam.rds")
 
 plot(roi_mhi_Gam, pages =1)
 options(na.action = "na.fail")
-dredge_roi_mhi <- dredge(roi_MHI_Gam, trace = 5)
+dredge_roi_mhi <- dredge(roi_mhi_Gam, trace = 5)
 head(dredge_roi_mhi)
 saveRDS(dredge_roi_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/dredge_roi_mhi.rds")
 

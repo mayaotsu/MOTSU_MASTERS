@@ -35,7 +35,7 @@ df_predict$brt_mean_pred <- rowMeans(Model_Estimates)
 #save df
 saveRDS(df_predict, "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/predict/taape_full_brt_predictions.rds")
 taape_full_predicted = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/predicted gams/taape_full_predicted.rds")
-cor(df_predict$brt_mean_pred, taape_full_predicted$fit_prob) #0.95
+cor(df_predict$brt_mean_pred, taape_full_predicted$fit_prob) #0.9541899
 
 rm(list = ls())
 ###################
@@ -148,9 +148,6 @@ df_predict$brt_mean_pred <- rowMeans(Model_Estimates)
 saveRDS(df_predict, "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/predict/toau_mhi_brt_predictions.rds")
 toau_MHI_predicted = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/predicted gams/toau_MHI_predicted.rds")
 cor(df_predict$brt_mean_pred, toau_MHI_predicted$fit_prob) #0.9177597
-
-
-
 
 ###################
 #### roi full ###

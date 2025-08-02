@@ -31,7 +31,7 @@ rm(list = ls())
 #####################
 #### TAAPE MHI ######
 #####################
-taape_MHI_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/taape_MHI_Gam.rds")
+taape_MHI_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/taape_MHI_Gam.rds")
 
 taape_MHI <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
 taape_MHI <- taape_MHI[taape_MHI$species == "LUKA" & taape_MHI$region == "MHI", ]
@@ -51,7 +51,7 @@ taape_MHI$fit_prob <- plogis(taape_MHI$fit_link) #The predicted value back-trans
 taape_MHI$lower_prob <- plogis(taape_MHI$lower_link) #95 CI lower bound back transformed from lower link
 taape_MHI$upper_prob <- plogis(taape_MHI$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(taape_MHI, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/taape_MHI_predicted.rds")
+saveRDS(taape_MHI, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/taape_MHI_predicted.rds")
 rm(list = ls())
 
 #####################

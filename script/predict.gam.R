@@ -5,38 +5,43 @@ library(mgcv)
 #####################
 #### TAAPE FULL #####
 #####################
-taape_full_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/taape_full_Gam.rds")
+#plug in model avg
+taape <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21")
+taape <- taape[taape$species=="LUKA",]
 
-taape_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
-taape_full <- taape_full[taape_full$species=="LUKA",]
+dredge_taape_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/dredge/dredge_taape_full.rds")
+avgmod.95p_taape_full <- model.avg(dredge_taape_full, cumsum(weight) <= 0.95, fit = TRUE)
+confint(avgmod.95p_taape_full)
 
-predict_taape_full <- predict(taape_full_Gam, newdata = taape_full, type = "link", se.fit = TRUE)
+predict_taape_full <- predict(avgmod.95p_taape_full, newdata = taape, type = "link", se.fit = TRUE)
 
 #adding predictions to df
-taape_full$fit_link <- predict_taape_full$fit
-taape_full$se_link <- predict_taape_full$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
+taape$fit_link <- predict_taape_full$fit
+taape$se_link <- predict_taape_full$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
 
 #conf intervals
-taape_full$lower_link <- taape_full$fit_link - 1.96 * taape_full$se_link #lower bound of 95 CI (log odds scale)
-taape_full$upper_link <- taape_full$fit_link + 1.96 * taape_full$se_link #upper bound of 95 CI (log odds scale)
+taape$lower_link <- taape$fit_link - 1.96 * taape$se_link #lower bound of 95 CI (log odds scale)
+taape$upper_link <- taape$fit_link + 1.96 * taape$se_link #upper bound of 95 CI (log odds scale)
 
 # Back-transform to probability scale
-taape_full$fit_prob <- plogis(taape_full$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
-taape_full$lower_prob <- plogis(taape_full$lower_link) #95 CI lower bound back transformed from lower link
-taape_full$upper_prob <- plogis(taape_full$upper_link) #95 CI upper bound back transformed from upper link
+taape$fit_prob <- plogis(taape$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
+taape$lower_prob <- plogis(taape$lower_link) #95 CI lower bound back transformed from lower link
+taape$upper_prob <- plogis(taape$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(taape_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/taape_full_predicted.rds")
+saveRDS(taape, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predict/taape_full_predicted.rds")
 rm(list = ls())
 
 #####################
 #### TAAPE MHI ######
 #####################
-taape_MHI_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/taape_MHI_Gam.rds")
-
-taape_MHI <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
+taape_MHI <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21")
 taape_MHI <- taape_MHI[taape_MHI$species == "LUKA" & taape_MHI$region == "MHI", ]
 
-predict_taape_MHI <- predict(taape_MHI_Gam, newdata = taape_MHI, type = "link", se.fit = TRUE)
+dredge_taape_mhi <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/dredge/dredge_taape_mhi.rds")
+avgmod.95p_taape_mhi <- model.avg(dredge_taape_mhi, cumsum(weight) <= 0.95, fit = TRUE)
+confint(avgmod.95p_taape_mhi)
+
+predict_taape_MHI <- predict(avgmod.95p_taape_mhi, newdata = taape_MHI, type = "link", se.fit = TRUE)
 
 #adding predictions to df
 taape_MHI$fit_link <- predict_taape_MHI$fit
@@ -51,18 +56,20 @@ taape_MHI$fit_prob <- plogis(taape_MHI$fit_link) #The predicted value back-trans
 taape_MHI$lower_prob <- plogis(taape_MHI$lower_link) #95 CI lower bound back transformed from lower link
 taape_MHI$upper_prob <- plogis(taape_MHI$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(taape_MHI, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/taape_MHI_predicted.rds")
+saveRDS(taape_MHI, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predict/taape_MHI_predicted.rds")
 rm(list = ls())
 
 #####################
 #### TOAU FULL #####
 #####################
-toau_full_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/toau_full_Gam.rds")
-
-toau_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
+toau_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21")
 toau_full <- toau_full[toau_full$species=="LUFU",]
 
-predict_toau_full <- predict(toau_full_Gam, newdata = toau_full, type = "link", se.fit = TRUE)
+dredge_toau_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/dredge/dredge_toau_full.rds")
+avgmod.95p_toau_full <- model.avg(dredge_toau_full, cumsum(weight) <= 0.95, fit = TRUE)
+confint(avgmod.95p_toau_full)
+
+predict_toau_full <- predict(avgmod.95p_toau_full, newdata = toau_full, type = "link", se.fit = TRUE)
 
 #adding predictions to df
 toau_full$fit_link <- predict_toau_full$fit
@@ -77,80 +84,87 @@ toau_full$fit_prob <- plogis(toau_full$fit_link) #The predicted value back-trans
 toau_full$lower_prob <- plogis(toau_full$lower_link) #95 CI lower bound back transformed from lower link
 toau_full$upper_prob <- plogis(toau_full$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(toau_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/toau_full_predicted.rds")
+saveRDS(toau_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predict/toau_full_predicted.rds")
 rm(list = ls())
 #####################
 #### TOAU MHI ######
 #####################
-toau_MHI_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/toau_MHI_Gam.rds")
+toau_mhi <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
+toau_mhi <- toau_mhi[toau_mhi$species == "LUFU" & toau_mhi$region == "MHI", ]
 
-toau_MHI <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
-toau_MHI <- toau_MHI[toau_MHI$species == "LUFU" & toau_MHI$region == "MHI", ]
+dredge_toau_mhi <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/dredge/dredge_toau_mhi.rds")
+avgmod.95p_toau_mhi <- model.avg(dredge_toau_mhi, cumsum(weight) <= 0.95, fit = TRUE)
+confint(avgmod.95p_toau_mhi)
 
-predict_toau_MHI <- predict(toau_MHI_Gam, newdata = toau_MHI, type = "link", se.fit = TRUE)
+predict_toau_mhi <- predict(avgmod.95p_toau_mhi, newdata = toau_mhi, type = "link", se.fit = TRUE)
 
 #adding predictions to df
-toau_MHI$fit_link <- predict_toau_MHI$fit
-toau_MHI$se_link <- predict_toau_MHI$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
+toau_mhi$fit_link <- predict_toau_mhi$fit
+toau_mhi$se_link <- predict_toau_mhi$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
 
 #conf intervals
-toau_MHI$lower_link <- toau_MHI$fit_link - 1.96 * toau_MHI$se_link #lower bound of 95 CI (log odds scale)
-toau_MHI$upper_link <- toau_MHI$fit_link + 1.96 * toau_MHI$se_link #upper bound of 95 CI (log odds scale)
+toau_mhi$lower_link <- toau_mhi$fit_link - 1.96 * toau_mhi$se_link #lower bound of 95 CI (log odds scale)
+toau_mhi$upper_link <- toau_mhi$fit_link + 1.96 * toau_mhi$se_link #upper bound of 95 CI (log odds scale)
 
 # Back-transform to probability scale
-toau_MHI$fit_prob <- plogis(toau_MHI$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
-toau_MHI$lower_prob <- plogis(toau_MHI$lower_link) #95 CI lower bound back transformed from lower link
-toau_MHI$upper_prob <- plogis(toau_MHI$upper_link) #95 CI upper bound back transformed from upper link
+toau_mhi$fit_prob <- plogis(toau_mhi$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
+toau_mhi$lower_prob <- plogis(toau_mhi$lower_link) #95 CI lower bound back transformed from lower link
+toau_mhi$upper_prob <- plogis(toau_mhi$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(toau_MHI, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/toau_MHI_predicted.rds")
+saveRDS(toau_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predict/toau_MHI_predicted.rds")
+rm(list = ls())
 
 #####################
 #### ROI FULL #####
 #####################
-roi_full_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/roi_full_Gam.rds")
+roi <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21")
+roi <- roi[roi$species=="CEAR",]
 
-roi_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
-roi_full <- roi_full[roi_full$species=="CEAR",]
+dredge_roi_full <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/dredge/dredge_roi_full.rds")
+avgmod.95p_roi_full <- model.avg(dredge_roi_full, cumsum(weight) <= 0.95, fit = TRUE)
+confint(avgmod.95p_roi_full)
 
-predict_roi_full <- predict(roi_full_Gam, newdata = roi_full, type = "link", se.fit = TRUE)
+predict_roi_full <- predict(avgmod.95p_roi_full, newdata = roi, type = "link", se.fit = TRUE)
 
 #adding predictions to df
-roi_full$fit_link <- predict_roi_full$fit
-roi_full$se_link <- predict_roi_full$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
+roi$fit_link <- predict_roi_full$fit
+roi$se_link <- predict_roi_full$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
 
 #conf intervals
-roi_full$lower_link <- roi_full$fit_link - 1.96 * roi_full$se_link #lower bound of 95 CI (log odds scale)
-roi_full$upper_link <- roi_full$fit_link + 1.96 * roi_full$se_link #upper bound of 95 CI (log odds scale)
+roi$lower_link <- roi$fit_link - 1.96 * roi$se_link #lower bound of 95 CI (log odds scale)
+roi$upper_link <- roi$fit_link + 1.96 * roi$se_link #upper bound of 95 CI (log odds scale)
 
 # Back-transform to probability scale
-roi_full$fit_prob <- plogis(roi_full$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
-roi_full$lower_prob <- plogis(roi_full$lower_link) #95 CI lower bound back transformed from lower link
-roi_full$upper_prob <- plogis(roi_full$upper_link) #95 CI upper bound back transformed from upper link
+roi$fit_prob <- plogis(roi$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
+roi$lower_prob <- plogis(roi$lower_link) #95 CI lower bound back transformed from lower link
+roi$upper_prob <- plogis(roi$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(roi_full, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/roi_full_predicted.rds")
+saveRDS(roi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predict/roi_full_predicted.rds")
 rm(list = ls())
 
 #####################
 #### ROI MHI ######
 #####################
-roi_MHI_Gam <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/gams/roi_MHI_Gam.rds")
+roi_mhi <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
+roi_mhi <- roi_mhi[roi_mhi$species == "CEAR" & roi_mhi$region == "MHI", ]
 
-roi_MHI <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_mhi_07.21")
-roi_MHI <- roi_MHI[roi_MHI$species == "CEAR" & roi_MHI$region == "MHI", ]
+dredge_roi_mhi <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/gams/dredge/dredge_roi_mhi.rds")
+avgmod.95p_roi_mhi <- model.avg(dredge_roi_mhi, cumsum(weight) <= 0.95, fit = TRUE)
+confint(avgmod.95p_roi_mhi)
 
-predict_roi_MHI <- predict(roi_MHI_Gam, newdata = roi_MHI, type = "link", se.fit = TRUE)
+predict_roi_mhi <- predict(avgmod.95p_roi_mhi, newdata = roi_mhi, type = "link", se.fit = TRUE)
 
 #adding predictions to df
-roi_MHI$fit_link <- predict_roi_MHI$fit
-roi_MHI$se_link <- predict_roi_MHI$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
+roi_mhi$fit_link <- predict_roi_mhi$fit
+roi_mhi$se_link <- predict_roi_mhi$se.fit #se of predicted log-odds (fit_link), measuring uncertainty around the prediction on the link scale
 
 #conf intervals
-roi_MHI$lower_link <- roi_MHI$fit_link - 1.96 * roi_MHI$se_link #lower bound of 95 CI (log odds scale)
-roi_MHI$upper_link <- roi_MHI$fit_link + 1.96 * roi_MHI$se_link #upper bound of 95 CI (log odds scale)
+roi_mhi$lower_link <- roi_mhi$fit_link - 1.96 * roi_mhi$se_link #lower bound of 95 CI (log odds scale)
+roi_mhi$upper_link <- roi_mhi$fit_link + 1.96 * roi_mhi$se_link #upper bound of 95 CI (log odds scale)
 
 # Back-transform to probability scale
-roi_MHI$fit_prob <- plogis(roi_MHI$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
-roi_MHI$lower_prob <- plogis(roi_MHI$lower_link) #95 CI lower bound back transformed from lower link
-roi_MHI$upper_prob <- plogis(roi_MHI$upper_link) #95 CI upper bound back transformed from upper link
+roi_mhi$fit_prob <- plogis(roi_mhi$fit_link) #The predicted value back-transformed to the probability scale, using the logistic function: the predicted probability of presence (between 0 and 1).
+roi_mhi$lower_prob <- plogis(roi_mhi$lower_link) #95 CI lower bound back transformed from lower link
+roi_mhi$upper_prob <- plogis(roi_mhi$upper_link) #95 CI upper bound back transformed from upper link
 
-saveRDS(roi_MHI, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predicted gams/roi_MHI_predicted.rds")
+saveRDS(roi_mhi, "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/gams/predict/roi_MHI_predicted.rds")

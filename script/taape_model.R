@@ -57,8 +57,8 @@ for (i in 1:length(PA_Model)){
   Model_PA_Eval[i,2]<-max(Model_Evals_PA[[i]]@TPR+Model_Evals_PA[[i]]@TNR-1)
 }
 
-print(summary(Model_PA_Eval[,1]))
-print(summary(Model_PA_Eval[,2]))
+print(summary(Model_PA_Eval[,1])) #auc
+print(summary(Model_PA_Eval[,2])) #tss
 
 #now reduce to 'non-random' predictors
 var_tested<-names(taape[,Predictors])

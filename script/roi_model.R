@@ -6,6 +6,10 @@ library(fmsb)
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
 df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21") 
 
+#drop 2022
+df <- df[df$year != "2022", ]
+df$year <- droplevels(df$year)
+
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
 df[is.nan(df)] <- NA
@@ -41,7 +45,7 @@ PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_step_0.001_0.75_07.21.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_step_0.001_0.75_07.21.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
 #for learning rate, at least 1000 trees, bag fraction 0.5-0.8 or 0.9 range, 0.9 is pretty high
@@ -87,7 +91,7 @@ PA_Model_Reduced<-fit.brt.n_eval_Balanced(roi,gbm.x=Reduced_Predictors, gbm.y= c
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_07.21.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_0.001_0.75_07.21.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -133,7 +137,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-save(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_percentcont_07.21.Rdata"))
+save(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_percentcont_07.21.Rdata"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -177,13 +181,13 @@ dev.off()
 
 ###
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/roi_mhi_reduced_0.001_0.75_forestplot_7.07.png"), units = "in", height = 5, width = 5, res = 500)
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/07.07/roi_mhi_reduced_0.001_0.75_forestplot_7.07.png"), units = "in", height = 5, width = 5, res = 500)
 PA_sp = data.frame(predictor = All_percent_contribution[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
                    sd = as.numeric(substr(All_percent_contribution[,2], nchar(All_percent_contribution[,2])-4+1,
                   nchar(All_percent_contribution[,2]))),
-                   color = c("red","gray", "gray", "red", 
-                             "red", "blue", "blue"))
+                   color = c("red", "gray", "gray", "red", "red", 
+                             "blue", "blue", "blue"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 

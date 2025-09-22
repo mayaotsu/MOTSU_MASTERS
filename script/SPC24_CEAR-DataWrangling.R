@@ -60,6 +60,8 @@ df <- df %>%
          "longitude", "species", "density", "presence", "region",
          "year", "month", "day") 
 
+df <- df %>% filter(year >= 2009 & year <= 2019)
+
 #save .RData
 #save(df, file ="/Users/mayaotsu/Downloads/calibr_CEAR_abund.RData")
 saveRDS(df, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR")

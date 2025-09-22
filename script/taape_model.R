@@ -31,7 +31,7 @@ df <- as.data.frame(df)
 Response<-which(colnames(df) %in% c("presence") )
 
 #specify running for full or MHI
-#taape <- df[df$species=="LUKA",]
+taape <- df[df$species=="LUKA",]
 taape <- df[df$species == "LUKA" & df$region == "MHI", ]
 
 start = Sys.time()

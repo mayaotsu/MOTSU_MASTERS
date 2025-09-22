@@ -199,13 +199,12 @@ long_roi <- melt(df_result_roi,
 df_long <- bind_rows(long_toau, long_taape, long_roi)
 
 # Convert percent_change to numeric
-df_long$percent_change <- as.numeric(as.character(df_long$percent_change))
+df_long$percent_change <- as.factor(df_long$percent_change)
 
 df_summary <- df_long %>%
   group_by(species, percent_change) %>%
-  summarise(mean_delta = mean(delta_prob, na.rm = TRUE),
-            sd_delta = sd(delta_prob, na.rm = TRUE),
-            groups = "drop")
+  reframe(mean_delta = mean(delta_prob, na.rm = TRUE),
+            sd_delta = sd(delta_prob, na.rm = TRUE))
 
 ggplot(df_summary, aes(x = percent_change, y = mean_delta, color = species, fill = species)) +
   geom_line() +
@@ -313,3 +312,25 @@ combined <- bind_rows(taape_spear_preds, toau_spear_preds, roi_spear_preds)
 #   print(paste("completed", Relevant_Species[i],i, "of", length(Relevant_Models)))
 #   rm(Model_Estimates)
 
+ggplot(df_summary, aes(x = percent_change, 
+                       y = mean_delta, 
+                       color = species, 
+                       fill = species)) +
+  # confidence interval shading
+  geom_ribbon(aes(ymin = mean_delta - sd_delta,
+                  ymax = mean_delta + sd_delta,
+                  fill = species),
+              alpha = 0.2, color = NA) +
+  # dotted mean lines
+  geom_line(linewidth = 1, linetype = "dotted") +
+  geom_point(size = 2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(
+    title = "Effect of Spearfishing Effort on Predicted Probability of Presence",
+    x = "% Change in Spearfishing Effort",
+    y = "Δ Probability of Presence",
+    color = "Species",
+    fill = "Species"
+  ) +
+  coord_cartesian(xlim = c(0, 20)) +  # force -100 to 100 on x-axis
+  theme_minimal()

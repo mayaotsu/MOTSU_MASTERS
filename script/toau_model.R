@@ -183,27 +183,27 @@ PA_sp = data.frame(predictor = All_percent_contribution[,1],
                    sd = as.numeric(substr(All_percent_contribution[,2], 
                   nchar(All_percent_contribution[,2])-4+1, 
                   nchar(All_percent_contribution[,2]))),
-                  color = c("blue","red", "gray", "red", 
-                            "blue", "red", "red", "blue", "gray"))
+                  color = c("blue","red", "gray", "blue", 
+                            "red", "blue", "red", "red", "blue", "gray"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +  
-  scale_x_continuous(limits = c(0, 40))+
-  labs(title = 'Toau (MHI)', x='Percent Contribution', y = '') +
+  scale_x_continuous(limits = c(0, 50))+
+  labs(title = 'Toʻau (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/forest/toau_mhi_reduced_0.001_0.75_forestplot07.7.png", width = 5, height = 5, units = "in")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/toau_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 5, height = 5, units = "in")
 dev.off()
 
 #fulll
-color = c("blue","red", "gray", "red", 
-          "blue", "blue", "red", "blue", "gray"))
+color = c("blue","red", "gray", "blue", 
+          "red", "blue", "blue", "red", "blue", "gray"))
 
 #mhi
-color = c("blue","red", "gray", "red", 
-          "blue", "red", "red", "blue", "gray"))
+color = c("blue","red", "gray", "blue", 
+          "red", "blue", "red", "red", "blue", "gray"))
 
 ######now make abund. only model#################
 

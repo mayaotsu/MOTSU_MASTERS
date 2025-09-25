@@ -179,22 +179,22 @@ dev.off()
 # Make Forest plots (easier interpretation for partial responses)
 #png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png"), units = "in", height = 5, width = 5, res = 500)
 #taapePA_0.001_0.75_AllPercentCont
-PA_sp = data.frame(predictor = taape_full_reduced_0.001_0.75_precentcont07.7[,1],
-                   percent_imp = as.numeric(sub("\\ .*", "", taape_full_reduced_0.001_0.75_precentcont07.7[,2])),
-                   sd = as.numeric(substr(taape_full_reduced_0.001_0.75_precentcont07.7[,2], nchar(taape_full_reduced_0.001_0.75_precentcont07.7[,2])-4+1, 
-                   nchar(taape_full_reduced_0.001_0.75_precentcont07.7[,2]))),
+PA_sp = data.frame(predictor = taape_mhi_reduced_0.001_0.75_precentcont07.7[,1],
+                   percent_imp = as.numeric(sub("\\ .*", "", taape_mhi_reduced_0.001_0.75_precentcont07.7[,2])),
+                   sd = as.numeric(substr(taape_mhi_reduced_0.001_0.75_precentcont07.7[,2], nchar(taape_mhi_reduced_0.001_0.75_precentcont07.7[,2])-4+1, 
+                   nchar(taape_mhi_reduced_0.001_0.75_precentcont07.7[,2]))),
                    color = c("blue","blue", "gray", "red", 
-                             "blue", "red", "blue", "gray"))
+                             "red", "red", "red", "blue", "gray"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
   geom_errorbarh(height=.1, colour = PA_sp$color) +
   scale_fill_discrete() +
-  labs(title = 'L. kasmira (Full Archipelago)', x='Percent Contribution', y = '') +
-  scale_x_continuous(limits = c(0, 40))+
+  labs(title = 'Taʻape (MHI)', x='Percent Contribution', y = '') +
+  scale_x_continuous(limits = c(0, 50))+
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png", width = 5, height = 5, units = "in")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/taape_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 5, height = 5, units = "in")
 dev.off()
 
 ## taape full

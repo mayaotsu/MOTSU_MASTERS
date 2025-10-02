@@ -1,25 +1,25 @@
-## DATA CLEANING FOR NEW 2024 NCRMMP
+## DATA CLEANING FOR NEW ROI 2024 NCRMMP
 
 rm(list = ls())
 library(dplyr)
 library(lubridate)
+select=dplyr::select
 
 load("/Users/mayaotsu/Downloads/ALL_REA_FISH_RAW.rdata")
-select=dplyr::select
-colnames(df)
-
-#species <- c("LUKA", "CEAR", "LUFU")[2]
-#nSPC <- c("nSPC")
-
-# df <- df %>% filter(METHOD == "nSPC")
-# df <- df %>% filter(SPECIES == "CEAR")
-# df <- df %>% filter(REGION_NAME %in% c("Main Hawaiian Islands", "Northwestern Hawaiian Islands" ))
 
 #rename columns 
 df <- df %>%
   rename(
-    island = "ISLAND", depth = "DEPTH", method = "METHOD", date_ = "DATE_", latitude = "LATITUDE", longitude = "LONGITUDE", 
-    species= "SPECIES", density = "DENSITY", count = "COUNT", region = "REGION")
+    island = "ISLAND",
+    depth = "DEPTH", 
+    method = "METHOD", 
+    date_ = "DATE_", 
+    latitude = "LATITUDE", 
+    longitude = "LONGITUDE", 
+    species= "SPECIES", 
+    density = "DENSITY", 
+    count = "COUNT", 
+    region = "REGION")
 
 #transform lon
 df$longitude = ifelse(df$longitude < 0, df$longitude + 360, df$longitude)
@@ -32,6 +32,7 @@ df <- df %>%
 #add year, month,day columns
 df <- df %>%
   mutate(
+    date_ = as.Date(date_),
     year = year(date_),
     month = month(date_),
     day = day(date_)
@@ -46,8 +47,7 @@ df = df %>%
   summarise(density = sum(x, na.rm = TRUE)) #%>% 
  # mutate(presence = ifelse(x > 0, 1, 0))
 
-#create new column, if species is CEAR, x will take value from density column
-#if species is not CEAR, x set to 0
+#create new column, if species is CEAR, x will take value from density column, if species is not CEAR, x set to 0
 df$presence = ifelse(df$density>0,1,0)
 df$species <- "CEAR"
 #df <- df %>% filter(species == "CEAR")
@@ -62,12 +62,10 @@ df <- df %>%
 
 df <- df %>% filter(year >= 2009 & year <= 2019)
 
-#save .RData
 #save(df, file ="/Users/mayaotsu/Downloads/calibr_CEAR_abund.RData")
 saveRDS(df, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_edited_CEAR")
 save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.RData")
 
+######################################
 ############### END ###################
-
-ggplot(df %>% filter(presence>0) , aes(x = longitude, y = latitude, fill = presence)) + geom_point(shape=21)+facet_wrap(~year)
-
+######################################

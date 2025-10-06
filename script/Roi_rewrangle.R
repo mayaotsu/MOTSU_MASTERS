@@ -6,10 +6,10 @@ select=dplyr::select
 #load taape, toau, roi df
 load('/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21.RData'); df1 <- df
 
-#1 remove cear
+#1 remove wrong cear
 spc_reduced <- spc_reduced %>%
   filter(species %in% c("LUKA", "LUFU")) %>%
-  ungroup() %>%
+  ungroup() %>% 
   mutate(
     lat   = round(lat, 5),
     lon   = round(lon, 4),
@@ -17,12 +17,17 @@ spc_reduced <- spc_reduced %>%
     year  = as.numeric(year),
     month = as.numeric(month),
     day   = as.numeric(day),
-    site_id = paste(island, depth, method, date_, lat, lon, region, year, month, day, sep="_")
-  )
+    site_id = paste(island, depth, method, date_, lat, lon, region, year, month, day, sep="_") #unique id
+  ) #%>%   
+  #select(site_id, density, presence)
 
-#2 select variables to keep
-unique <- spc_reduced %>%
-  select(site_id, island, depth, method, date_, lat, lon, region, 
+#2 creating site grid for cear to line up with
+# unique <- spc_reduced %>%
+#   select(site_id, island, depth, method, date_, lat, lon, region, year, month, day) %>%
+#   distinct()
+grid <- spc_reduced %>%
+  select(site_id, island, depth, method, date_, lat, lon, region,
+         year, month, day,
          rugosity, mean_1mo_chla_ESA, q05_1yr_sst_jpl, q95_1yr_sst_jpl,
          otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) %>%
   distinct()
@@ -50,33 +55,33 @@ raw <- raw %>%
   ) %>%
   mutate(
     lat = round(latitude, 5),
-    lon = round(ifelse(longitude < 0, longitude + 360, longitude), 4),
+    lon = round(longitude, 4),
     date_ = as.Date(date_),
-    depth = as.numeric(depth),
-    year  = as.numeric(year(date_)),
-    month = as.numeric(month(date_)),
-    day   = as.numeric(day(date_)),
+    year  = year(date_),
+    month = month(date_),
+    day   = day(date_),
     presence = ifelse(density > 0, 1, 0),
-    site_id = paste(island, depth, method, date_, lat, lon, region, sep="_")
+    site_id = paste(island, depth, method, date_, lat, lon, region, year, month, day, sep="_")
   ) %>%
   select(site_id, density, presence)
+
 
 #avoid dupliactes
 raw_cear_unique <- raw %>%
   group_by(site_id) %>%
   summarise(
     density  = sum(density, na.rm = TRUE),
-    presence = ifelse(sum(presence, na.rm = TRUE) > 0, 1, 0),
+    presence = ifelse(sum(presence, na.rm = TRUE) > 0, 1, 0), #cear pres 1 if observed, if not 0
     .groups = "drop"
   )
 
 # 4 left join cear presence and density to luka/lufu df
-cear_full <- unique %>%
+cear_full <- grid %>%
   left_join(raw_cear_unique, by = "site_id") %>%
   mutate(
     species  = "CEAR",
-    presence = ifelse(is.na(presence), 0, presence),
-    density  = ifelse(is.na(density), 0, density)
+    density  = ifelse(is.na(density), 0, density),
+    presence = ifelse(is.na(presence), 0, presence)
   )
 
 #5 join cear to lufu/luka df

@@ -154,7 +154,7 @@ boxplot(roi$density ~ roi$year)
 dev.off()
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_pdp_07.21_wide.png", res = 300, height = 10, width = 8, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_pdp_07.21_new.png", res = 300, height = 10, width = 8, units = "in")
 par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){

@@ -1,3 +1,5 @@
+#try object description and year as a factor
+#count number of presence in roi df before pairing and then after pairing
 rm(list =ls())
 library(dplyr)
 library(lubridate)
@@ -15,7 +17,7 @@ spc_reduced <- spc_reduced %>%
     lat   = round(lat, 5),
     lon   = round(lon, 4),
     date_ = as.Date(date_),
-    year  = as.numeric(as.character(year)), # change 2: make year character then numeric 
+    year  = as.factor(as.character(year)), # change 2: make year character then numeric 
     month = as.numeric(month),
     day   = as.numeric(day),
     site_id = paste(island, depth, method, date_, lat, lon, region, year, month, day, sep="_") #unique id
@@ -38,6 +40,10 @@ grid <- spc_reduced %>%
 load("/Users/mayaotsu/Downloads/ALL_REA_FISH_RAW.rdata")
 raw <- df; rm(df)
 
+#keep obs desc (where fish was observed) (where he made the cutoff for those components)
+#did he keep after 5 minutes, after 10 minutes
+#and exclude flag is 1 do not use
+#exclude flag: drop anything that has a flag
 raw <- raw %>%
   rename(
     island    = ISLAND,

@@ -1,5 +1,7 @@
 ## DATA CLEANING FOR NEW ROI 2024 NCRMMP
-
+#dataframe of presences of stations, left join and left df is taape and toau and env covariates,
+#presences for roi presences
+#converyt 
 rm(list = ls())
 library(dplyr)
 library(lubridate)
@@ -69,3 +71,15 @@ save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/SPC25_CEAR.R
 ######################################
 ############### END ###################
 ######################################
+
+roi <- df %>% subset(SPECIES == "CEAR") 
+unique(roi$ISLAND)
+roi = roi %>% subset(REGION %in% c("MHI", "NWHI"))
+plot(roi$LONGITUDE, roi$LATITUDE)
+unique(roi$ISLAND)
+
+
+
+
+
+

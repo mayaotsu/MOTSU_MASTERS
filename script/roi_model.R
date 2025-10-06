@@ -4,11 +4,11 @@ rm(list = ls())
 library(matrixStats)
 library(fmsb)
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
-df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21") 
+df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS") 
 
 #drop 2022
 df <- df[df$year != "2022", ]
-df$year <- droplevels(df$year)
+#df$year <- droplevels(df$year)
 
 is.nan.data.frame <- function(x)
   do.call(cbind, lapply(x, is.nan))
@@ -18,7 +18,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(1, 2, 11, 14:22) 
+Predictors<-c(1, 2, 11, 14:21, 23) 
 #re-add year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
@@ -154,8 +154,8 @@ boxplot(roi$density ~ roi$year)
 dev.off()
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_pdp_07.21.png", res = 300, height = 10, width = 8, units = "in")
-par(mfrow=c(3,4))
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi_mhi_reduced_0.001_0.75_pdp_07.21_wide.png", res = 300, height = 10, width = 8, units = "in")
+par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
   id<-which(colnames(part_plot[[1]])==Variable_List$Variables[y])
@@ -181,13 +181,13 @@ dev.off()
 
 ###
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/07.07/roi_mhi_reduced_0.001_0.75_forestplot_7.07.png"), units = "in", height = 5, width = 5, res = 500)
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/07.21/roi_mhi_reduced_0.001_0.75_forestplot_7.21.png"), units = "in", height = 5, width = 5, res = 500)
 PA_sp = data.frame(predictor = All_percent_contribution[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
                    sd = as.numeric(substr(All_percent_contribution[,2], nchar(All_percent_contribution[,2])-4+1,
                   nchar(All_percent_contribution[,2]))),
-                   color = c("red", "gray", "gray", "red", "red", 
-                             "blue", "blue", "blue"))
+                   color = c("red", "gray", "gray", "red", 
+                             "red", "blue", "blue", "blue"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
@@ -196,10 +196,14 @@ ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(p
   labs(title = 'Roi (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/roi_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 5, height = 5, units = "in")
 dev.off()
 
 
-#full
+#full color = c("red", "gray", "gray", "red", "red", "blue", "gray", "blue"))
+
+#mhi
+
 
 ######now make abund. only model#################
 

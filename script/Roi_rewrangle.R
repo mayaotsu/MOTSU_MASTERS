@@ -3,10 +3,11 @@ library(dplyr)
 library(lubridate)
 select=dplyr::select
 
-#load taape, toau, roi df
+#load taape (2276), toau (2276), roi (2557) df (dataset ive been using to run models)
 load('/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21.RData'); df1 <- df
 
-#1 remove wrong cear
+#1 remove wrong cear to start with just taape and toau to pair roi with later
+spc_reduced$lon <- spc_reduced$lon - 360 # change 1: changing spc_reduce lon 
 spc_reduced <- spc_reduced %>%
   filter(species %in% c("LUKA", "LUFU")) %>%
   ungroup() %>% 
@@ -14,17 +15,18 @@ spc_reduced <- spc_reduced %>%
     lat   = round(lat, 5),
     lon   = round(lon, 4),
     date_ = as.Date(date_),
-    year  = as.numeric(year),
+    year  = as.numeric(as.character(year)), # change 2: make year character then numeric 
     month = as.numeric(month),
     day   = as.numeric(day),
     site_id = paste(island, depth, method, date_, lat, lon, region, year, month, day, sep="_") #unique id
   ) #%>%   
-  #select(site_id, density, presence)
-
+#select(site_id, density, presence)
 #2 creating site grid for cear to line up with
+
 # unique <- spc_reduced %>%
 #   select(site_id, island, depth, method, date_, lat, lon, region, year, month, day) %>%
 #   distinct()
+
 grid <- spc_reduced %>%
   select(site_id, island, depth, method, date_, lat, lon, region,
          year, month, day,
@@ -32,7 +34,7 @@ grid <- spc_reduced %>%
          otp_nearshore_sediment, coral_cover, otp_all_effluent, MHI_spear) %>%
   distinct()
 
-#3 Load raw dataset and extract CEAR data
+#3 Load raw dataset and extract CEAR data, matching column names and lat/lon decimal places
 load("/Users/mayaotsu/Downloads/ALL_REA_FISH_RAW.rdata")
 raw <- df; rm(df)
 
@@ -89,6 +91,25 @@ spc_reduced_final <- bind_rows(spc_reduced, cear_full)
 
 table(spc_reduced_final$species)
 
+# if we subset our original LUFU/LUKU dataset for one species at a time and subset the final dataset for
+# the same species, they should be the exact same 
+subset(spc_reduced, species == "LUFU") == subset(spc_reduced_final, species == "LUFU")
+unique(subset(spc_reduced, species == "LUFU") == subset(spc_reduced_final, species == "LUFU"))
+unique(subset(spc_reduced, species == "LUFU")$density == subset(spc_reduced_final, species == "LUFU")$density)
+# which what we find for LUFU (if there was any issues, we would see T/F's)
+
+subset(spc_reduced, species == "LUKA") == subset(spc_reduced_final, species == "LUKA")
+unique(subset(spc_reduced, species == "LUKA") == subset(spc_reduced_final, species == "LUKA"))
+unique(subset(spc_reduced, species == "LUKA")$density == subset(spc_reduced_final, species == "LUKA")$density)
+# and LUKA
+
+# and to show you what happens when they don't equal if you switch out the species
+subset(spc_reduced, species == "LUFU") == subset(spc_reduced_final, species == "LUKA")
+unique(subset(spc_reduced, species == "LUFU") == subset(spc_reduced_final, species == "LUKA"))
+
+# and what if the rows were all mixed up
+unique(subset(spc_reduced, species == "LUKA")[sample(nrow(subset(spc_reduced, species == "LUKA"))),] == subset(spc_reduced_final, species == "LUKA"))
+# this just shows what would this output look like if there was disagreement 
 saveRDS(spc_reduced_final, 
         file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS")
 save(spc_reduced_final, 

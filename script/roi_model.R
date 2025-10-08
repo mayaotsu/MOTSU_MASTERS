@@ -181,7 +181,7 @@ dev.off()
 
 ###
 # Make Forest plots (easier interpretation for partial responses)
-png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/07.21/roi_mhi_reduced_0.001_0.75_forestplot_7.21.png"), units = "in", height = 5, width = 5, res = 500)
+png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/07.21/roi_full_reduced_0.001_0.75_forestplot_7.21.png"), units = "in", height = 5, width = 5, res = 500)
 PA_sp = data.frame(predictor = All_percent_contribution[,1],
                    percent_imp = as.numeric(sub("\\ .*", "", All_percent_contribution[,2])),
                    sd = as.numeric(substr(All_percent_contribution[,2], nchar(All_percent_contribution[,2])-4+1,
@@ -196,7 +196,7 @@ ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(p
   labs(title = 'Roi (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/roi_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 5, height = 5, units = "in")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/roi_full_reduced_0.001_0.75_forestplot07.21.png", width = 5, height = 5, units = "in")
 dev.off()
 
 

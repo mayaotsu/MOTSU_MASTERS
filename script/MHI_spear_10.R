@@ -97,8 +97,8 @@ saveRDS(roi_spear_predictions, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MA
 # ===============================================
 # 5. Load Previously Saved Results (Optional)
 # ===============================================
-# taape_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_preds.rds")
-# toau_spear_preds  <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_preds.rds")
+taape_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_preds.rds")
+toau_spear_preds  <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_preds.rds")
 # roi_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/roi_spear_preds.rds")
 
 #! need to run this whole thing gthrough for each species
@@ -106,17 +106,17 @@ saveRDS(roi_spear_predictions, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MA
 # 6. Run Spearfishing Effort Shift Analysis on Oʻahu
 # ===============================================
 # Filter to just Oʻahu
-df_base_oahu <- subset(df_base, island == "Oahu") #df_base
+df_base_Hawaii <- subset(df_base, island == "Hawaii") #df_base
 
-# Initialize results dataframe df_base_oahu
-df_result <- df_base_oahu %>% 
+# Initialize results dataframe df_base_Hawaii
+df_result <- df_base_Hawaii %>% 
   dplyr::select(lat, lon, island)
 
 # Predict baseline for Oʻahu
-base_preds_oahu <- matrix(NA, nrow = nrow(df_base_oahu), ncol = 50) #df_base_oahu
+base_preds_Hawaii <- matrix(NA, nrow = nrow(df_base_Hawaii), ncol = 50) #df_base_oahu
 for (k in 1:50) {
   model_k <- PA_Model_Reduced[[1]][[k]]
-  base_preds_oahu[,k] <- predict.gbm(model_k, df_base_oahu,
+  base_preds_Hawaii[,k] <- predict.gbm(model_k, df_base_Hawaii,
                                      n.trees = model_k$gbm.call$best.trees, type = "response")
   print(paste("Completed base model", k, "of 50"))
 }
@@ -129,7 +129,7 @@ for (i in seq_along(percent_multiplier)) {
   pct <- percent_multiplier[i]
   col_name <- as.character(col_names[i])
   
-  df_temp <- df_base_oahu %>%
+  df_temp <- df_base_Hawaii %>%
     mutate(MHI_spear = MHI_spear * pct)
   
   temp_preds <- matrix(NA, nrow = nrow(df_temp), ncol = 50)
@@ -143,7 +143,7 @@ for (i in seq_along(percent_multiplier)) {
   
   
   # Compute mean change from baseline
-  mean_base <- rowMeans(base_preds_oahu)
+  mean_base <- rowMeans(base_preds_Hawaii)
   mean_temp <- rowMeans(temp_preds)
   delta <- mean_temp - mean_base
   
@@ -162,17 +162,17 @@ rm(temp_preds, mean_base, mean_temp, delta, df_temp)  # clean up
 df_result_roi <- df_result_roi %>%
   mutate(species = "CEAR")
 
-save(df_result_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/10spear/oahu_result_roi.Rdata")
+save(df_result_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/10spear/Hawaii_result_roi.Rdata")
 # repeat for other species
 # make a dataframe that combines this stuff (colMeans(df_result[,4:24])) together 
 # and make sure you know which species is what and which means belong to which 100,90,80 etc
 
 
-
 ## make new plot ##
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_taape.RData")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_toau.RData")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_roi.RData")
+rm(list = ls())
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Hawaii_result_taape.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Hawaii_result_toau.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Hawaii_result_roi.RData")
 
 #plot
 library(reshape2)
@@ -222,9 +222,10 @@ ggplot(df_summary, aes(x = percent_change, y = mean_delta, color = species, fill
     fill = "Species"
   ) +
   scale_x_continuous(breaks = seq(-100, 100, 10), limits = c(-100, 100)) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 14) +
+  ylim(-0.03, 0.50)
 
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/predicted_spear_loop.png", width = 12, height = 5, units = "in", bg = "white")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/predicted_spear_loop_Hawaii.png", width = 12, height = 5, units = "in", bg = "white")
 
 #####################
 ### plot -+10 increase

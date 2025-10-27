@@ -2,12 +2,14 @@
 # 1. Load Data and Set Up Spearfishing Scenarios
 # ===============================================
 rm(list = ls())
-
-# Load species–environment data
-df <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_full_07.21")
-
 library(dplyr)
 
+# Load species–environment data
+df <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS")
+
+# ===============================================
+# 2. Prepare Datasets for Prediction: Base, +10%, -10%
+# ===============================================
 # Create columns with +10% and -10% changes in spearfishing effort
 df_spear <- df %>%
   mutate(
@@ -15,33 +17,18 @@ df_spear <- df %>%
     `MHI_spear-10` = MHI_spear * 0.90
   )
 
-rm(df)
-
-# ===============================================
-# 2. Load GBM Models for taape or toau
-# ===============================================
-library(gbm)
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_full_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_0.001_0.75_07.21.Rdata")
-
-
-#confirm ensemble length
-length(PA_Model_Reduced[[1]])  # should be 50
-
-# ===============================================
-# 3. Prepare Datasets for Prediction: Base, +10%, -10%
-# ===============================================
 df_base <- df_spear %>%
   ungroup() %>%
   dplyr::select(-`MHI_spear+10`, -`MHI_spear-10`)
 
+#+10 spearfishing scenario, drops original MHI_spear and replaced with +10
 df_plus <- df_spear %>%
   ungroup() %>%
   dplyr::select(-MHI_spear) %>%
   dplyr::rename(MHI_spear = `MHI_spear+10`) %>%
   dplyr::select(names(df_base))
 
+#drops original MHI_spear, replaces with -10
 df_minus <- df_spear %>%
   ungroup() %>%
   dplyr::select(-MHI_spear) %>%
@@ -49,7 +36,17 @@ df_minus <- df_spear %>%
   dplyr::select(names(df_base))
 
 rm(df_spear)
+# ===============================================
+# 3. Load GBM Models for taape or toau
+# ===============================================
+library(gbm)
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_mhi_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_0.001_0.75_07.21.Rdata")
 
+
+#confirm ensemble length
+length(PA_Model_Reduced[[1]])  # should be 50
 # ===============================================
 # 4. Optional: Skip Prediction for +10% / -10% (Already Done)
 # ===============================================
@@ -85,7 +82,7 @@ prob_minus <- rowMeans(minus_preds)
 #diff_plus: prob+10- base change in predicted probability if effort increases by 10
 #diff_minus: prob-10-base change in predicted probability of occurence if effort decreases by 10 --> df of results
 
-test_results <- df_base %>%
+roi_spear_predictions <- df_base %>%
   dplyr::select(lat, lon, island, region, MHI_spear) %>%
   mutate(
     prob_base = prob_base,
@@ -95,15 +92,16 @@ test_results <- df_base %>%
     diff_minus = prob_minus10 - prob_base
   )
 
-saveRDS(roi_results, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_preds.rds")
+saveRDS(roi_spear_predictions, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/roi_spear_preds.rds")
 
 # ===============================================
 # 5. Load Previously Saved Results (Optional)
 # ===============================================
-taape_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_preds.rds")
-toau_spear_preds  <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_preds.rds")
-roi_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/roi_spear_preds.rds")
+# taape_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_preds.rds")
+# toau_spear_preds  <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_preds.rds")
+# roi_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/roi_spear_preds.rds")
 
+#! need to run this whole thing gthrough for each species
 # ===============================================
 # 6. Run Spearfishing Effort Shift Analysis on Oʻahu
 # ===============================================
@@ -169,10 +167,12 @@ save(df_result_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output
 # make a dataframe that combines this stuff (colMeans(df_result[,4:24])) together 
 # and make sure you know which species is what and which means belong to which 100,90,80 etc
 
+
+
 ## make new plot ##
-long_taape <- load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_taape.RData")
-long_toau <- load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_toau.RData")
-long_roi <- load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_roi.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_taape.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_toau.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/oahu_result_roi.RData")
 
 #plot
 library(reshape2)
@@ -200,6 +200,7 @@ df_long <- bind_rows(long_toau, long_taape, long_roi)
 
 # Convert percent_change to numeric
 df_long$percent_change <- as.factor(df_long$percent_change)
+df_long$percent_change <- as.numeric(as.character(df_long$percent_change))
 
 df_summary <- df_long %>%
   group_by(species, percent_change) %>%
@@ -220,11 +221,12 @@ ggplot(df_summary, aes(x = percent_change, y = mean_delta, color = species, fill
     color = "Species",
     fill = "Species"
   ) +
-  theme_minimal()
+  scale_x_continuous(breaks = seq(-100, 100, 10), limits = c(-100, 100)) +
+  theme_minimal(base_size = 14)
 
 ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/predicted_spear_loop.png", width = 12, height = 5, units = "in", bg = "white")
 
-
+#####################
 ### plot -+10 increase
 rm(list= ls()) 
 taape_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_preds.rds")
@@ -235,82 +237,6 @@ taape_spear_preds$species <- "taape"
 toau_spear_preds$species <- "toau"
 roi_spear_preds$species <- "roi"
 combined <- bind_rows(taape_spear_preds, toau_spear_preds, roi_spear_preds)
-
-# # +10% summary# +10% summaryroi_spear_preds
-# plus_summary <- combined %>%
-#   dplyr::group_by(island, species) %>%
-#   dplyr::summarize(
-#     mean_diff = mean(diff_plus, na.rm = TRUE),
-#     sd_diff = sd(diff_plus, na.rm = TRUE),
-#     .groups = "drop"
-#   ) %>%
-#   dplyr::mutate(scenario = "+10% Spearfishing")
-# 
-# minus_summary <- combined %>%
-#   dplyr::group_by(island, species) %>%
-#   dplyr::summarize(
-#     mean_diff = mean(diff_minus, na.rm = TRUE),
-#     sd_diff = sd(diff_minus, na.rm = TRUE),
-#     .groups = "drop"
-#   ) %>%
-#   dplyr::mutate(scenario = "–10% Spearfishing")
-# 
-# summary_all <- bind_rows(plus_summary, minus_summary)
-# colnames(summary_all)
-# 
-# summary_all$island <- factor(summary_all$island, levels = c(
-#   "Niihau", "Kauai", "Oahu", "Molokai", "Lanai", "Kahoolawe", "Maui", "Hawaii"
-# ))
-# 
-# summary_all %>%  filter(island %in% c("Hawaii", "Kahoolawe", "Kauai", "Lanai", "Maui",
-#                                       "Molokai", "Niihau", "Oahu")) %>%
-#   ggplot( aes(x = island, y = mean_diff, color = species)) +
-#   geom_point(position = position_dodge(width = 0.5), size = 3) +
-#   geom_errorbar(aes(ymin = mean_diff - sd_diff, ymax = mean_diff + sd_diff),
-#                 width = 0.2, position = position_dodge(width = 0.5)) +
-#   facet_wrap(~scenario) +
-#   labs(title = "Change in Predicted Occurrence by Island and Species",
-#        x = "Island", y = "Mean Change in Probability (Δ)") +
-#   theme_minimal(base_size = 14) +
-#   scale_color_manual(values = c("taape" = "blue", "toau" = "red"))
-# ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/mhi_10spear.png", width = 12, height = 5, units = "in", bg = "white")
-
-# #decrease in probability geographical map
-
-# ggplot(toau_spear_preds, aes(x = lon, y = lat, color = diff_minus)) +
-#   geom_point(size = 2) +
-#   scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0,
-#                         name = "Δ Probability") +
-#   labs(title = "Change in Predicted Occurrence (–10% Spearfishing)",
-#        x = "Longitude", y = "Latitude") +
-#   coord_cartesian(xlim = c(198, 206), ylim = c(19, 23)) +
-#   theme_classic() +
-#   theme(
-#     plot.background = element_rect(fill = "gray80", color = NA),
-#     panel.background = element_rect(fill = "gray80", color = NA)
-#   )
-
-
-
-
-# 
-# #model estimates creating number of rows same as df, and 50 ensembel
-# # 4 loop takes each individual model and predicts over that dataset
-# 
-# for (i in 1:length(Relevant_Models)){
-#   Model_Estimates<-matrix(, nrow=nrow(Env_Vars_SSLL_Quarter_Deg), ncol=50)
-#   SSLL_PA_Models<-readRDS(paste0("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/taape_full_reduced_0.001_0.75_07.7.Rdata",Relevant_Models[i])) #read in full reduced model for each species 
-#   
-#   for (k in 1:50){
-#     Model_Estimates[,k]<-predict.gbm(SSLL_PA_Models[[1]][[k]], Env_Vars_SSLL_Quarter_Deg,
-#                                      n.trees=SSLL_PA_Models[[1]][[k]]$gbm.call$best.trees, type="response")
-#     print(paste("completed", k, "of 50"))}
-#   saveRDS(Model_Estimates, 
-#  # can stop here
-#  
-#   paste0("~/Documents/Eco_Cast_Plus_2025/Model_Predictions/PA/",Relevant_Species[i],"_SSLL_PA_Model_Est.rds"))
-#   print(paste("completed", Relevant_Species[i],i, "of", length(Relevant_Models)))
-#   rm(Model_Estimates)
 
 ggplot(df_summary, aes(x = percent_change, 
                        y = mean_delta, 

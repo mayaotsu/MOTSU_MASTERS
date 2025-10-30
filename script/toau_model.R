@@ -194,7 +194,7 @@ ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(p
   labs(title = 'Toʻau (MHI)', x='Percent Contribution', y = '') +
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/toau_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 5, height = 5, units = "in")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/toau_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 7, height = 5, units = "in")
 dev.off()
 
 #fulll

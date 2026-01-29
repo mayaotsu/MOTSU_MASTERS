@@ -106,17 +106,17 @@ toau_spear_preds  <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/out
 # 6. Run Spearfishing Effort Shift Analysis on Oʻahu
 # ===============================================
 # Filter to just Oʻahu
-df_base_Hawaii <- subset(df_base, island == "Hawaii") #df_base
+df_base_Kauai <- subset(df_base, island == "Kauai") #df_base
 
-# Initialize results dataframe df_base_Hawaii
-df_result <- df_base_Hawaii %>% 
+# Initialize results dataframe df_base_Maui
+df_result <- df_base_Kauai %>% 
   dplyr::select(lat, lon, island)
 
 # Predict baseline for Oʻahu
-base_preds_Hawaii <- matrix(NA, nrow = nrow(df_base_Hawaii), ncol = 50) #df_base_oahu
+base_preds_Kauai <- matrix(NA, nrow = nrow(df_base_Kauai), ncol = 50) #df_base_oahu
 for (k in 1:50) {
   model_k <- PA_Model_Reduced[[1]][[k]]
-  base_preds_Hawaii[,k] <- predict.gbm(model_k, df_base_Hawaii,
+  base_preds_Kauai[,k] <- predict.gbm(model_k, df_base_Kauai,
                                      n.trees = model_k$gbm.call$best.trees, type = "response")
   print(paste("Completed base model", k, "of 50"))
 }
@@ -129,7 +129,7 @@ for (i in seq_along(percent_multiplier)) {
   pct <- percent_multiplier[i]
   col_name <- as.character(col_names[i])
   
-  df_temp <- df_base_Hawaii %>%
+  df_temp <- df_base_Kauai %>%
     mutate(MHI_spear = MHI_spear * pct)
   
   temp_preds <- matrix(NA, nrow = nrow(df_temp), ncol = 50)
@@ -143,7 +143,7 @@ for (i in seq_along(percent_multiplier)) {
   
   
   # Compute mean change from baseline
-  mean_base <- rowMeans(base_preds_Hawaii)
+  mean_base <- rowMeans(base_preds_Kauai)
   mean_temp <- rowMeans(temp_preds)
   delta <- mean_temp - mean_base
   
@@ -159,10 +159,10 @@ rm(temp_preds, mean_base, mean_temp, delta, df_temp)  # clean up
 # ===============================================
 # 8. Finalize and Save Results
 # ===============================================
-df_result_roi <- df_result_roi %>%
+df_result_roi<- df_result_roi %>%
   mutate(species = "CEAR")
 
-save(df_result_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/10spear/Hawaii_result_roi.Rdata")
+save(df_result_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/10spear/Kauai_result_roi.Rdata")
 # repeat for other species
 # make a dataframe that combines this stuff (colMeans(df_result[,4:24])) together 
 # and make sure you know which species is what and which means belong to which 100,90,80 etc
@@ -170,9 +170,9 @@ save(df_result_roi, file ="/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output
 
 ## make new plot ##
 rm(list = ls())
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Hawaii_result_taape.RData")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Hawaii_result_toau.RData")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Hawaii_result_roi.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Oahu_result_taape.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Oahu_result_toau.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/Oahu_result_roi.RData")
 
 #plot
 library(reshape2)
@@ -215,7 +215,7 @@ ggplot(df_summary, aes(x = percent_change, y = mean_delta, color = species, fill
               alpha = 0.2, color = NA) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   labs(
-    title = "Effect of Spearfishing Effort on Predicted Observability on Oʻahu",
+    title = "Effect of Spearfishing Effort on Predicted Observability on Oahu",
     x = "% Change in Spearfishing Effort",
     y = "Δ Probability of Presence",
     color = "Species",
@@ -223,9 +223,9 @@ ggplot(df_summary, aes(x = percent_change, y = mean_delta, color = species, fill
   ) +
   scale_x_continuous(breaks = seq(-100, 100, 10), limits = c(-100, 100)) +
   theme_minimal(base_size = 14) +
-  ylim(-0.03, 0.50)
+  ylim(-0.04, 0.2)
 
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/predicted_spear_loop_Hawaii.png", width = 12, height = 5, units = "in", bg = "white")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/plots/predicted_spear_loop_Oahu.png", width = 8, height = 5, units = "in", bg = "white")
 
 #####################
 ### plot -+10 increase

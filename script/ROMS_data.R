@@ -1,12 +1,12 @@
+rm(list =ls())
 getwd()
-print(unique(df$year))
-
-load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData")
+setwd("/Users/mayaotsu/Downloads/OCN683_FisheriesOceanography/ROMS2009/0.50m/")
+#load("/Users/mayaotsu/Downloads/calibr_LUKA_abund.RData")
 library(ncdf4)
 
 #example 2019
-roms2019 <- nc_open("4121aa99aca9d92ecad0f283a34e1b93.nc")
-print(roms2019)
+roms2009 <- nc_open("9b7fc95a554b84b1ab8095b382c411d9.nc")
+print(roms2009)
 
 #raster(netcdfname, var=eastward_sea_water_velocity)
 time <- ncvar_get(roms2019, "time") #in seconds

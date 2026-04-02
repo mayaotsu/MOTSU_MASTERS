@@ -32,7 +32,6 @@ taape <- df[df$species=="LUKA" & df$region=="mhi",]
 # toau <- df[df$species=="LUFU" & df$region=="mhi",]
 roi <- df[df$species=="CEAR" & df$region=="mhi",]
 
-
 #extract brt models
 PA_Model <- PA_Model_Reduced[[1]]
 iters <- length(PA_Model)
@@ -271,20 +270,33 @@ pdp_master_sst$species <- factor(
   levels = c("taape","toau","roi")
 )
 
+#reverse logit transofrmation
+pdp_master_sst <- pdp_master_sst %>%
+  mutate(
+    mean  = plogis(mean),
+    lower = plogis(lower),
+    upper = plogis(upper)
+  )
+
 #SST plots
+#keep uppr and lower to turn to the ribbon
 ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
 
-  geom_ribbon(aes(ymin = lower, ymax = upper),
+geom_ribbon(aes(ymin = lower, ymax = upper),
               alpha = 0.2,
               color = NA) +
 
- # geom_line(size = 1) +
-  geom_smooth(method = "loess", se = FALSE, span = 0.3, linewidth = 1) +
+ geom_line(size = 1) +
+   geom_smooth(method = "loess",
+              se = TRUE,
+              span = 0.3,
+              linewidth = 1) +
+
   facet_grid(variable ~ species, scales = "free") +
 
   labs(
     x = NULL,
-    y = "Partial effect on occurrence (logit scale)"
+    y = "Partial effect on occurrence (reverse logit scale)"
   ) +
 
   theme_bw(base_size = 13) +
@@ -296,27 +308,27 @@ ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
 
 
 ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
-  
+
   geom_ribbon(
     aes(ymin = lower, ymax = upper),
     alpha = 0.2,
     color = NA
   ) +
-  
+
   geom_smooth(
     method = "loess",
     se = FALSE,
     span = 0.3,
     linewidth = 1
   ) +
-  
+
   facet_grid(variable ~ species, scales = "free") +
-  
+
   labs(
     x = NULL,
     y = "Partial effect on occurrence (logit scale)"
   ) +
-  
+
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_blank(),

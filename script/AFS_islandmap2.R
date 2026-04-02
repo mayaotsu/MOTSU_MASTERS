@@ -100,6 +100,20 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.2, ...) {
   return(scale_y_continuous("", breaks = nsbrks, labels = nslbls, expand = c(0, 0), ...))
 }
 
+# add hawaii map
+library(maps)
+library(dplyr)
+library(rnaturalearth)
+library(sf)
+
+hawaii_map <- map_data("world") %>%
+  filter(long > -181 & long < -154,
+         lat > 18 & lat < 29)
+
+df$species <- recode(df$sp,
+                     "LUFU" = "Toʻau",
+                     "LUKA" = "Taʻape",
+                     "CEAR" = "Roi")
 (fa = df %>%
     filter(sp == "LUKA") %>%
     filter(response > 0) %>%
@@ -108,6 +122,12 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.2, ...) {
     group_by(lon, lat, ISLAND, sp) %>%
     summarise(n = mean(response, na.rm = T)) %>%
     ggplot(aes(lon, lat)) +
+    geom_polygon(data = hawaii_map,
+                 aes(long, lat, group = group),
+                 fill = "grey85",
+                 color = "grey40",
+                 linewidth = 0.3,
+                 inherit.aes = FALSE) +
     geom_point(aes(size = n, fill = n, color = n), shape = 21, alpha = 0.6) +  
     coord_cartesian(xlim = range(df$LON), ylim = range(df$LAT)) +  # Set axis limits
 
@@ -119,7 +139,7 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.2, ...) {
    # + annotation_map(map_data("world")) 
   + 
     # theme_classic() +
-     facet_wrap(.~sp, scales = "free", ncol = 4) +
+     facet_wrap(.~species, scales = "free", ncol = 4) +
     # scale_y_latitude() +
     # scale_x_longitude() +
     # ylab("Latitude (dec deg)") + xlab("Longitude (dec deg)") +
@@ -198,6 +218,33 @@ png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/proposal_plot.png", u
 grid.arrange(fa, fb, ncol = 1)
 dev.off()
 
-hawaii_map <- map_data("state") %>% filter(region == "hawaii")
 
-
+ggplot() +
+  
+  geom_polygon(data = hawaii_map,
+               aes(long, lat, group = group),
+               fill = "grey85",
+               color = "grey40",
+               linewidth = 0.3) +
+  
+  geom_point(data = plot_df,
+             aes(lon, lat,
+                 size = density,
+                 color = density),
+             alpha = 0.8) +
+  
+  coord_fixed(xlim = c(-181, -154),
+              ylim = c(18, 29)) +
+  
+  scale_color_viridis_c(
+    name = expression("Individuals per 100 "~m^2)
+  ) +
+  
+  scale_size_continuous(
+    name = expression("Individuals per 100 "~m^2),
+    range = c(1,6)
+  ) +
+  
+  facet_wrap(~species, ncol = 1) +
+  
+  theme_classic()

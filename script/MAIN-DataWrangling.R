@@ -16,15 +16,16 @@ spc = rbind(rbind(df1, df2, df3)) %>%
 rm(df, df1,df2,df3)
 
 #old?
-df = rbind(rbind(df1, df2, df3)) %>%
-  filter(method == "nSPC") %>%
-  filter(region %in% c("MHI", "NWHI")) %>%
-  filter(year >= 2009) %>%
-  select(longitude, latitude, day, month, year) %>%
-  distinct()
-rm(df1,df2,df3)
-save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/eds_rerun1.RData")
-rm(df1, df2,df,df3)
+# df = rbind(rbind(df1, df2, df3)) %>%
+#   filter(method == "nSPC") %>%
+#   filter(region %in% c("MHI", "NWHI")) %>%
+#   filter(year >= 2009) %>%
+#   select(longitude, latitude, day, month, year) %>%
+#   distinct()
+# rm(df1,df2,df3)
+
+#save(df, file ="/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/eds_rerun1.RData")
+# rm(df1, df2,df,df3)
 # # rerun eds with eds_rerun df
 
 colnames(spc)[5:6] = c("lat", "lon")

@@ -139,7 +139,7 @@ df$species <- recode(df$sp,
    # + annotation_map(map_data("world")) 
   + 
     # theme_classic() +
-     facet_wrap(.~species, scales = "free", ncol = 4) +
+    #facet_wrap(.~species, scales = "free", ncol = 4) +
     # scale_y_latitude() +
     # scale_x_longitude() +
     # ylab("Latitude (dec deg)") + xlab("Longitude (dec deg)") +
@@ -169,7 +169,7 @@ df$species <- recode(df$sp,
     scale_fill_gradientn(colours = matlab.like(100), guide = "legend") +
     #annotation_map(map_data("world")) + 
     # theme_light() +
-    facet_wrap(.~sp, scales = "free", ncol = 4) +
+    #facet_wrap(.~sp, scales = "free", ncol = 4) +
     coord_cartesian(xlim = range(df$LON), ylim = range(df$LAT)) +  
     # scale_y_latitude() +
     # scale_x_longitude() +
@@ -182,6 +182,7 @@ df$species <- recode(df$sp,
     theme(legend.position = c(0.15, 0.3),
           legend.background = element_blank()) +
     labs(tag = "(b)"))
+
 
 (fc = df %>%
     filter(sp == "CEAR") %>%
@@ -199,7 +200,7 @@ df$species <- recode(df$sp,
     scale_fill_gradientn(colours = matlab.like(100), guide = "legend") +
     #annotation_map(map_data("world")) + 
     # theme_light() +
-    facet_wrap(.~sp, scales = "free", ncol = 4) +
+    #facet_wrap(.~sp, scales = "free", ncol = 4) +
     coord_cartesian(xlim = range(df$LON), ylim = range(df$LAT)) +  
     # scale_y_latitude() +
     # scale_x_longitude() +
@@ -213,38 +214,67 @@ df$species <- recode(df$sp,
           legend.background = element_blank()) +
     labs(tag = "(c)"))
 
-fa / fb
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/proposal_plot.png", units = "in", height = 8, width = 10, res = 500)
+fa / fb / fc
+grid.arrange(fa, fb, fc, ncol = 1)
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/3_species_abundance_plot.png", units = "in", height = 10, width = 8, res = 500)
 grid.arrange(fa, fb, ncol = 1)
 dev.off()
 
 
-ggplot() +
+library(viridis)
+plot_all <- df %>%
+  filter(response > 0) %>%
+  mutate(lon = round(LON, 0.1),
+         lat = round(LAT, 0.1)) %>%
   
+  group_by(lon, lat, species) %>%
+  summarise(n = mean(response, na.rm = TRUE), .groups = "drop") %>%
+  
+  ggplot(aes(lon, lat)) +
+  
+  # basemap
   geom_polygon(data = hawaii_map,
                aes(long, lat, group = group),
-               fill = "grey85",
-               color = "grey40",
-               linewidth = 0.3) +
+               fill = "grey90",
+               color = "grey50",
+               linewidth = 0.3,
+               inherit.aes = FALSE) +
   
-  geom_point(data = plot_df,
-             aes(lon, lat,
-                 size = density,
-                 color = density),
+  # data
+  geom_point(aes(size = n, color = n),
              alpha = 0.8) +
   
   coord_fixed(xlim = c(-181, -154),
               ylim = c(18, 29)) +
   
+  # 🔑 LOG SCALE (critical for ecological data)
   scale_color_viridis_c(
+    trans = "log10",
     name = expression("Individuals per 100 "~m^2)
   ) +
   
   scale_size_continuous(
-    name = expression("Individuals per 100 "~m^2),
-    range = c(1,6)
+    trans = "log10",
+    range = c(1, 6),
+    name = expression("Individuals per 100 "~m^2)
   ) +
   
   facet_wrap(~species, ncol = 1) +
   
-  theme_classic()
+  labs(x = expression(paste("Longitude (", degree, "W)")),
+       y = expression(paste("Latitude (", degree, "N)"))) +
+  
+  theme_classic() +
+  theme(
+    legend.position = "right",
+    strip.text = element_text(size = 12, face = "bold")
+  )
+
+plot_all
+ggsave(
+  filename = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/3_species_abundances.png",
+  plot = plot_all,
+  width = 8,
+  height = 10,
+  dpi = 500
+)

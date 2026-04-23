@@ -216,10 +216,10 @@ df$species <- recode(df$sp,
 
 fa / fb / fc
 grid.arrange(fa, fb, fc, ncol = 1)
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/3_species_abundance_plot.png", units = "in", height = 10, width = 8, res = 500)
-grid.arrange(fa, fb, ncol = 1)
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/3_species_abundance_plot.png",
+    units = "in", height = 12, width = 8, res = 500)
+par(mfrow= c(1,2))
 dev.off()
-
 
 library(viridis)
 plot_all <- df %>%
@@ -278,3 +278,4 @@ ggsave(
   height = 10,
   dpi = 500
 )
+

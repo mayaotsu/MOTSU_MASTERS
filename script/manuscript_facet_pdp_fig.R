@@ -352,11 +352,19 @@ percent = pdp_master_benthic %>%
   summarise(percent_cont = unique(percent))
 
 #percent for plots
-percent$x <- c(0.6, 0.6, 0.6, #coral cover going down
+percent$y <- c(0.6, 0.6, 0.6, #coral cover going down
                0.58, 0.55, 0.625,
-               0.3, 0.54, 0.6)
+               0.3, 0.54, 0.6,
+               
+               0.3, 0.3, 0.3, #coral cover going down
+               0.55, 0.52, 0.3,
+               0.2, 0.2, 0.3)
 
-percent$y <- c(0.1, 0.1, 0.7,
+percent$x <- c(0.1, 0.1, 0.7,
+               3, 25, 25, 
+               15, 15, 15,
+               
+               0.1, 0.1, 0.7,
                3, 25, 25, 
                15, 15, 15) #mhi Y's
 
@@ -381,18 +389,13 @@ ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) 
   ) +
   geom_text(
     data = percent,
-    aes(label = percent_cont, color = region),
-    x = Inf,
-    y = Inf,
-    hjust = 1.1,
-    vjust = 1.5,
-    inherit.aes = FALSE
-  )
+    aes(x = x, y = y,
+    label = percent_cont, color = region) )
 
 ggsave(
   "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_species.png",
-  width = 14,
-  height = 6,
+  width = 18,
+  height = 12,
   dpi = 300
 )
 

@@ -279,20 +279,31 @@ pdp_master_sst <- pdp_master_sst %>%
   )
 
 #SST plots
+percent = pdp_master_sst %>% 
+  group_by(region, variable, species) %>% 
+  summarise(percent_cont = unique(percent))
+
+percent$x <- c(18.3, 18.3, 18.3, 29, 29,
+               18.3, 18.3, 18.3, 29, 29)
+
+percent$y <- c(0.25, 0.23, 0.5, 0.6, 0.27, 
+               0.22, 0.20, 0.42, 0.5, 0.23) #mhi Y's
+
+
 #keep uppr and lower to turn to the ribbon
 ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
+# geom_ribbon(aes(ymin = lower, ymax = upper),
+#               alpha = 0.2,
+#               color = NA) +
 
-geom_ribbon(aes(ymin = lower, ymax = upper),
-              alpha = 0.2,
-              color = NA) +
-
- geom_line(size = 1) +
+ #geom_line(size = 1) +
    geom_smooth(method = "loess",
               se = TRUE,
               span = 0.3,
               linewidth = 1) +
+  geom_rug(sides = "b") + 
 
-  facet_grid(variable ~ species, scales = "free") +
+  facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =2) +
 
   labs(
     x = NULL,
@@ -302,45 +313,20 @@ geom_ribbon(aes(ymin = lower, ymax = upper),
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_blank(),
-    strip.text = element_text(face = "bold"),
-    panel.grid = element_blank()
-  )
-
-
-ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
-
-  geom_ribbon(
-    aes(ymin = lower, ymax = upper),
-    alpha = 0.2,
-    color = NA
+    strip.text = element_text(face = "bold")
+   # panel.grid = element_blank()
   ) +
+  geom_text(data = percent,
+            mapping = aes(x=x, y= y, label = percent_cont))
 
-  geom_smooth(
-    method = "loess",
-    se = FALSE,
-    span = 0.3,
-    linewidth = 1
-  ) +
-
-  facet_grid(variable ~ species, scales = "free") +
-
-  labs(
-    x = NULL,
-    y = "Partial effect on occurrence (logit scale)"
-  ) +
-
-  theme_bw(base_size = 13) +
-  theme(
-    strip.background = element_blank(),
-    strip.text = element_text(face = "bold"),
-    panel.grid = element_blank()
-  )
 
 #save
-saveRDS(
-  pdp_master,
-  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/pdp_master_all_species.rds"
-)
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95.png", width = 12, height =10)
+
+# saveRDS(
+#   pdp_master,
+#   "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/pdp_master_all_species.rds"
+# )
 
 
 #benthic plots
@@ -352,27 +338,55 @@ pdp_master_benthic$species <- factor(
   levels = c("taape","toau","roi")
 )
 
+#reverse logit transofrmation
+pdp_master_benthic <- pdp_master_benthic %>%
+  mutate(
+    mean  = plogis(mean),
+    lower = plogis(lower),
+    upper = plogis(upper)
+  )
+
 #benthic plots
+percent = pdp_master_benthic %>% 
+  group_by(region, variable, species) %>% 
+  summarise(percent_cont = unique(percent))
+
+#percent for plots
+percent$x <- c(0.6, 0.6, 0.6, #coral cover going down
+               0.58, 0.55, 0.625,
+               0.3, 0.54, 0.6)
+
+percent$y <- c(0.1, 0.1, 0.7,
+               3, 25, 25, 
+               15, 15, 15) #mhi Y's
+
+
+#keep uppr and lower to turn to the ribbon
 ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) +
-  
-  geom_ribbon(aes(ymin = lower, ymax = upper),
-              alpha = 0.2,
-              color = NA) +
-  
-  geom_line(size = 1) +
-  
-  facet_grid(variable ~ species, scales = "free") +
-  
+  geom_smooth(method = "loess",
+              se = TRUE,
+              span = 0.3,
+              linewidth = 1) +
+  geom_rug(sides = "b") + 
+  facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =3) +
   labs(
     x = NULL,
-    y = "Partial effect on occurrence (logit scale)"
+    y = "Partial effect on occurrence (reverse logit scale)"
   ) +
-  
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_blank(),
-    strip.text = element_text(face = "bold"),
-    panel.grid = element_blank()
+    strip.text = element_text(face = "bold")
+    # panel.grid = element_blank()
+  ) +
+  geom_text(
+    data = percent,
+    aes(label = percent_cont, color = region),
+    x = Inf,
+    y = Inf,
+    hjust = 1.1,
+    vjust = 1.5,
+    inherit.aes = FALSE
   )
 
 ggsave(

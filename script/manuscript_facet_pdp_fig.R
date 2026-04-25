@@ -6,17 +6,17 @@ library(ggplot2)
 #load brt model
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/taape/taape_full_reduced_0.001_0.75_07.21.Rdata")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/taape/taape_mhi_reduced_0.001_0.75_07.21.Rdata")
-#load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_0.001_0.75_07.21.Rdata")
-# load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_0.001_0.75_07.21.Rdata")
-# load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_0.001_0.75_07.21.Rdata")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_0.001_0.75_07.21.Rdata")
 
 #load percent contribution and convert to df
 All_percent_contribution = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_full_reduced_0.001_0.75_precentcont07.7.rds")
 All_percent_contribution = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_mhi_reduced_0.001_0.75_precentcont07.7.rds")
-#load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_percentcont_07.21.Rdata")
-# load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_percentcont_07.21.Rdata")
-# load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_percentcont_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_percentcont_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_percentcont_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_percentcont_07.21.Rdata")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_percentcont_07.21.Rdata")
 
 percent_df <- data.frame(
@@ -29,7 +29,7 @@ df <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_f
 
 # subset species and scale
 taape <- df[df$species=="LUKA" & df$region=="mhi",]
-# toau <- df[df$species=="LUFU" & df$region=="mhi",]
+toau <- df[df$species=="LUFU" & df$region=="mhi",]
 roi <- df[df$species=="CEAR" & df$region=="mhi",]
 
 #extract brt models
@@ -40,13 +40,13 @@ iters <- length(PA_Model)
 var_tested <- PA_Model[[1]]$var.names
 
 # identify continuous predictors (can only plot these)
-Cont_Preds <- var_tested[sapply(taape[,var_tested], is.numeric)]
+Cont_Preds <- var_tested[sapply(roi[,var_tested], is.numeric)]
 
 #store the numeric predictor indices
 Num_Preds <- which(var_tested %in% Cont_Preds)
 
 # extracts PDP values for every model iteration
-Num_Vars <- var_tested[sapply(taape[,var_tested], is.numeric)]
+Num_Vars <- var_tested[sapply(roi[,var_tested], is.numeric)]
 
 #extract PDP values for every model iteration, loop through every brt model
 #generate pdp for each variable
@@ -113,7 +113,7 @@ percent_df$variable <- recode(percent_df$variable,
 pdp_summary <- left_join(pdp_summary, percent_df, by="variable")
 
 #add speciees to combine later
-pdp_summary$species <- "taape"
+pdp_summary$species <- "roi"
 pdp_summary$region <- "mhi"
 
 #df for annotation text
@@ -147,15 +147,15 @@ ggplot(pdp_summary, aes(x, mean)) +
     span = 0.3
   ) +
   
-  geom_text(
-    data = label_df,
-    aes(x = x, y = y, label = paste0(percent, "%")),
-    inherit.aes = FALSE,
-    hjust = 0,
-    vjust = 1,
-    size = 3
-  ) +
-  
+  # geom_text(
+  #   data = label_df,
+  #   aes(x = x, y = y, label = paste0(percent, "%")),
+  #   inherit.aes = FALSE,
+  #   hjust = 0,
+  #   vjust = 1,
+  #   size = 3
+  # ) +
+  # 
   facet_wrap(~variable, scales = "free") +
   
   labs(
@@ -174,7 +174,7 @@ ggplot(pdp_summary, aes(x, mean)) +
 #save df
 saveRDS(
   pdp_summary,
-  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/taape_full_pdp_summary.rds")
+  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/roi_mhi_pdp_summary.rds")
 
 
 ### load dataframes 
@@ -221,28 +221,28 @@ pdp_master$region <- factor(
 )
 
 #smoothing
-pdp_master_smooth <- pdp_master %>%
-  group_by(species, region, variable) %>%
-  do({
-    
-    df <- .
-    
-    lo_mean  <- loess(mean  ~ x, data = df, span = 0.3)
-    lo_lower <- loess(lower ~ x, data = df, span = 0.3)
-    lo_upper <- loess(upper ~ x, data = df, span = 0.3)
-    
-    data.frame(
-      x = df$x,
-      mean  = predict(lo_mean,  newdata = data.frame(x = df$x)),
-      lower = predict(lo_lower, newdata = data.frame(x = df$x)),
-      upper = predict(lo_upper, newdata = data.frame(x = df$x)),
-      species = df$species,
-      region = df$region,
-      variable = df$variable
-    )
-    
-  }) %>%
-  ungroup()
+# pdp_master_smooth <- pdp_master %>%
+#   group_by(species, region, variable) %>%
+#   do({
+#     
+#     df <- .
+#     
+#     lo_mean  <- loess(mean  ~ x, data = df, span = 0.3)
+#     lo_lower <- loess(lower ~ x, data = df, span = 0.3)
+#     lo_upper <- loess(upper ~ x, data = df, span = 0.3)
+#     
+#     data.frame(
+#       x = df$x,
+#       mean  = predict(lo_mean,  newdata = data.frame(x = df$x)),
+#       lower = predict(lo_lower, newdata = data.frame(x = df$x)),
+#       upper = predict(lo_upper, newdata = data.frame(x = df$x)),
+#       species = df$species,
+#       region = df$region,
+#       variable = df$variable
+#     )
+#     
+#   }) %>%
+#   ungroup()
 
 # filter for q05 and q95
 pdp_master_sst <- pdp_master %>%
@@ -281,11 +281,24 @@ ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
 #               color = NA) +
 
  #geom_line(size = 1) +
+  geom_smooth(aes(y = upper),
+              method = "loess",
+              se = FALSE,
+              span = 0.3,
+              linewidth = 0.4,
+              linetype = "dashed") +
+  
+  geom_smooth(aes(y = lower),
+              method = "loess",
+              se = FALSE,
+              span = 0.3,
+              linewidth = 0.4,
+              linetype = "dashed") +
    geom_smooth(method = "loess",
               se = TRUE,
               span = 0.3,
               linewidth = 1) +
-  geom_rug(sides = "b") + 
+  geom_rug(sides = "b", alpha = 0.2) + 
 
   facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =2) +
 
@@ -297,15 +310,14 @@ ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_blank(),
-    strip.text = element_text(face = "bold")
-   # panel.grid = element_blank()
-  ) +
+    strip.text = element_text(face = "bold")) +
+    # strip.placement = "outside") +
   geom_text(data = percent,
             mapping = aes(x=x, y= y, label = percent_cont))
 
 
 #save
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95.png", width = 12, height =10)
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95_lesslabels.png", width = 12, height =10)
 
 # saveRDS(
 #   pdp_master,
@@ -359,8 +371,22 @@ ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) 
               se = TRUE,
               span = 0.3,
               linewidth = 1) +
+  geom_smooth(aes(y = upper),
+              method = "loess",
+              se = FALSE,
+              span = 0.3,
+              linewidth = 0.4,
+              linetype = "dashed") +
+  
+  geom_smooth(aes(y = lower),
+              method = "loess",
+              se = FALSE,
+              span = 0.3,
+              linewidth = 0.4,
+              linetype = "dashed") +
   geom_rug(sides = "b") + 
-  facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =3) +
+  facet_grid(species ~ variable, scales = "free") +
+             # nrow = 3, ncol =3) +
   labs(
     x = NULL,
     y = "Partial effect on occurrence (reverse logit scale)"
@@ -368,16 +394,16 @@ ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) 
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_blank(),
-    strip.text = element_text(face = "bold")
+    strip.text = element_text(face = "bold"),
+    strip.placement = "outside") +
     # panel.grid = element_blank()
-  ) +
   geom_text(
     data = percent,
     aes(x = x, y = y,
     label = percent_cont, color = region) )
 
 ggsave(
-  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_species.png",
+  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_species_lesslabels.png",
   width = 18,
   height = 12,
   dpi = 300

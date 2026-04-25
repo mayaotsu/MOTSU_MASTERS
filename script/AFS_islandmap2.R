@@ -151,7 +151,7 @@ df$species <- recode(df$sp,
     scale_size_continuous(range = c(1, 6)) +  # Adjust bubble sizes here
     theme(legend.position = c(0.15, 0.3),
           legend.background = element_blank()) +
-    labs(tag = "(a)"))
+    labs(tag = "(a) Ta'ape"))
 
 (fb = df %>%
     filter(sp == "LUFU") %>%
@@ -161,6 +161,12 @@ df$species <- recode(df$sp,
     group_by(lon, lat, ISLAND, sp) %>%
     summarise(n = (mean(response+1)), na.rm = T) %>%
     ggplot(aes(lon, lat)) +
+    geom_polygon(data = hawaii_map,
+                 aes(long, lat, group = group),
+                 fill = "grey85",
+                 color = "grey40",
+                 linewidth = 0.3,
+                 inherit.aes = FALSE) +
     geom_point(aes(size = n, fill = n, color = n), shape = 21, alpha = 0.7) +
      #coord_fixed() +
    # scale_fill_viridis_c(guide = "legend", begin = 0, end = 0.8) +
@@ -181,7 +187,7 @@ df$species <- recode(df$sp,
            size = guide_legend(expression("Individuals per 100" ~ m^2~""))) +
     theme(legend.position = c(0.15, 0.3),
           legend.background = element_blank()) +
-    labs(tag = "(b)"))
+    labs(tag = "(b) To'au"))
 
 
 (fc = df %>%
@@ -192,6 +198,12 @@ df$species <- recode(df$sp,
     group_by(lon, lat, ISLAND, sp) %>%
     summarise(n = (mean(response+1)), na.rm = T) %>%
     ggplot(aes(lon, lat)) +
+    geom_polygon(data = hawaii_map,
+                 aes(long, lat, group = group),
+                 fill = "grey85",
+                 color = "grey40",
+                 linewidth = 0.3,
+                 inherit.aes = FALSE) +
     geom_point(aes(size = n, fill = n, color = n), shape = 21, alpha = 0.7) +
     #coord_fixed() +
     # scale_fill_viridis_c(guide = "legend", begin = 0, end = 0.8) +
@@ -212,12 +224,12 @@ df$species <- recode(df$sp,
            size = guide_legend(expression("Individuals per 100" ~ m^2~""))) +
     theme(legend.position = c(0.15, 0.3),
           legend.background = element_blank()) +
-    labs(tag = "(c)"))
+    labs(tag = "(c) Roi"))
 
 fa / fb / fc
 grid.arrange(fa, fb, fc, ncol = 1)
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/3_species_abundance_plot.png",
-    units = "in", height = 12, width = 8, res = 500)
+ggsave("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/3_species_abundance_plot.png",
+    units = "in", height = 12, width = 8)
 par(mfrow= c(1,2))
 dev.off()
 

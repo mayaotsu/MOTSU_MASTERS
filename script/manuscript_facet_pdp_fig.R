@@ -71,38 +71,16 @@ pdp_df <- bind_rows(
 #.       depth.   5.   0.30.  1
 #.       depth.   10.  0.28.  2
 
-
-#LOESS smoothing across ensemble predictions
-# pdp_summary <- pdp_df %>%
-#   group_by(variable) %>%
-#   do({
-# 
-#     df <- .
-# 
-#     lo <- loess(y ~ x, data=df, span=0.3) #fit loess smoothing
-# 
-#     pred <- predict(lo, se=TRUE) #predict mean and uncertainty
-# 
-#     data.frame(
-#       x = df$x,
-#       mean = pred$fit,
-#       lower = pred$fit - 1.96 * pred$se.fit,
-#       upper = pred$fit + 1.96 * pred$se.fit
-#     )
-# 
-#   })
-
 #instead of loess smooth and loess SE ribbon, mean across models, SD across models
 #ribbon will now reflect variation across ensemble brt models instead of uncertainty in loess smoother
 pdp_summary <- pdp_df %>%
   group_by(variable, x) %>%
   summarise(
     mean = mean(y),
-    sd = sd(y),
-    lower = mean - 1.96 * sd,
-    upper = mean + 1.96 * sd,
-    .groups = "drop"
+    lower = min(y),
+    upper = max(y),
   )
+
 #now have smooth pdp curves with uncertainty
 #result: variable x.    mean   lower.    upper
 #.       depth.   5.   0.30.    0.25.     0.35
@@ -136,29 +114,35 @@ pdp_summary <- left_join(pdp_summary, percent_df, by="variable")
 
 #add speciees to combine later
 pdp_summary$species <- "taape"
-pdp_summary$region <- "full"
+pdp_summary$region <- "mhi"
 
 #df for annotation text
-label_df <- pdp_summary %>%
-  group_by(variable) %>%
-  summarise(
-    percent = first(percent),
-    x = min(x),        # left side of panel
-    y = max(upper),    # top of panel
-    .groups = "drop"
-  )
+# label_df <- pdp_summary %>%
+#   group_by(variable) %>%
+#   summarise(
+#     percent = first(percent),
+#     x = min(x),        # left side of panel
+#     y = max(upper),    # top of panel
+#     .groups = "drop"
+#   )
 
 #ggplot figure
 ggplot(pdp_summary, aes(x, mean)) +
   
-  geom_ribbon(aes(ymin = lower, ymax = upper),
-              alpha = 0.2,
-              fill = "#0072B2") +
+  geom_smooth(aes(fill = region, x=x, y=upper)
+             , span = 0.1, 
+              # ymin = lower, ymax = upper),
+              alpha = 0.2) +
+  geom_smooth(aes(fill = region, x=x, y=lower)
+             , span = 0.1, 
+             # ymin = lower, ymax = upper),
+             alpha = 0.2) +
+              # fill = "#0072B2") +
   
-  geom_smooth(
+  geom_smooth(aes(color = region),
     method = "loess",
     se = FALSE,
-    color = "#0072B2",
+    # color = "#0072B2",
     linewidth = 1,
     span = 0.3
   ) +
@@ -352,20 +336,20 @@ percent = pdp_master_benthic %>%
   summarise(percent_cont = unique(percent))
 
 #percent for plots
-percent$y <- c(0.6, 0.6, 0.6, #coral cover going down
-               0.58, 0.55, 0.625,
-               0.3, 0.54, 0.6,
+percent$y <- c(0.4, 0.5, 0.55, #coral cover taape toau roi red
+               0.25, 0.18, 0.4, #depth taape toau and roi red
+               0.23, 0.18, 0.4, #rugosity red
                
-               0.3, 0.3, 0.3, #coral cover going down
-               0.55, 0.52, 0.3,
-               0.2, 0.2, 0.3)
+               0.35, 0.42, 0.47, #coral cover taape toau roi blue
+               0.28, 0.21, 0.47, #depth taape toau and roi blue
+               0.2, 0.15, 0.32) #rugosity blue
 
-percent$x <- c(0.1, 0.1, 0.7,
-               3, 25, 25, 
+percent$x <- c(0.1, 0.1, 0.7, #coral cover
+               5, 27, 15, #depth red
                15, 15, 15,
                
-               0.1, 0.1, 0.7,
-               3, 25, 25, 
+               0.1, 0.1, 0.7,#coral cover
+               5, 27, 15, #depth blue
                15, 15, 15) #mhi Y's
 
 

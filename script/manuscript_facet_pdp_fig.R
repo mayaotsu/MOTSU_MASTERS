@@ -220,29 +220,6 @@ pdp_master$region <- factor(
   levels = c("mhi","full")
 )
 
-#smoothing
-# pdp_master_smooth <- pdp_master %>%
-#   group_by(species, region, variable) %>%
-#   do({
-#     
-#     df <- .
-#     
-#     lo_mean  <- loess(mean  ~ x, data = df, span = 0.3)
-#     lo_lower <- loess(lower ~ x, data = df, span = 0.3)
-#     lo_upper <- loess(upper ~ x, data = df, span = 0.3)
-#     
-#     data.frame(
-#       x = df$x,
-#       mean  = predict(lo_mean,  newdata = data.frame(x = df$x)),
-#       lower = predict(lo_lower, newdata = data.frame(x = df$x)),
-#       upper = predict(lo_upper, newdata = data.frame(x = df$x)),
-#       species = df$species,
-#       region = df$region,
-#       variable = df$variable
-#     )
-#     
-#   }) %>%
-#   ungroup()
 
 # filter for q05 and q95
 pdp_master_sst <- pdp_master %>%
@@ -273,6 +250,10 @@ percent$x <- c(18.3, 18.3, 18.3, 29, 29,
 percent$y <- c(0.25, 0.23, 0.5, 0.6, 0.27, 
                0.22, 0.20, 0.42, 0.5, 0.23) #mhi Y's
 
+tags <- percent %>%
+  ungroup() %>%            
+  arrange(species, variable) %>%
+  mutate(tag = paste0(letters[1:n()], "."))
 
 #keep uppr and lower to turn to the ribbon
 ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
@@ -300,8 +281,7 @@ ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
               linewidth = 1) +
   geom_rug(sides = "b", alpha = 0.2) + 
 
-  facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =2) +
-
+  facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =2) + #, nrow = 3, ncol =2
   labs(
     x = NULL,
     y = "Partial effect on occurrence (reverse logit scale)"
@@ -313,11 +293,18 @@ ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
     strip.text = element_text(face = "bold")) +
     # strip.placement = "outside") +
   geom_text(data = percent,
-            mapping = aes(x=x, y= y, label = percent_cont))
-
+            mapping = aes(x=x, y= y, label = percent_cont)) +
+  geom_text(data = tags,
+            aes(label = tag),
+            x = -Inf,y = Inf,
+            hjust = -0.2,vjust = 1.2,
+            inherit.aes = FALSE,
+            fontface = "bold",
+            size = 5
+              )
 
 #save
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95_lesslabels.png", width = 12, height =10)
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95test.png", width = 12, height =10)
 
 # saveRDS(
 #   pdp_master,
@@ -364,6 +351,10 @@ percent$x <- c(0.1, 0.1, 0.7, #coral cover
                5, 27, 15, #depth blue
                15, 15, 15) #mhi Y's
 
+tags <- percent %>%
+  ungroup() %>%            
+  arrange(species, variable) %>%
+  mutate(tag = paste0(letters[1:n()], "."))
 
 #keep uppr and lower to turn to the ribbon
 ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) +
@@ -400,7 +391,17 @@ ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) 
   geom_text(
     data = percent,
     aes(x = x, y = y,
-    label = percent_cont, color = region) )
+    label = percent_cont, color = region)) +
+  
+  geom_text(data = tags,
+      aes(label = tag),
+      x = -Inf,y = Inf,
+      hjust = -0.2,vjust = 1.2,
+      inherit.aes = FALSE,
+      fontface = "bold",
+      size = 5
+      )
+  )
 
 ggsave(
   "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_species_lesslabels.png",

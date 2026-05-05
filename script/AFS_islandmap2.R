@@ -226,11 +226,12 @@ df$species <- recode(df$sp,
           legend.background = element_blank()) +
     labs(tag = "(c) Roi"))
 
+
 fa / fb / fc
 grid.arrange(fa, fb, fc, ncol = 1)
-ggsave("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/3_species_abundance_plot.png",
-    units = "in", height = 12, width = 8)
 par(mfrow= c(1,2))
+ggsave("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/3_species_abundance_plot.png",
+    units = "in", height = 12, width = 10)
 dev.off()
 
 library(viridis)

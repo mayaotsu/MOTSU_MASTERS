@@ -489,7 +489,7 @@ spc_reduced %>%
   group_by(island) %>%
   summarize(
     total_obs = n(),
-    na_count = sum(is.na(q05_1yr_sst_CRW)),
+    na_count = sum(is.na(q05_1yr_sst_jpl)),
     percent_na = round((na_count / total_obs) * 100, 2)
   )
 
@@ -497,7 +497,7 @@ spc_reduced %>%
   group_by(island) %>%
   summarize(
     total_obs = n(),
-    na_count = sum(is.na(q95_1yr_sst_CRW)),
+    na_count = sum(is.na(q95_1yr_sst_jpl)),
     percent_na = round((na_count / total_obs) * 100, 2)
   )
 
@@ -518,7 +518,7 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
 
 #pa by lat/lon SST q05
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
-    geom_point(aes(color = q05_1yr_sst_jpl, shape = factor(presence)), size = 2, alpha = 0.7) +
+    geom_point(aes(color = q05_1yr_sst_jpl)) +
     scale_color_viridis_c(name = "q05 SST (°C)", option = "C") +
     scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
     theme_minimal() +
@@ -529,7 +529,7 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
   
 #sst q95
   ggplot(spc_reduced, aes(x = lon, y = lat)) +
-    geom_point(aes(color = q95_1yr_sst_CRW, shape = factor(presence)), size = 2, alpha = 0.7) +
+    geom_point(aes(color = q95_1yr_sst_jpl, shape = factor(presence)), size = 2, alpha = 0.7) +
     scale_color_viridis_c(name = "q95 SST (°C)", option = "C") +
     scale_shape_manual(values = c(1, 19), name = "Presence", labels = c("Absent", "Present")) +
     theme_minimal() +
@@ -605,5 +605,8 @@ plot(spc_reduced$lon[which(spc_reduced$q05_1yr_sst_CRW>50)], (spc_reduced$lat[wh
     theme(legend.position = "right")
   
   
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RData")   # or whatever the object is called
+# check the object name if unsure:
 
+write.csv(spc_final, "spc_reduced_final.csv", row.names = FALSE)
   

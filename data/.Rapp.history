@@ -1,3 +1,5 @@
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spcdata_main.rds")
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/eds_rerun.RData")
 load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RData")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS")

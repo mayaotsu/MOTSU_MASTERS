@@ -18,10 +18,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(1, 2, 11, 14:21, 23) 
-#re-add year (factor variable) 10
-#depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTCRW16&17,
-#nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 27
+Predictors<-c(2, 11, 14:21, 23) 
 
 Response<-which(colnames(df) %in% c("presence") )
 # Look at predictor covariance and plot predictors across space to make sure they look right
@@ -45,7 +42,7 @@ PA_Model_Step<-fit.brt.n_eval_Balanced(roi, gbm.x=Predictors, gbm.y= c(Response)
 end = Sys.time()
 end - start 
 
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_step_0.001_0.75_07.21.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/roi_full_step_no_island.Rdata"))
 #lr 0.001
 #function creates ensemble of your choice size, learning rate and tree complexity, low learning rate better
 #for learning rate, at least 1000 trees, bag fraction 0.5-0.8 or 0.9 range, 0.9 is pretty high

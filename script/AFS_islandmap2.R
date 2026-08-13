@@ -234,6 +234,9 @@ ggsave("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/3_species_abundan
     units = "in", height = 12, width = 10)
 dev.off()
 
+df <- df %>%
+  mutate(species = factor(species, levels = c("Taʻape", "Toʻau", "Roi")))
+
 library(viridis)
 plot_all <- df %>%
   filter(response > 0) %>%
@@ -285,7 +288,7 @@ plot_all <- df %>%
 
 plot_all
 ggsave(
-  filename = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/3_species_abundances.png",
+  filename = "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures//3_species_abundances.png",
   plot = plot_all,
   width = 8,
   height = 10,

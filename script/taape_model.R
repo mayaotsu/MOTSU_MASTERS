@@ -2,7 +2,6 @@
 rm(list = ls()) 
 library(matrixStats)
 library(fmsb)
-#getwd()
 source("/Users/mayaotsu/Documents/MOTSU_MASTERS/BRT_Workshop-main/BRT_Eval_Function_JJS.R")
 df<-readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS") 
 
@@ -14,7 +13,7 @@ set.seed(101)
 Random <- rnorm(nrow(df))
 df$Random = Random
 colnames(df)
-Predictors<-c(1,2, 11, 14:21, 23) 
+Predictors<-c(2, 11, 14:21, 23) 
 #re-add island (1), year (factor variable) 10
 #depth2, lat5, lon6, year10, rugosity13, mean 1 mo chla ESA 15, q05&951yrSSTjpl16&17,
 #nearshore sediment18, coral cover19, effluent20, MHI spear 21, random 22

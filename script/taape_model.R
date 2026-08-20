@@ -38,7 +38,7 @@ PA_Model_Step<-fit.brt.n_eval_Balanced(taape, gbm.x=Predictors, gbm.y= c(Respons
 end = Sys.time()
 end - start 
 
-save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_full_step_no_island.Rdata"))
+save(PA_Model_Step, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_mhi_step_no_island.Rdata"))
 
 #lr 0.001
 #try bag fractions 0.6, 0.75
@@ -86,7 +86,7 @@ PA_Model_Reduced<-fit.brt.n_eval_Balanced(taape, gbm.x=Reduced_Predictors, gbm.y
 end = Sys.time()
 end - start 
 
-save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_full_reduced_no_island.Rdata"))
+save(PA_Model_Reduced, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_mhi_reduced_no_island.Rdata"))
 
 #re-evaluate model fit
 PA_Model<-PA_Model_Reduced[[1]]
@@ -133,7 +133,7 @@ for(q in 1:iters){                                #this was 50
 }
 All_percent_contribution<-cbind(rownames(percent_contrib), paste(round(rowMeans(percent_contrib),2), round(rowSds(percent_contrib),2), sep=" ± "))
 Combined_All_percent_contribution<-All_percent_contribution
-saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_full_reduced_percentcont_no_island.rds"))
+saveRDS(All_percent_contribution, file = paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_mhi_reduced_percentcont_no_island.rds"))
 
 Mean_PA_Contributions<-as.data.frame(t(rowMeans(percent_contrib)))
 PA_Predictors_Plot<- rbind(rep(max(Mean_PA_Contributions),length(var_tested)) , rep(0,length(var_tested)) , Mean_PA_Contributions)
@@ -150,7 +150,7 @@ Variable_List<-Variable_List[order(-Variable_List$V1),]
 
 Num_Preds<-which(rownames(Variable_List) %in% Cont_Preds)
 
-png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_full_reduced_no_island.png", res = 300, height = 10, width = 10, units = "in")
+png("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape_mhi_reduced_no_island.png", res = 300, height = 10, width = 10, units = "in")
 par(mfrow=c(3,3))
 mn_part_plot<-list()  
 for(y in Num_Preds){
@@ -178,12 +178,13 @@ dev.off()
 # Make Forest plots (easier interpretation for partial responses)
 #png(paste0("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/forest/taape_full_reduced_0.001_0.75_forestplot07.7.png"), units = "in", height = 5, width = 5, res = 500)
 #taapePA_0.001_0.75_AllPercentCont
-PA_sp = data.frame(predictor = taape_mhi_reduced_0.001_0.75_precentcont07.7[,1],
-                   percent_imp = as.numeric(sub("\\ .*", "", taape_mhi_reduced_0.001_0.75_precentcont07.7[,2])),
-                   sd = as.numeric(substr(taape_mhi_reduced_0.001_0.75_precentcont07.7[,2], nchar(taape_mhi_reduced_0.001_0.75_precentcont07.7[,2])-4+1, 
-                   nchar(taape_mhi_reduced_0.001_0.75_precentcont07.7[,2]))),
-                   color = c("blue","blue", "gray", "red", 
-                             "red", "red", "red", "blue", "gray"))
+PA_sp = data.frame(predictor = taape_mhi_reduced_percentcont_no_island[,1],
+                   percent_imp = as.numeric(sub("\\ .*", "", taape_mhi_reduced_percentcont_no_island[,2])),
+                   sd = as.numeric(substr(taape_mhi_reduced_percentcont_no_island[,2], 
+                   nchar(taape_mhi_reduced_percentcont_no_island[,2])-4+1, 
+                   nchar(taape_mhi_reduced_percentcont_no_island[,2]))),
+                   color = c("blue","blue", "red", "red", 
+                             "blue", "gray", "red", "blue", "gray"))
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
@@ -193,16 +194,16 @@ ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(p
   scale_x_continuous(limits = c(0, 50))+
   #geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5) +
   theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size=14))
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/07.21/taape_mhi_reduced_0.001_0.75_forestplot07.21.png", width = 7, height = 5, units = "in")
+ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/forest_plots/08.12.26/taape_mhi_reduced_no_island.png", width = 7, height = 5, units = "in")
 dev.off()
 
 ## taape full
-color = c("blue","blue", "gray", "gray", 
-          "red", "blue", "red", "blue", "gray"))
+color = c("blue","blue", "red", "red", 
+          "blue", "blue", "red", "blue", "gray"))
 
 #taape MHI
-color = c("blue","blue", "gray", "red", 
-          "red", "red", "red", "blue", "gray"))
+color = c("blue","blue", "red", "red", 
+          "blue", "gray", "red", "blue", "gray"))
 
 ##
 # average predicted probability across all 50 models, for every row in taape

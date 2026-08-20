@@ -4,20 +4,20 @@ library(dplyr)
 library(ggplot2)
 
 #load brt model
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/taape/taape_full_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/taape/taape_mhi_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_full_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_mhi_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/toau/toau_full_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/toau/toau_mhi_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/roi/roi_full_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/roi/roi_mhi_reduced_no_island.Rdata")
 
 #load percent contribution and convert to df
-All_percent_contribution = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_full_reduced_0.001_0.75_precentcont07.7.rds")
-All_percent_contribution = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_mhi_reduced_0.001_0.75_precentcont07.7.rds")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_full_reduced_percentcont_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_percentcont_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_full_reduced_percentcont_07.21.Rdata")
-load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_percentcont_07.21.Rdata")
+All_percent_contribution = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_full_reduced_percentcont_no_island.rds")
+All_percent_contribution = readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_mhi_reduced_percentcont_no_island.rds")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/toau/toau_full_reduced_percentcont_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/toau/toau_mhi_reduced_percentcont_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/roi/roi_full_reduced_percentcont_no_island.Rdata")
+load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/roi/roi_mhi_reduced_percentcont_no_island.Rdata")
 
 percent_df <- data.frame(
   variable = All_percent_contribution[,1],
@@ -92,8 +92,8 @@ pdp_summary$variable <- recode(pdp_summary$variable,
                                depth = "Depth (m)",
                                rugosity = "Rugosity",
                                mean_1mo_chla_ESA = "Chla (1 month mean)",
-                               q05_1yr_sst_jpl = "SST (5th percentile)",
-                               q95_1yr_sst_jpl = "SST (95th percentile)",
+                               q05_1yr_sst_jpl = "SST (Q05)",
+                               q95_1yr_sst_jpl = "SST (Q95)",
                                coral_cover = "Coral Cover (%)",
                                full_spear = "Spearfishing Effort"
 )
@@ -103,8 +103,8 @@ percent_df$variable <- recode(percent_df$variable,
                               depth = "Depth (m)",
                               rugosity = "Rugosity",
                               mean_1mo_chla_ESA = "Chla (1 month mean)",
-                              q05_1yr_sst_jpl = "SST (5th percentile)",
-                              q95_1yr_sst_jpl = "SST (95th percentile)",
+                              q05_1yr_sst_jpl = "SST (Q05)",
+                              q95_1yr_sst_jpl = "SST (Q95)",
                               coral_cover = "Coral Cover (%)",
                               full_spear = "Spearfishing Effort"
 )

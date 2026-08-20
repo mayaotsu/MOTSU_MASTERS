@@ -5,29 +5,20 @@ library(grid)
 library(ggplot2)
 library(patchwork)
 
-base_path <- "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/07.21"
+base_path <- "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/forest_plots/08.12.26/"
 
 # ORDERED to match desired grid:
 files <- c(
-  "taape_full_reduced_0.001_0.75_forestplot07.21.png",
-  "toau_full_reduced_0.001_0.75_forestplot07.21.png",
-  "roi_full_reduced_0.001_0.75_forestplot_7.21.png",
+  "taape_full_reduced_no_island.png",
+  "toau_full_reduced_no_island.png",
+  "roi_full_reduced_no_island.png",
   
-  "taape_mhi_reduced_0.001_0.75_forestplot07.21.png",
-  "toau_mhi_reduced_0.001_0.75_forestplot07.21.png",
-  "roi_mhi_reduced_0.001_0.75_forestplot07.21.png"
+  "taape_mhi_reduced_no_island.png",
+  "toau_mhi_reduced_no_island.png",
+  "roi_mhi_reduced_no_island.png"
 )
 
 files <- file.path(base_path, files)
-
-# titles <- c(
-#   "Taʻape (Full Archipelago)",
-#   "Toʻau - (Full Archipelago)",
-#   "ROI - (Full Archipelago)",
-#   "Taʻape - (MHI)",
-#   "Toʻau - (MHI)",
-#   "ROI - (MHI)"
-# )
 
 titles <- c(
   "(a) ",
@@ -38,10 +29,11 @@ titles <- c(
   "(f) "
 )
 
-auc_vals <- c(0.87, 0.89, 0.89, #taape full, toau full, roi full
-              0.82, 0.79, 0.79) #taape mhi, toau mhi, roi mhi
-tss_vals <- c(0.61, 0.65, 0.65, 
-              0.51, 0.46, 0.46)
+#instead of putting these manually is there a way to pull these from the model so it is more reproducible?
+auc_vals <- c(0.84, 0.86, 0.87, #taape full, toau full, roi full
+              0.80, 0.76, 0.75) #taape mhi, toau mhi, roi mhi
+tss_vals <- c(0.55, 0.58, 0.62, 
+              0.49, 0.44, 0.40)
 
 img_to_plot <- function(file, title, auc, tss) {
   img <- readPNG(file)
@@ -70,7 +62,7 @@ combined <- wrap_plots(plots, ncol = 3)
 print(combined)
 
 ggsave(
-  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/forestplots_combined_2x3.png",
+  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/forestplots_combined_no_island.png",
   combined,
   width = 12,
   height = 8,

@@ -3,6 +3,8 @@ rm(list = ls())
 library(dplyr)
 library(ggplot2)
 
+#run all this code for each species and full or mhi until save df step then rm(ls) to run for the next species and scale
+#once all rds are saved for each species and scale, run the second half of the script
 #load brt model
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_full_reduced_no_island.Rdata")
 load("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_mhi_reduced_no_island.Rdata")
@@ -28,8 +30,13 @@ percent_df <- data.frame(
 df <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR.RDS")
 
 # subset species and scale
+taape <- df[df$species=="LUKA",]
 taape <- df[df$species=="LUKA" & df$region=="mhi",]
+
+toau <- df[df$species=="LUFU",]
 toau <- df[df$species=="LUFU" & df$region=="mhi",]
+
+roi <- df[df$species=="CEAR",]
 roi <- df[df$species=="CEAR" & df$region=="mhi",]
 
 #extract brt models
@@ -91,22 +98,26 @@ pdp_summary <- pdp_df %>%
 pdp_summary$variable <- recode(pdp_summary$variable,
                                depth = "Depth (m)",
                                rugosity = "Rugosity",
-                               mean_1mo_chla_ESA = "Chla (1 month mean)",
+                               mean_1mo_chla_ESA = "Chlorophyll a",
                                q05_1yr_sst_jpl = "SST (Q05)",
                                q95_1yr_sst_jpl = "SST (Q95)",
                                coral_cover = "Coral Cover (%)",
-                               full_spear = "Spearfishing Effort"
+                               MHI_spear = "Spearfishing Effort",
+                               otp_nearshore_sediment = "Nearshore Sediment",
+                               otp_all_effluent = "Effluent"
 )
 
 #recode percent_df the SAME WAY
 percent_df$variable <- recode(percent_df$variable,
                               depth = "Depth (m)",
                               rugosity = "Rugosity",
-                              mean_1mo_chla_ESA = "Chla (1 month mean)",
+                              mean_1mo_chla_ESA = "Chlorophyll a",
                               q05_1yr_sst_jpl = "SST (Q05)",
                               q95_1yr_sst_jpl = "SST (Q95)",
                               coral_cover = "Coral Cover (%)",
-                              full_spear = "Spearfishing Effort"
+                              full_spear = "Spearfishing Effort",
+                              otp_nearshore_sediment = "Nearshore Sediment",
+                              otp_all_effluent = "Effluent"
 )
 
 #NOW join
@@ -115,16 +126,6 @@ pdp_summary <- left_join(pdp_summary, percent_df, by="variable")
 #add speciees to combine later
 pdp_summary$species <- "roi"
 pdp_summary$region <- "mhi"
-
-#df for annotation text
-# label_df <- pdp_summary %>%
-#   group_by(variable) %>%
-#   summarise(
-#     percent = first(percent),
-#     x = min(x),        # left side of panel
-#     y = max(upper),    # top of panel
-#     .groups = "drop"
-#   )
 
 #ggplot figure
 ggplot(pdp_summary, aes(x, mean)) +
@@ -174,23 +175,21 @@ ggplot(pdp_summary, aes(x, mean)) +
 #save df
 saveRDS(
   pdp_summary,
-  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/roi_mhi_pdp_summary.rds")
+  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/roi_mhi_no_island.rds")
 
 
 ### load dataframes 
 rm(list = ls()) 
 library(dplyr)
 
-taape_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/taape_full_pdp_summary.rds")
-taape_mhi  <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/taape_mhi_pdp_summary.rds")
-# taape_mhi <- taape_mhi %>%
-#   select(-percent.x, -percent.y)
+taape_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/taape_full_no_island.rds")
+taape_mhi  <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/taape_mhi_no_island.rds")
 
-toau_full  <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/toau_full_pdp_summary.rds")
-toau_mhi   <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/toau_mhi_pdp_summary.rds")
+toau_full  <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/toau_full_no_island.rds")
+toau_mhi   <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/toau_mhi_no_island.rds")
 
-roi_full   <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/roi_full_pdp_summary.rds")
-roi_mhi    <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/roi_mhi_pdp_summary.rds")
+roi_full   <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/roi_full_no_island.rds")
+roi_mhi    <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/roi_mhi_no_island.rds")
 
 #back convert from logit because it will be from 0-1 (prob of occurence space )
 

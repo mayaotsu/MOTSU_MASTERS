@@ -178,234 +178,196 @@ saveRDS(
   "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/roi_mhi_no_island.rds")
 
 
-### load dataframes 
-rm(list = ls()) 
+### load dataframes and build combined manuscript facet figures
+rm(list = ls())
+
 library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# ---- load & combine ------------------------------------------------------
 
 taape_full <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/taape_full_no_island.rds")
 taape_mhi  <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/taape_mhi_no_island.rds")
-
 toau_full  <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/toau_full_no_island.rds")
 toau_mhi   <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/toau_mhi_no_island.rds")
-
 roi_full   <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/roi_full_no_island.rds")
 roi_mhi    <- readRDS("/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/8.12.26/roi_mhi_no_island.rds")
 
-#back convert from logit because it will be from 0-1 (prob of occurence space )
-
-#bind rows
 pdp_master <- bind_rows(
-  taape_full,
-  taape_mhi,
-  toau_full,
-  toau_mhi,
-  roi_full,
-  roi_mhi
+  taape_full, taape_mhi,
+  toau_full,  toau_mhi,
+  roi_full,   roi_mhi
 )
 
 unique(pdp_master$species)
 unique(pdp_master$region)
+unique(pdp_master$variable)   # sanity check exact label spelling before any filtering
 
-pdp_master$species <- tolower(pdp_master$species)
-pdp_master$region  <- tolower(pdp_master$region)
+pdp_master$species <- factor(tolower(pdp_master$species), levels = c("taape", "toau", "roi"))
+pdp_master$region  <- factor(tolower(pdp_master$region),  levels = c("mhi", "full"))
 
-pdp_master$species <- factor(
-  pdp_master$species,
-  levels = c("taape","toau","roi")
+saveRDS(
+  pdp_master,
+  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/pdp_master_all_species.rds"
 )
 
-pdp_master$region <- factor(
-  pdp_master$region,
-  levels = c("mhi","full")
-)
+# ============================================================
+# SST panel
+# ============================================================
 
-
-# filter for q05 and q95
+# fixed: labels are "SST (Q05)" / "SST (Q95)" (this is what script 1's
+# recode block actually writes) -- NOT "SST (5th percentile)" etc, which
+# was silently matching zero rows before.
 pdp_master_sst <- pdp_master %>%
-  filter(variable %in% c("SST (5th percentile)", "SST (95th percentile)"))
-
-#clean species name
-pdp_master_sst$species <- factor(
-  pdp_master_sst$species,
-  levels = c("taape","toau","roi")
-)
-
-#reverse logit transofrmation
-pdp_master_sst <- pdp_master_sst %>%
+  filter(variable %in% c("SST (Q05)", "SST (Q95)")) %>%
   mutate(
     mean  = plogis(mean),
     lower = plogis(lower),
     upper = plogis(upper)
   )
 
-#SST plots
-percent = pdp_master_sst %>% 
-  group_by(region, variable, species) %>% 
-  summarise(percent_cont = unique(percent))
+nrow(pdp_master_sst)  # should be > 0; stop here and check the filter above if not
 
-percent$x <- c(18.3, 18.3, 18.3, 29, 29,
-               18.3, 18.3, 18.3, 29, 29)
-
-percent$y <- c(0.25, 0.23, 0.5, 0.6, 0.27, 
-               0.22, 0.20, 0.42, 0.5, 0.23) #mhi Y's
-
-tags <- percent %>%
-  ungroup() %>%            
-  arrange(species, variable) %>%
-  mutate(tag = paste0(letters[1:n()], "."))
-
-#keep uppr and lower to turn to the ribbon
-ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
-# geom_ribbon(aes(ymin = lower, ymax = upper),
-#               alpha = 0.2,
-#               color = NA) +
-
- #geom_line(size = 1) +
-  geom_smooth(aes(y = upper),
-              method = "loess",
-              se = FALSE,
-              span = 0.3,
-              linewidth = 0.4,
-              linetype = "dashed") +
-  
-  geom_smooth(aes(y = lower),
-              method = "loess",
-              se = FALSE,
-              span = 0.3,
-              linewidth = 0.4,
-              linetype = "dashed") +
-   geom_smooth(method = "loess",
-              se = TRUE,
-              span = 0.3,
-              linewidth = 1) +
-  geom_rug(sides = "b", alpha = 0.2) + 
-
-  facet_wrap(species ~ variable, scales = "free", nrow = 3, ncol =2) + #, nrow = 3, ncol =2
-  labs(
-    x = NULL,
-    y = "Partial effect on occurrence (reverse logit scale)"
-  ) +
-
-  theme_bw(base_size = 13) +
-  theme(
-    strip.background = element_blank(),
-    strip.text = element_text(face = "bold")) +
-    # strip.placement = "outside") +
-  geom_text(data = percent,
-            mapping = aes(x=x, y= y, label = percent_cont)) +
-  geom_text(data = tags,
-            aes(label = tag),
-            x = -Inf,y = Inf,
-            hjust = -0.2,vjust = 1.2,
-            inherit.aes = FALSE,
-            fontface = "bold",
-            size = 5
-              )
-
-#save
-ggsave("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95test.png", width = 12, height =10)
-
-# saveRDS(
-#   pdp_master,
-#   "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/data/manuscript_facet_figure/pdp_master_all_species.rds"
-# )
+percent <- pdp_master_sst %>%
+  group_by(region, variable, species) %>%
+  summarise(percent_cont = unique(percent), .groups = "drop")
 
 
-#benthic plots
-pdp_master_benthic <- pdp_master %>%
-  filter(variable %in% c("Rugosity", "Depth (m)", "Coral Cover (%)"))
-
-pdp_master_benthic$species <- factor(
-  pdp_master_benthic$species,
-  levels = c("taape","toau","roi")
-)
-
-#reverse logit transofrmation
-pdp_master_benthic <- pdp_master_benthic %>%
+percent <- pdp_master_sst %>%
+  group_by(region, variable, species) %>%
+  summarise(percent_cont = unique(percent), .groups = "drop") %>%
+  # stagger mhi above full so the two colored labels don't overlap in
+  # the corner -- adjust these two numbers to nudge both up/down together
+  mutate(label_vjust = ifelse(region == "mhi", 1.3, 2.8)) %>%
+  # EDIT HERE: list which species/variable panels should have their
+  # label in the upper RIGHT instead of the default upper left.
   mutate(
-    mean  = plogis(mean),
-    lower = plogis(lower),
-    upper = plogis(upper)
+    label_corner = case_when(
+      variable == "SST (Q95)" ~ "right",
+      TRUE ~ "left"
+    ),
+    x_pos     = ifelse(label_corner == "right", Inf, -Inf),
+    hjust_val = ifelse(label_corner == "right", 1.1, -0.1)
   )
 
-#benthic plots
-percent = pdp_master_benthic %>% 
-  group_by(region, variable, species) %>% 
-  summarise(percent_cont = unique(percent))
 
-#percent for plots
-percent$y <- c(0.4, 0.5, 0.55, #coral cover taape toau roi red
-               0.25, 0.18, 0.4, #depth taape toau and roi red
-               0.23, 0.18, 0.4, #rugosity red
-               
-               0.35, 0.42, 0.47, #coral cover taape toau roi blue
-               0.28, 0.21, 0.47, #depth taape toau and roi blue
-               0.2, 0.15, 0.32) #rugosity blue
-
-percent$x <- c(0.1, 0.1, 0.7, #coral cover
-               5, 27, 15, #depth red
-               15, 15, 15,
-               
-               0.1, 0.1, 0.7,#coral cover
-               5, 27, 15, #depth blue
-               15, 15, 15) #mhi Y's
-
-tags <- percent %>%
-  ungroup() %>%            
-  arrange(species, variable) %>%
-  mutate(tag = paste0(letters[1:n()], "."))
-
-#keep uppr and lower to turn to the ribbon
-ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) +
-  geom_smooth(method = "loess",
-              se = TRUE,
-              span = 0.3,
-              linewidth = 1) +
+sst_plot <- ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
   geom_smooth(aes(y = upper),
-              method = "loess",
-              se = FALSE,
-              span = 0.3,
-              linewidth = 0.4,
-              linetype = "dashed") +
-  
+              method = "loess", se = FALSE,
+              span = 0.3, linewidth = 0.4, linetype = "dashed") +
   geom_smooth(aes(y = lower),
-              method = "loess",
-              se = FALSE,
-              span = 0.3,
-              linewidth = 0.4,
-              linetype = "dashed") +
-  geom_rug(sides = "b") + 
-  facet_grid(species ~ variable, scales = "free") +
-             # nrow = 3, ncol =3) +
+              method = "loess", se = FALSE,
+              span = 0.3, linewidth = 0.4, linetype = "dashed") +
+  geom_smooth(method = "loess", se = TRUE, span = 0.3, linewidth = 1) +
+  geom_rug(sides = "b", alpha = 0.2) +
+  # facet_grid instead of facet_wrap: variable labels appear once across
+  # the top (shared per column), species labels appear once down the
+  # right side (shared per row) -- no repeated/combined strip text.
+  facet_grid(
+    species ~ variable,
+    scales = "free",
+    labeller = labeller(species = c(taape = "Ta\u02bbape", toau = "To\u02bbau", roi = "Roi"))
+  ) +
   labs(
     x = NULL,
-    y = "Partial effect on occurrence (reverse logit scale)"
+    # fixed: this is plogis() / inverse-logit, i.e. a probability scale,
+    # not "reverse logit"
+    y = "Partial effect on occurrence (Logit scale)"
   ) +
   theme_bw(base_size = 13) +
   theme(
     strip.background = element_blank(),
-    strip.text = element_text(face = "bold"),
-    strip.placement = "outside") +
-    # panel.grid = element_blank()
+    strip.text.x = element_text(face = "bold", size = 14),  # variable titles, top
+    strip.text.y = element_text(face = "bold", size = 14, angle = 0)  # species labels, right
+  ) +
+  # corner-anchored instead of data-coordinate positions: works
+  # correctly under scales = "free" no matter each panel's data range,
+  # and needs no per-panel lookup table to maintain.
   geom_text(
     data = percent,
-    aes(x = x, y = y,
-    label = percent_cont, color = region)) +
-  
-  geom_text(data = tags,
-      aes(label = tag),
-      x = -Inf,y = Inf,
-      hjust = -0.2,vjust = 1.2,
-      inherit.aes = FALSE,
-      fontface = "bold",
-      size = 5
-      )
+    aes(x = x_pos, y = Inf, label = percent_cont, color = region,
+        vjust = label_vjust, hjust = hjust_val),
+    size = 5,
+    inherit.aes = FALSE,
+    show.legend = FALSE
   )
 
+sst_plot
+
 ggsave(
-  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_species_lesslabels.png",
-  width = 18,
-  height = 12,
-  dpi = 300
+  "/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/figures/SST_q05_q95_no_island.png",
+  plot = sst_plot, width = 12, height = 10, dpi = 300
 )
 
+# ============================================================
+#  ============================================================
+# Benthic panel
+# ============================================================
+
+pdp_master_benthic <- pdp_master %>%
+  filter(variable %in% c("Rugosity", "Depth (m)", "Coral Cover (%)")) %>%
+  mutate(
+    mean  = plogis(mean),
+    lower = plogis(lower),
+    upper = plogis(upper)
+  )
+
+nrow(pdp_master_benthic)
+
+percent_benthic <- pdp_master_benthic %>%
+  group_by(region, variable, species) %>%
+  summarise(percent_cont = unique(percent), .groups = "drop") %>%
+  mutate(label_vjust = ifelse(region == "mhi", 1.3, 2.8)) %>%
+  # EDIT HERE: list which species/variable panels should go upper right.
+  mutate(
+    label_corner = case_when(
+      species == "roi" & variable == "Coral Cover (%)" ~ "right",
+      TRUE ~ "left"
+    ),
+    x_pos     = ifelse(label_corner == "right", Inf, -Inf),
+    hjust_val = ifelse(label_corner == "right", 1.1, -0.1)
+  )
+
+percent_benthic %>% arrange(species, variable, region) %>% print(n = 20)
+
+benthic_plot <- ggplot(pdp_master_benthic, aes(x = x, y = mean, color = region, fill = region)) +
+  geom_smooth(method = "loess", se = TRUE, span = 0.3, linewidth = 1) +
+  geom_smooth(aes(y = upper),
+              method = "loess", se = FALSE,
+              span = 0.3, linewidth = 0.4, linetype = "dashed") +
+  geom_smooth(aes(y = lower),
+              method = "loess", se = FALSE,
+              span = 0.3, linewidth = 0.4, linetype = "dashed") +
+  geom_rug(sides = "b") +
+  facet_grid(
+    species ~ variable,
+    scales = "free",
+    labeller = labeller(species = c(taape = "Ta\u02bbape", toau = "To\u02bbau", roi = "Roi"))
+  ) +
+  labs(
+    x = NULL,
+    y = "Partial effect on occurrence (Logit scale)"
+  ) +
+  theme_bw(base_size = 13) +
+  theme(
+    strip.background = element_blank(),
+    strip.text.x = element_text(face = "bold", size = 14),  # variable titles, top
+    strip.text.y = element_text(face = "bold", size = 14, angle = 0),  # species labels, right
+    strip.placement = "outside"
+  ) +
+  geom_text(
+    data = percent_benthic,
+    aes(x = x_pos, y = Inf, label = percent_cont, color = region,
+        vjust = label_vjust, hjust = hjust_val),
+    size = 5,
+    inherit.aes = FALSE,
+    show.legend = FALSE
+  )
+
+benthic_plot
+
+ggsave(
+  "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_no_island.png",
+  plot = benthic_plot, width = 18, height = 12, dpi = 300
+)

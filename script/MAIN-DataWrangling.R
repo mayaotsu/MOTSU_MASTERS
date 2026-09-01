@@ -609,4 +609,20 @@ load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/data/spc_reduced_final_CEAR
 # check the object name if unsure:
 
 write.csv(spc_final, "spc_reduced_final.csv", row.names = FALSE)
-  
+
+
+#look at temperature distribution
+
+# Overall range (full archipelago, both regions combined)
+range(spc_reduced_final_CEAR$q05_1yr_sst_jpl, na.rm = TRUE) #17.68440 25.01055
+range(spc_reduced_final_CEAR$q95_1yr_sst_jpl, na.rm = TRUE) #25.6174 29.6210
+
+#q05 range
+tapply(spc_reduced_final_CEAR$q05_1yr_sst_jpl, spc_reduced_final_CEAR$region, range, na.rm = TRUE) 
+#mhi 22.96140 25.01055
+#nwhi 17.6844 23.7358
+
+#q95 range
+tapply(spc_reduced_final_CEAR$q95_1yr_sst_jpl, spc_reduced_final_CEAR$region, range, na.rm = TRUE)
+#mhi 25.61740 29.25412
+#nwhi 26.8462 29.6210

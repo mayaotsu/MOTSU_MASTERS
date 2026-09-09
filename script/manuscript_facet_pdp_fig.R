@@ -231,11 +231,6 @@ nrow(pdp_master_sst)  # should be > 0; stop here and check the filter above if n
 
 percent <- pdp_master_sst %>%
   group_by(region, variable, species) %>%
-  summarise(percent_cont = unique(percent), .groups = "drop")
-
-
-percent <- pdp_master_sst %>%
-  group_by(region, variable, species) %>%
   summarise(percent_cont = unique(percent), .groups = "drop") %>%
   # stagger mhi above full so the two colored labels don't overlap in
   # the corner -- adjust these two numbers to nudge both up/down together
@@ -250,7 +245,6 @@ percent <- pdp_master_sst %>%
     x_pos     = ifelse(label_corner == "right", Inf, -Inf),
     hjust_val = ifelse(label_corner == "right", 1.1, -0.1)
   )
-
 
 sst_plot <- ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = region)) +
   geom_smooth(aes(y = upper),
@@ -273,13 +267,15 @@ sst_plot <- ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = r
     x = NULL,
     # fixed: this is plogis() / inverse-logit, i.e. a probability scale,
     # not "reverse logit"
-    y = "Partial effect on occurrence (Logit scale)"
+    y = "Partial effect on occurrence (probability scale)"
   ) +
-  theme_bw(base_size = 13) +
+  theme_bw(base_size = 16) +
   theme(
     strip.background = element_blank(),
-    strip.text.x = element_text(face = "bold", size = 14),  # variable titles, top
-    strip.text.y = element_text(face = "bold", size = 14, angle = 0)  # species labels, right
+    strip.text.x = element_text(face = "bold", size = 16),  # variable titles, top
+    strip.text.y = element_text(face = "bold", size = 16, angle = 0),  # species labels, right
+    axis.text = element_text(size = 13),    # x/y axis tick numbers
+    axis.title = element_text(size = 16)    # "Partial effect on occurrence..."
   ) +
   # corner-anchored instead of data-coordinate positions: works
   # correctly under scales = "free" no matter each panel's data range,
@@ -288,7 +284,7 @@ sst_plot <- ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = r
     data = percent,
     aes(x = x_pos, y = Inf, label = percent_cont, color = region,
         vjust = label_vjust, hjust = hjust_val),
-    size = 5,
+    size = 6,
     inherit.aes = FALSE,
     show.legend = FALSE
   )
@@ -369,5 +365,5 @@ benthic_plot
 
 ggsave(
   "/Users/mayaotsu/Documents/Github/MOTSU_MASTERS/figures/pdp_benthic_no_island.png",
-  plot = benthic_plot, width = 18, height = 12, dpi = 300
+  plot = benthic_plot, width = 14, height = 8, dpi = 300
 )

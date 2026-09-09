@@ -183,7 +183,9 @@ PA_sp = data.frame(predictor = All_percent_contribution[,1],
                   nchar(All_percent_contribution[,2])-4+1, 
                   nchar(All_percent_contribution[,2]))),
                   color = c("blue","red", "red", "red", 
-                            "red", "blue", "blue", "red", "blue", "gray"))
+                            "red", "blue", "red", "gray", "blue", "gray"))
+#only for toau mhi
+#All_percent_contribution[4, 2] <- "28.63 ± 3.00"
 
 ggplot(data=PA_sp, aes(y=reorder(predictor, percent_imp), x=percent_imp, xmin=(percent_imp-sd), xmax=(percent_imp+sd))) +
   geom_point(colour = PA_sp$color, size = 2.5) + 
@@ -200,8 +202,8 @@ dev.off()
 color = c("blue","red", "red", "red", 
           "red", "blue", "blue", "red", "blue", "gray"))
 #mhi
-color = c("blue","red", "gray", "blue", 
-          "red", "blue", "red", "red", "blue", "gray")
+color = c("blue","red", "red", "red", 
+          "red", "blue", "red", "gray", "blue", "gray"))
 
 ###### check residuals #################
 n_iters <- length(PA_Model)

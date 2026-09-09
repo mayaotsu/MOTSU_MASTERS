@@ -40,9 +40,9 @@ rm(df_spear)
 # 3. Load GBM Models for taape or toau
 # ===============================================
 library(gbm)
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/taape/taape_mhi_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/toau/toau_mhi_reduced_0.001_0.75_07.21.Rdata")
-load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/07.21/roi/roi_mhi_reduced_0.001_0.75_07.21.Rdata")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/08.12.26/taape/taape_mhi_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/08.12.26/toau/toau_mhi_reduced_no_island.Rdata")
+load("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/brts/08.12.26/roi/roi_mhi_reduced_no_island.Rdata")
 
 
 #confirm ensemble length
@@ -99,7 +99,7 @@ saveRDS(roi_spear_predictions, file = "/Users/mayaotsu/Documents/GitHub/MOTSU_MA
 # ===============================================
 taape_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/taape_spear_preds.rds")
 toau_spear_preds  <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/toau_spear_preds.rds")
-# roi_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/roi_spear_preds.rds")
+roi_spear_preds <- readRDS("/Users/mayaotsu/Documents/GitHub/MOTSU_MASTERS/output/10spear/roi_spear_preds.rds")
 
 #! need to run this whole thing gthrough for each species
 # ===============================================

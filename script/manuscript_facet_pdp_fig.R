@@ -264,7 +264,7 @@ sst_plot <- ggplot(pdp_master_sst, aes(x = x, y = mean, color = region, fill = r
     labeller = labeller(species = c(taape = "Ta\u02bbape", toau = "To\u02bbau", roi = "Roi"))
   ) +
   labs(
-    x = NULL,
+    x = "SST °C",
     # fixed: this is plogis() / inverse-logit, i.e. a probability scale,
     # not "reverse logit"
     y = "Partial effect on occurrence (probability scale)"
